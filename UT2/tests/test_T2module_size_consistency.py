@@ -10,9 +10,9 @@ from UT2.run_ccd import *
 
 def test_Size_consistencyRHFT2():
     # run pyscf for some reason
-    basis = ['ccpvdz','6-31G','ccpvtz']#,'augccpvdz','augccdpvtz']
+    basis = ['ccpvdz']#,'6-31G','ccpvtz']#,'augccpvdz','augccdpvtz']
     atomString = ['Ne 0 0 0; Ne 0 0 50', 'Ne 0 0 0']
-    testMethods=[{"ccdType":"CCD"}]
+    testMethods=[{"ccdType":"CCD"},{"ccdType":"CCDQf-1"},{"ccdType":"CCDQf-2"},{"ccdType":"CCD(Qf)"},{"ccdType":"pCCD"}]
     value=[]
     count=0
     for bas, molecule,method in itertools.product(basis, atomString,testMethods):
