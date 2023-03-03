@@ -2,8 +2,8 @@ import numpy as np
 import pyscf
 from pyscf import ao2mo
 from pyscf import cc
-import t2energy as t2energy
-import t2residEqns as t2residEqns
+import UT2.t2energy as t2energy
+import UT2.t2residEqns as t2residEqns
 import sys
 
 
@@ -31,7 +31,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
     nucE = mf.energy_nuc()
     print("nuclear repulsion:", nucE)
     print(np.shape(gaaaa))
-    t2aaaa, t2bbbb, t2abab, currentE = ccd_kernel(
+    t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
         na,
         nb,
         nvirta,
@@ -54,6 +54,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
         4,
         cc_runtype,
     )
+
+    return currentE, corrE
 
 
 def ccd_kernel(
@@ -88,7 +90,7 @@ def ccd_kernel(
     t2abab = np.zeros((nvirta, nvirtb, na, nb))
 
     if diis_size is not None:
-        from diis import DIIS
+        from UT2.diis import DIIS
 
         diis_update = DIIS(diis_size, start_iter=diis_start_cycle)
         t2aaaa_dim = t2aaaa.size
@@ -335,7 +337,9 @@ def ccd_kernel(
             " correlation contribution:",
             nucE + current_energy - hf_energy,
         )
+        corrE=nucE+current_energy
         print(cc_runtype["ccdType"], " energy:", nucE + current_energy)
+        tfinalEnergy=current_energy+nucE
     if cc_runtype["ccdType"] == "CCD(Qf)":
         import modify_T2energy_pertQf as pertQf
 
@@ -343,9 +347,11 @@ def ccd_kernel(
         print("CCD correlation contribution: ", nucE + current_energy - hf_energy)
         print("(Qf) perturbative energy correction: ", qf_corr)
         print(cc_runtype["ccdType"], " energy:", nucE + current_energy + qf_corr)
+        tfinalEnergy=current_energy+nucE+qf_corr
+        corrE=qf_corr
     print("\n\n\n")
 
-    return t2aaaa, t2bbbb, t2abab, current_energy
+    return t2aaaa, t2bbbb, t2abab, tfinalEnergy, corrE 
 
 
 def convertSCFinfo(mf, mol, orb):
