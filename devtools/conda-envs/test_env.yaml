@@ -10,7 +10,6 @@ dependencies:
   - pip
   - scipy
   - numpy
-  - pyscf
  
     # Testing
   - pytest
