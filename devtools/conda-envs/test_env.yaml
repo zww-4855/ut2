@@ -2,7 +2,7 @@ name: test
 channels:
 
   - conda-forge
-
+  - pyscf
   - defaults
 dependencies:
     # Base depends
@@ -10,6 +10,7 @@ dependencies:
   - pip
   - scipy
   - numpy
+  - pyscf
  
     # Testing
   - pytest
