@@ -8,7 +8,10 @@ dependencies:
     # Base depends
   - python
   - pip
-
+  - scipy
+  - numpy
+  - pyscf
+ 
     # Testing
   - pytest
   - pytest-cov
