@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
 name = "UT2"
-description = "A suite of coupled-cluster methods designed to converge towards an "ultimate" T2 method"
+description = "Ultimate Coupled-cluster method based on T2 only"
 dynamic = ["version"]
 readme = "README.md"
 authors = [
@@ -83,3 +83,4 @@ default-tag = "1.0.0"
 
 [tool.versioningit.write]
 file = "UT2/_version.py"
+
