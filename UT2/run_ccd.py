@@ -6,6 +6,10 @@ import UT2.t2energy as t2energy
 import UT2.t2residEqns as t2residEqns
 import sys
 
+import UT2.modify_T2resid_T4Qf1 as qf1
+import UT2.modify_T2resid_T4Qf2 as qf2
+import UT2.modify_T2energy_pertQf as pertQf
+from numpy import linalg
 
 def ccd_main(mf, mol, orb, cc_runtype):
     (
@@ -188,7 +192,6 @@ def ccd_kernel(
 
         # ***I DONT KNOW IF THE PREFACTOR OF 0.5 IS RIGHT
         if cc_runtype["ccdType"] == "CCDQf-1":
-            import modify_T2resid_T4Qf1 as qf1
 
             qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
             qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
@@ -198,8 +201,6 @@ def ccd_kernel(
             resid_abab += 0.5 * qf1_abab
 
         elif cc_runtype["ccdType"] == "CCDQf-2":
-            import modify_T2resid_T4Qf1 as qf1
-            import modify_T2resid_T4Qf2 as qf2
 
             qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
             qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
@@ -213,10 +214,8 @@ def ccd_kernel(
             resid_bbbb += 0.5 * qf1_bbbb + (1.0 / 6.0) * qf2_bbbb
             resid_abab += 0.5 * qf1_abab + (1.0 / 6.0) * qf2_abab
 
-        elif cc_runtype["ccdType"] == "CCDQfHf-1":
-            import modify_T2resid_T4Qf1 as qf1
-            import ccdqf_2_resid as qf2
-            import ccdqfhf_1_resid as hf1
+#        elif cc_runtype["ccdType"] == "CCDQfHf-1":
+
 
         new_doubles_aaaa = resid_aaaa * eabij_aa  # doubles_res_aaaa * eabij_aa
         new_doubles_bbbb = resid_bbbb * eabij_bb  # doubles_res_bbbb * eabij_bb
@@ -247,7 +246,6 @@ def ccd_kernel(
                 new_doubles_abab, new_doubles_aaaa, new_doubles_bbbb, matDim
             )
 
-            from numpy import linalg
 
             def place_tensorDiag(eps, nv, no):
                 t2 = np.zeros((nv, nv, no, no))
@@ -341,7 +339,6 @@ def ccd_kernel(
         print(cc_runtype["ccdType"], " energy:", nucE + current_energy)
         tfinalEnergy=current_energy+nucE
     if cc_runtype["ccdType"] == "CCD(Qf)":
-        import modify_T2energy_pertQf as pertQf
 
         qf_corr = pertQf.energy_pertQf(g, l2, t2, occaa, virtaa)
         print("CCD correlation contribution: ", nucE + current_energy - hf_energy)
