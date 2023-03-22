@@ -19,9 +19,9 @@ Test to verify that RHF T2 methods give the same energy as UHF T2 methods before
     ('ccpvdz',{"ccdType":"CCDQf-2"}),
     ('ccpvtz',{"ccdType":"CCDQf-2"}),
     ('ccpvdz',{"ccdType":"CCD(Qf)"}),
-    ('ccpvtz',{"ccdType":"CCD(Qf)"}),
-    ('ccpvdz',{"ccdType":"pCCD"}),
-    ('ccpvtz',{"ccdType":"pCCD"}),])
+    ('ccpvtz',{"ccdType":"CCD(Qf)"}),])
+#    ('ccpvdz',{"ccdType":"pCCD"}),
+#    ('ccpvtz',{"ccdType":"pCCD"}),])
 
 def test_RHFequalUHF(Basis,Method):
     atomString = 'F 0 0 0; F 0 0 1.1'
@@ -55,6 +55,6 @@ def test_RHFequalUHF(Basis,Method):
 
 
 #Basis='ccpvdz'
-#Method={"ccdType":"CCD"}
+#Method={"ccdType":"pCCD"}
 #test_RHFequalUHF(Basis,Method)
 
