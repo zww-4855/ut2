@@ -9,6 +9,7 @@ import itertools
 from UT2.run_ccd import * 
 '''
    Test each T2 method's size-consistency property for dimeric Neon
+REMINDER: pCCD is *NOT* size-consistent by design
 '''
 @pytest.mark.parametrize("Basis,Method",[('ccpvdz',{"ccdType":"CCD"}),
     ('ccpvtz',{"ccdType":"CCD"}),
@@ -17,9 +18,7 @@ from UT2.run_ccd import *
     ('ccpvdz',{"ccdType":"CCDQf-2"}),
     ('ccpvtz',{"ccdType":"CCDQf-2"}),
     ('ccpvdz',{"ccdType":"CCD(Qf)"}),
-    ('ccpvtz',{"ccdType":"CCD(Qf)"}),
-    ('ccpvdz',{"ccdType":"pCCD"}),
-    ('ccpvtz',{"ccdType":"pCCD"}),])
+    ('ccpvtz',{"ccdType":"CCD(Qf)"}),])
 
 
 def test_Size_consistencyRHFT2(Basis,Method):
