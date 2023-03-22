@@ -476,32 +476,32 @@ def generalUHF(mf, mol, h1e, f, na, nb, orb):
     return faa, fbb, g_aaaa, g_bbbb, g_abab
 
 
-def test_rhf_energy(mol, mf, orb):
-    eri = ao2mo.full(mol, orb, verbose=0)
-    print("eri:", eri, np.shape(eri))
-    eriFull = ao2mo.restore("s1", eri, orb.shape[1])
-    print("full", eriFull, np.shape(eriFull))
-    eriFull = eriFull.transpose(0, 2, 1, 3)
-
-    hcore = mf.get_hcore()
-    hcoreMO = orb.T @ hcore @ orb
-
-    f = mf.get_fock()
-    fock = orb.T @ f @ orb
-
-    nelec = mol.nelectron
-    nocc = nelec // 2
-
-    test_e = np.einsum("ii", hcoreMO[:nocc, :nocc]) + np.einsum(
-        "ii", fock[:nocc, :nocc]
-    )
-
-    teint_energy = 2.0 * np.einsum(
-        "ijij", eriFull[:nocc, :nocc, :nocc, :nocc]
-    ) - np.einsum("ijji", eriFull[:nocc, :nocc, :nocc, :nocc])
-    test_e2 = np.einsum("ii", hcoreMO[:nocc, :nocc]) * 2.0 + teint_energy
-
-    print(mf.e_tot, test_e + mf.energy_nuc(), test_e2 + mf.energy_nuc())
+#def test_rhf_energy(mol, mf, orb):
+#    eri = ao2mo.full(mol, orb, verbose=0)
+#    print("eri:", eri, np.shape(eri))
+#    eriFull = ao2mo.restore("s1", eri, orb.shape[1])
+#    print("full", eriFull, np.shape(eriFull))
+#    eriFull = eriFull.transpose(0, 2, 1, 3)
+#
+#    hcore = mf.get_hcore()
+#    hcoreMO = orb.T @ hcore @ orb
+#
+#    f = mf.get_fock()
+#    fock = orb.T @ f @ orb
+#
+#    nelec = mol.nelectron
+#    nocc = nelec // 2
+#
+#    test_e = np.einsum("ii", hcoreMO[:nocc, :nocc]) + np.einsum(
+#        "ii", fock[:nocc, :nocc]
+#    )
+#
+#    teint_energy = 2.0 * np.einsum(
+#        "ijij", eriFull[:nocc, :nocc, :nocc, :nocc]
+#    ) - np.einsum("ijji", eriFull[:nocc, :nocc, :nocc, :nocc])
+#    test_e2 = np.einsum("ii", hcoreMO[:nocc, :nocc]) * 2.0 + teint_energy
+#
+#    print(mf.e_tot, test_e + mf.energy_nuc(), test_e2 + mf.energy_nuc())
 
 
 ## TODO:
