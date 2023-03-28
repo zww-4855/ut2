@@ -1,0 +1,2803 @@
+Tue Mar 28 12:23:36 EDT 2023
+
+              ****************************************************
+              * ACES : Advanced Concepts in Electronic Structure *
+              *                    Ver. 2.10.0                    *
+              ****************************************************
+
+                             Quantum Theory Project
+                             University of Florida
+                             Gainesville, FL  32611
+  @ACES2: Executing "rm -f FILES"
+  @ACES2: Executing "xjoda"
+ The value of HAVEGEOM record:                     0
+ The value of PES_SCAN record:                     0
+ The OPTARC is here? F F
+ Do we have geom? F
+ Hessian in JOBARC?                    -1
+
+
+                      ACES STATE VARIABLE REGISTRATION LOG
+     ----------------------------------------------------------------------
+     The ACES State Variables were initialized.
+     Updating (CALCLEVEL,pCCD): 'pCCD' converts to 'pCCD' -> 52
+     Updating (MEMORY_SIZE,2Gb): 15000000 -> 268435456
+     Updating (UNITS,BOHR): 'BOHR' converts to 'BOHR' -> 1
+     Updating (BASIS,6-31G): String copy succeeded.
+     Updating (SYMMETRY,OFF): 'OFF' converts to 'OFF' -> 1
+     Updating (REFERENCE,RHF): 'RHF' converts to 'RHF' -> 0
+     Updating (PRINT,1): 0 -> 1
+     Updating (SCF_CONV,12): 7 -> 12
+     Updating (CC_CONV,12): 7 -> 12
+     Updating (SCF_EXTRAP,0): '0' converts to 'NONE' -> 0
+     Updating (GRAD_CALC,analytical): 'analytical' converts to 'ANALYTICAL' -> 1
+     Updating (PROGRAM,PCCD): 'PCCD' converts to 'PCCD' -> 4
+     Updating (OO_DIIS,off): 'off' converts to 'OFF' -> 0
+     ----------------------------------------------------------------------
+
+
+                       ACES STATE VARIABLE VALIDATION LOG
+     ----------------------------------------------------------------------
+     Updating (COORDINATES,CARTESIAN): 'CARTESIAN' converts to 'CARTESIAN' -> 1
+ A geometry for frequency {0,1} present:                    -1
+     Updating (GRAD_CALC,analytical): 'analytical' converts to 'ANALYTICAL' -> 1
+     Updating (DERIV_LEV,first): 'first' converts to 'ON' -> 1
+ The value of grad calc                     1
+ The Deriv. level, havegeom?, and vib? :                     1
+                     0                     0                     0
+ The derivative level @exit                     1
+     Updating (CC_EXPORDER,5): 0 -> 5
+     Updating (TAMP_SUM,5): 0 -> 5
+ First order props and grad flags @enter:                     0
+                     1
+ First order props, deriv level and grad_calc @exit:                     0
+                     1                     1
+     Updating (ORBITALS,standard): 'standard' converts to 'STANDARD' -> 0
+     Updating (PERT_ORB,standard): 'standard' converts to 'STANDARD' -> 0
+     Updating (ESTATE_TOL,5): -1 -> 5
+     Updating (RESTART,0): '0' converts to 'OFF' -> 0
+     Updating (HBARABCD,OFF): 'OFF' converts to 'OFF' -> 1
+     Updating (HBARABCI,OFF): 'OFF' converts to 'OFF' -> 1
+     Updating (ABCDFULL,ON): 'ON' converts to 'ON' -> 1
+     Updating (CACHE_RECS,102): -1 -> 102
+     Updating (FILE_RECSIZ,131072): -1 -> 131072
+     ----------------------------------------------------------------------
+
+          ASV#   ASV KEY DEFINITION =    CURRENT [   DEFAULT] UNITS
+          ------------------------------------------------------------
+            1:                PRINT =          1 [         0] 
+            2:            CALCLEVEL =         52 [         0] 
+            3:            DERIV_LEV =          1 [        -1] 
+            4:              CC_CONV =         12 [         7] (tol)
+
+            5:             SCF_CONV =         12 [         7] (tol)
+            6:            XFORM_TOL =         11 [        11] (tol)
+            7:            CC_MAXCYC =         50 [        50] cycles
+            8:           LINDEP_TOL =          8 [         8] 
+
+            9:                  RDO =         -1 [        -1] 
+           10:           SCF_EXTRAP =          0 [         1] 
+           11:            REFERENCE =          0 [         0] 
+           12:          CC_EXPORDER =          5 [         0] 
+
+           13:             TAMP_SUM =          5 [         0] 
+           14:            NTOP_TAMP =         15 [        15] 
+           15:              DAMPSCF =         20 [        20] x 0.01
+           16:           SCF_MAXCYC =        150 [       150] cycles
+
+           18:                PROPS =          0 [         0] 
+           19:              DENSITY =          0 [         0] 
+           20:          SCF_EXPORDE =          6 [         6] 
+           21:          CC_EXTRAPOL =          1 [         1] 
+
+           22:            BRUECKNER =          0 [         0] 
+           23:               XFIELD =          0 [         0] x 10-6
+           24:               YFIELD =          0 [         0] x 10-6
+           25:               ZFIELD =          0 [         0] x 10-6
+
+           26:            SAVE_INTS =          0 [         0] 
+           28:               CHARGE =          0 [         0] 
+           29:          MULTIPLICTY =          1 [         1] 
+           30:          CPHF_CONVER =         12 [        12] (tol)
+
+           31:          CPHF_MAXCYC =         64 [        64] cycles
+           35:               INCORE =          0 [         0] 
+           36:          MEMORY_SIZE =  268435456 [  15000000] Words
+           37:          FILE_RECSIZ =     131072 [        -1] Words
+
+           38:                NONHF =          0 [         0] 
+           39:             ORBITALS =          0 [        -1] 
+           40:          SCF_EXPSTAR =          8 [         8] 
+           41:          LOCK_ORBOCC =          0 [         0] 
+
+           42:          FILE_STRIPE =          0 [         0] 
+           43:               DOHBAR =          0 [         0] 
+           44:           CACHE_RECS =        102 [        -1] 
+           45:                GUESS =          0 [         0] 
+
+           46:           JODA_PRINT =          0 [         0] 
+           47:           OPT_METHOD =          0 [         0] 
+           48:          CONVERGENCE =          4 [         4] H/bohr
+           49:          EIGENVECTOR =          1 [         1] 
+
+           50:              NEGEVAL =          2 [         2] 
+           51:          CURVILINEAR =          0 [         0] 
+           52:          STP_SIZ_CTL =          0 [         0] 
+           53:             MAX_STEP =        300 [       300] millibohr
+
+           54:            VIBRATION =          0 [         0] 
+           55:            EVAL_HESS =         -1 [        -1] # of cyc.
+           56:            INTEGRALS =          1 [         1] 
+           57:          FD_STEPSIZE =          0 [         0] 10-4 bohr
+
+           58:               POINTS =          0 [         0] 
+           59:          CONTRACTION =          1 [         1] 
+           60:             SYMMETRY =          1 [         2] 
+           62:            SPHERICAL =          1 [         1] 
+
+           63:          RESET_FLAGS =          0 [         0] 
+           64:             PERT_ORB =          0 [         2] 
+           65:             GENBAS_1 =          0 [         0] 
+           66:             GENBAS_2 =          0 [         0] 
+
+           67:             GENBAS_3 =          0 [         0] 
+           68:          COORDINATES =          1 [         3] 
+           69:            CHECK_SYM =          1 [         1] 
+           70:            SCF_PRINT =          0 [         0] 
+
+           71:                  ECP =          0 [         0] 
+           72:              RESTART =          0 [         1] 
+           73:            TRANS_INV =          0 [         0] 
+           74:          HFSTABILITY =          0 [         0] 
+
+           75:             ROT_EVEC =          0 [         0] 
+           76:           BRUCK_CONV =          4 [         4] (tol)
+           78:                UNITS =          1 [         0] 
+           79:          FD_USEGROUP =          0 [         0] 
+
+           80:           FD_PROJECT =          0 [         0] 
+           83:                VTRAN =          0 [         0] 
+           84:             HF2_FILE =          1 [         1] 
+           85:             SUBGROUP =          0 [         0] 
+
+           86:           SUBGRPAXIS =          0 [         0] 
+           87:               EXCITE =          0 [         0] 
+           88:            ZETA_CONV =         12 [        12] (tol)
+           90:           TREAT_PERT =          0 [         0] 
+
+           91:          ESTATE_PROP =          0 [         0] 
+           92:           OPT_MAXCYC =         50 [        50] 
+           93:             ABCDTYPE =          0 [         0] 
+           95:           AO_LADDERS =          1 [         1] 
+
+           96:                 FOCK =          1 [         1] 
+           97:          ESTATE_MAXC =         20 [        20] 
+           98:           ESTATE_TOL =          5 [        -1] (tol)
+           99:            TURBOMOLE =          0 [         0] 
+
+          100:           GAMMA_ABCD =          0 [         0] 
+          101:            ZETA_TYPE =          1 [         1] 
+          102:          ZETA_MAXCYC =         50 [        50] 
+          103:             RESRAMAN =          0 [         0] 
+
+          104:                  PSI =          0 [         0] 
+          105:             GEOM_OPT =          0 [         0] 
+          106:             EXTERNAL =          2 [         2] 
+          107:          HESS_UPDATE =          0 [         0] 
+
+          108:         INIT_HESSIAN =          0 [         0] 
+          109:          EXTRAPOLATE =          0 [         0] 
+          201:              EA_CALC =          0 [         0] 
+          203:                 TDHF =          0 [         0] 
+
+          204:           FUNCTIONAL =          4 [         4] 
+          205:           EOM_MAXCYC =         50 [        50] cycles
+          206:              EOMPROP =          0 [         0] 
+          207:             ABCDFULL =          1 [         0] 
+
+          208:           INTGRL_TOL =         14 [        14] (tol)
+          209:             DAMP_TYP =          0 [         0] 
+          210:             DAMP_TOL =         10 [        10] x 0.01
+          211:              LSHF_A1 =          0 [         0] x 0.01
+
+          212:              LSHF_B1 =          0 [         0] x 0.01
+          213:             POLYRATE =          0 [         0] 
+          214:              IP_CALC =          0 [         0] 
+          216:            IP_SEARCH =          0 [         0] 
+
+          217:               EOMREF =          0 [         0] 
+          218:              SOLVENT =          0 [         0] 
+          219:            EE_SEARCH =          0 [         0] 
+          220:            EOM_PRJCT =          0 [         0] 
+
+          221:               NEWVRT =          0 [         0] 
+          222:             HBARABCD =          1 [         0] 
+          223:             HBARABCI =          1 [         0] 
+          224:             NT3EOMEE =          0 [         0] 
+
+          225:              NOREORI =          2 [         2] 
+          227:               KS_POT =          0 [         0] 
+          228:             DIP_CALC =          0 [         0] 
+          230:             DEA_CALC =          0 [         0] 
+
+          232:              PROGRAM =          4 [         0] 
+          233:                CCR12 =          0 [         0] 
+          234:            EOMXFIELD =          0 [         0] x 10-6
+          235:            EOMYFIELD =          0 [         0] x 10-6
+
+          236:            EOMZFIELD =          0 [         0] x 10-6
+          237:              INSERTF =          0 [         0] 
+          238:            GRAD_CALC =          1 [         0] 
+          239:            IMEM_SIZE =    3000000 [   3000000] Words
+
+          240:              MAKERHF =          0 [         0] 
+          241:           GLOBAL_MEM =          0 [         0] Words
+          242:             PRP_INTS =          0 [         0] 
+          243:           TRUNC_ORBS =          0 [         0] 
+
+          244:             FNO_KEEP =          0 [         0] percent
+          245:             FNO_BSSE =          0 [         0] 
+          246:              NATURAL =          0 [         0] 
+          248:              UNO_REF =          0 [         0] 
+
+          249:           UNO_CHARGE =          0 [         0] 
+          250:             UNO_MULT =          1 [         1] 
+          251:                RAMAN =          0 [         0] 
+          252:            KUCHARSKI =          0 [         0] 
+
+          253:             SCF_TYPE =          0 [         0] 
+          254:               DIRECT =          0 [         0] 
+          255:         SINGLE_STORE =          0 [         0] 
+          256:          PREP_VIBRON =          0 [         0] 
+
+          257:          GRID_VIBRON =          0 [         0] 
+          258:          SCAN_NORMAL =          0 [         0] 
+          259:         NORMAL_CURVY =          0 [         0] 
+          260:           GEO_SAMPLE =          0 [         0] 
+
+          261:             PART_EOM =          0 [         0] 
+          262:          ORDER_ALPHA =          0 [         0] 
+          263:               FFIELD =          0 [         0] x 10-6
+          264:             AUTO_OCC =          0 [         2] 
+
+          265:          GEN_QUARTIC =          0 [         0] 
+          266:             OOMP_CYC =         50 [        50] 
+          267:            DKH_ORDER =          0 [         0] 
+          268:           UNCONTRACT =          0 [         0] 
+
+          269:          OPT_CONTROL =          0 [         0] 
+          270:              DAMP_CC =        100 [       100] x 0.01
+          271:             PES_SCAN =          0 [         0] 
+          273:         PRJCT_SINGLE =          1 [         1] 
+
+          274:                 COPT =          0 [         0] 
+          275:            RPA_SOLVE =          0 [         0] 
+          276:          TIME_DPD_CC =          0 [         0] 
+          277:         EE_ROOT_FIND =          0 [         0] 
+
+          278:            OO_METHOD =          0 [         0] 
+          279:             PCCD_REF =          0 [         0] 
+          280:            EOM_SOLVE =          0 [         0] 
+          281:         OO_CONSTRAIN =          0 [         0] 
+
+          282:            OO_MAXCYC =         50 [        50] 
+          283:              OO_DIIS =          0 [         1] 
+          284:         OV_CONSTRAIN =          0 [         0] 
+          ------------------------------------------------------------
+
+                         ACES STATE VARIABLES (STRINGS)
+          ------------------------------------------------------------
+          BASIS = 6-31G
+          OCCUPATION = [ESTIMATED BY SCF]
+          ------------------------------------------------------------
+ Can_do_frq F                     0
+ -----After call to Entry-----
+ The FNDDONE in Geopt:                     1
+ The gradient calcs:                     1
+ Hessian calc.,Geo. opt. and iarch: F F                     0
+ Entering Fetchz IARCH .NE. 1                     0
+ @-Entry to fetchz logic                     0                     0
+Creating CUSTRUCT jobarc record
+     0.000000     0.000000     0.000000
+     0.000000     0.000000     1.732879
+ 
+ @GEOPT, IPASS1,  PS1EXIST=:                     0 F
+ Before the call to GMETRY, XYZIN T
+ The number of atoms    2
+ 
+ The Cartesians before translations to CM
+   0.0000000   0.0000000   0.0000000
+   0.0000000   0.0000000   1.7328789
+ 
+ The atomic masses 
+    1.0078250   18.9984000
+ The Cartesians in center of mass coords
+   0.0000000   0.0000000  -1.6455841
+   0.0000000   0.0000000   0.0872948
+ 
+ 
+  @symmetry-i, Coordinates after COM shift 
+   0.0000000   0.0000000  -1.6455841
+   0.0000000   0.0000000   0.0872948
+ 
+  Determining Principal axis of Rot -1
+  Scale first column 
+  The eigenvector of the moment of inertia matrix
+  Determinant?    1.00000
+     0.000000000000    0.000000000000    1.000000000000
+     0.000000000000    1.000000000000    0.000000000000
+    -1.000000000000    0.000000000000    0.000000000000
+ 
+  Rotational constants (in cm-1): 
+    20.94636       20.94636
+ 
+ The symmetry processing begins
+ The Cartesians in principal axis before entering symmetry auto
+   0.00000   0.00000  -1.64558
+  -0.00000   0.00000   0.08729
+ The Cartesians in bare input axis before entering symmetry auto
+   0.00000   0.00000   0.00000
+   0.00000   0.00000   1.73288
+ 
+  Coordinates at entry to symmetry_auto:
+     0.000000000000    0.000000000000   -1.645584136625
+    -0.000000000000    0.000000000000    0.087294763375
+ 
+********************************************************************************
+   The full molecular point group is CXv .
+   The largest Abelian subgroup of the full molecular point group is C2v .
+   The computational point group is C1  .
+********************************************************************************
+ @-SYM_AUTO The Orientation matrices: ORIEN2 and ORIENT
+ 
+
+                 COLUMN   1       COLUMN   2       COLUMN   3
+ ROW   1      1.00000000000    0.00000000000    0.00000000000
+ ROW   2      0.00000000000    1.00000000000    0.00000000000
+ ROW   3     -0.00000000000    0.00000000000    1.00000000000
+ 
+
+                 COLUMN   1       COLUMN   2       COLUMN   3
+ ROW   1      1.00000000000    0.00000000000    0.00000000000
+ ROW   2      0.00000000000    1.00000000000    0.00000000000
+ ROW   3      0.00000000000    0.00000000000    1.00000000000
+ 
+@-SYM_AUTO Current coordinates (in /COORD/) common block
+   0.0000000   0.0000000  -1.6455841
+  -0.0000000   0.0000000   0.0872948
+ 
+ Coordinates at exit from symmetry_auto)
+   0.0000000   0.0000000  -1.6455841
+  -0.0000000   0.0000000   0.0872948
+ 
+ 
+ @-SYM_AUTO ORIENT2=ORIEN2xORIENT
+
+                 COLUMN   1       COLUMN   2       COLUMN   3
+ ROW   1      1.00000000000    0.00000000000    0.00000000000
+ ROW   2      0.00000000000    1.00000000000    0.00000000000
+ ROW   3     -0.00000000000    0.00000000000    1.00000000000
+ Q(Input-ordered)<->Q(Principle axis orientation) 
+
+                 COLUMN   1       COLUMN   2       COLUMN   3
+ ROW   1      1.00000000000    0.00000000000    0.00000000000
+ ROW   2      0.00000000000    1.00000000000    0.00000000000
+ ROW   3     -0.00000000000    0.00000000000    1.00000000000
+                     2
+ The new (sym. rotated) geometry
+     0.000000     0.000000    -1.645584
+    -0.000000     0.000000     0.087295
+ The old (principal axis) geometry
+     0.000000     0.000000     0.000000
+     0.000000     0.000000     1.732879
+         --------------------------------------------------
+          The internal to input order reorientation matrix
+         --------------------------------------------------
+             1.0000000000   0.0000000000   0.0000000000
+             0.0000000000   1.0000000000   0.0000000000
+             0.0000000000   0.0000000000   1.0000000000
+         --------------------------------------------------
+         -----------------------------------------------
+         Cartesian coordinates corresponding to internal 
+                 coordinate input (Angstroms) 
+ ----------------------------------------------------------------
+ Z-matrix   Atomic            C o o r d i n a t e s
+  Symbol    Number           X              Y              Z
+ ----------------------------------------------------------------
+     H         1         0.00000000     0.00000000    -0.87080569
+     F         9        -0.00000000     0.00000000     0.04619440
+ ----------------------------------------------------------------
+   Interatomic distance matrix (Angstroms) 
+ 
+                 H             F    
+                [ 1]        [ 2]
+  H    [ 1]     0.00000
+  F    [ 2]     0.91700     0.00000
+ 
+The basis set definitions
+   1 H:6-31G             
+   9 F:6-31G             
+The nord array:    1   2
+ The MPVMZMAT record (symmetry unique only, others are zero)
+   1   2
+ 
+The basis set definitions
+   1 H:6-31G             
+   9 F:6-31G             
+ @GEOPT-W, Archive file not created for single-point calculation.
+ 
+ @GEOPT, IPASS1,  PS1EXIST=:                     0 F
+ Finite diffs; ignore and geomopt vars: F F
+ The vib calc. related varrs:
+ iflags(h_IFLAGS_vib):                     0
+ The finite diffs: F
+ iflags2(h_IFLAGS2_geom_opt):                     0
+ first run of popt num. frq:                     0
+  @ACES2: Executing "xvmol"
+ One- and two-electron integrals over symmetry-adapted AOs are calculated.\n
+ @READIN: Spherical harmonics are used.
+  
+   2 types of atoms
+   0 symmetry operations
+
+  
+  Integrals less than  0.10E-13 are neglected.
+
+  Atomic type number  1 :
+  -----------------------
+
+    Nuclear charge:                        1
+    number of symmetry independent atoms:  1
+    highest orbital type:                  s
+
+      1 groups of CGTOs of s type
+
+    nuclear coordinates (in a.u.) are :
+
+  
+  Atomic type number  2 :
+  -----------------------
+
+    Nuclear charge:                        9
+    number of symmetry independent atoms:  1
+    highest orbital type:                  p
+
+      1 groups of CGTOs of s type
+      1 groups of CGTOs of p type
+
+    nuclear coordinates (in a.u.) are :
+
+  
+   Internuclear distances (A) :
+
+     for atom H 01 (coordinates :   0.00000   0.00000  -1.64558)
+
+     F 02   1     distance is  0.917
+
+     for atom F 02 (coordinates :   0.00000   0.00000   0.08729)
+
+
+   Group multiplication table :
+
+         1
+
+   Gaussian basis information :
+
+   atom                 exponent      coefficients
+
+ H 01  1    S   
++                 1      18.731137   0.0334946   0.0000000
+                  2       2.825394   0.2347270   0.0000000
+                  3       0.640122   0.8137573   0.0000000
+                  4       0.161278   0.0000000   1.0000000
+
+ F 02  1    S   
++                 5    7001.713000   0.0018196   0.0000000   0.0000000
+                  6    1051.366000   0.0139160   0.0000000   0.0000000
+                  7     239.285700   0.0684050   0.0000000   0.0000000
+                  8      67.397450   0.2331860   0.0000000   0.0000000
+                  9      21.519960   0.4712670   0.0000000   0.0000000
+                 10       7.403101   0.3566190   0.0000000   0.0000000
+                 11      20.847950   0.0000000  -0.1085070   0.0000000
+                 12       4.808308   0.0000000  -0.1464520   0.0000000
+                 13       1.344070   0.0000000   1.1286890   0.0000000
+                 14       0.358151   0.0000000   0.0000000   1.0000000
+
+ F 02  1    X   
++                15      20.847950   0.0716290   0.0000000
+                 16       4.808308   0.3459120   0.0000000
+                 17       1.344070   0.7224700   0.0000000
+                 18       0.358151   0.0000000   1.0000000
+
+ F 02  1    Y   
++                19      20.847950   0.0716290   0.0000000
+                 20       4.808308   0.3459120   0.0000000
+                 21       1.344070   0.7224700   0.0000000
+                 22       0.358151   0.0000000   1.0000000
+
+ F 02  1    Z   
++                23      20.847950   0.0716290   0.0000000
+                 24       4.808308   0.3459120   0.0000000
+                 25       1.344070   0.7224700   0.0000000
+                 26       0.358151   0.0000000   1.0000000
+ 11 11
+  1  2  3  4  5  6  7  8  9 10 11
+1
+
+             SYMMETRY TRANSFORMATION INFO
+             11 SYMMETRY ADAPTED BASIS FUNCTIONS 
+
+
+          irreducible representation number 1
+
+    1    1    H 01   1s     1   1   1.0
+    2    2    H 01   1s     1   2   1.0
+    3    3    F 02   1s     1   3   1.0
+    4    4    F 02   1s     1   4   1.0
+    5    5    F 02   1s     1   5   1.0
+    6    6    F 02   2px    1   6   1.0
+    7    7    F 02   2px    1   7   1.0
+    8    8    F 02   2py    1   8   1.0
+    9    9    F 02   2py    1   9   1.0
+   10   10    F 02   2pz    1  10   1.0
+   11   11    F 02   2pz    1  11   1.0
+  @READIN-I, Nuclear repulsion energy :    5.1936693326 a.u.
+  required memory for a1 array                4451690  words 
+  required memory for a2 array                  70214  words 
+  @TWOEL-I,        677 integrals of symmetry type  I I I I
+  @TWOEL-I, Total number of 2-e integrals        677.
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.00 (      0.0)   0: 0: 0.00 (      0.0)   0: 0: 0.0 (      0.0)
+  @ACES2: Executing "xvmol2ja"
+ ZMAT<->VMOL
+   1   2
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.00 (      0.0)   0: 0: 0.00 (      0.0)   0: 0: 0.0 (      0.0)
+  @ACES2: Executing "xvscf"
+@VSCF: There are   11 functions in the AO basis.
+
+       There are    1 irreducible representations.
+
+
+       Irrep        # of functions
+         1                 11
+ 
+  @VSCF-I, Parameters for SCF calculation: 
+             SCF reference function:  RHF
+       Maximum number of iterations:  150
+          Full symmetry point group: CXv 
+          Computational point group: C1  
+             Initial density matrix: CORE                   
+          SCF convergence tolerance: 10**(-12)
+           Convergence acceleration: OFF
+               Latest start for RPP:   8
+                          RPP order:   6
+
+  @SYMSIZ-I, Memory information:   13374904 words required.
+  @SYMSIZ-I, Fock matrices are constructed from AO integral file.
+  Occupancies from core Hamiltonian:
+
+          Alpha population by irrep:   5
+           Beta population by irrep:   5
+
+
+ The Alpha and Beta double pre. occupation numbers
+ 
+   1.00000   1.00000   1.00000   1.00000   1.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000
+ 
+   1.00000   1.00000   1.00000   1.00000   1.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000
+ 
+  The No. of Alpha and Beta occupied orbitals (can be greater than
+  no. electons if fractional occupations are used)
+ 
+     No. of alpha occupied orbitals:    5
+     No. of beta occupied orbitasl :    5
+ 
+  --------------------------------------------------------------------
+  Iteration         Total Energy            Largest Error in FDS-SDF
+  --------------------------------------------------------------------
+       1           -93.6786673906              0.1674381315D+01
+       2           -96.2971329008              0.1749127053D+01
+       3           -98.5940777546              0.1246497741D+01
+       4           -99.5171419982              0.8146279341D+00
+       5           -99.8429992314              0.4348056739D+00
+       6           -99.9395421167              0.2481870675D+00
+       7           -99.9701922407              0.1318629281D+00
+       8           -99.9793695351              0.7430523215D-01
+       9           -99.9821864832              0.4035813745D-01
+      10           -99.9830372217              0.2239721692D-01
+      11           -99.9832962683              0.1228072559D-01
+      12           -99.9833747739              0.6780555219D-02
+      13           -99.9833986263              0.3730402844D-02
+      14           -99.9834058631              0.2056374747D-02
+      15           -99.9834080605              0.1132550988D-02
+      16           -99.9834087274              0.6240354822D-03
+      17           -99.9834089298              0.3437935345D-03
+      18           -99.9834089913              0.1894108732D-03
+      19           -99.9834090099              0.1043577845D-03
+      20           -99.9834090156              0.5749469502D-04
+      21           -99.9834090173              0.3167755357D-04
+      22           -99.9834090178              0.1745252537D-04
+      23           -99.9834090180              0.9615683203D-05
+      24           -99.9834090180              0.5297738778D-05
+      25           -99.9834090181              0.2918838762D-05
+      26           -99.9834090181              0.1608136756D-05
+      27           -99.9834090181              0.8860147584D-06
+      28           -99.9834090181              0.4881522140D-06
+      29           -99.9834090181              0.2689504665D-06
+      30           -99.9834090181              0.1481792548D-06
+      31           -99.9834090181              0.8164017373D-07
+      32           -99.9834090181              0.4497998807D-07
+      33           -99.9834090181              0.2478195626D-07
+      34           -99.9834090181              0.1365373192D-07
+      35           -99.9834090181              0.7522595880D-08
+      36           -99.9834090181              0.4144612431D-08
+      37           -99.9834090181              0.2283496281D-08
+      38           -99.9834090181              0.1258095850D-08
+      39           -99.9834090181              0.6931540897D-09
+      40           -99.9834090181              0.3818941829D-09
+      41           -99.9834090181              0.2104069141D-09
+      42           -99.9834090181              0.1159323748D-09
+      43           -99.9834090181              0.6388278795D-10
+      44           -99.9834090181              0.3519684544D-10
+      45           -99.9834090181              0.1939293170D-10
+      46           -99.9834090181              0.1069300204D-10
+      47           -99.9834090181              0.5897726751D-11
+      48           -99.9834090181              0.3248290525D-11
+      49           -99.9834090181              0.1792455073D-11
+      50           -99.9834090181              0.9868772466D-12
+
+@VSCF: SCF has converged.
+
+     E(SCF)=       -99.9834090181
+
+
+  ORBITAL EIGENVECTORS (ZMAT ordered AO basis)
+
+  SYMMETRY BLOCK 1 (ALPHA)
+
+                          MO #  1       MO #  2       MO #  3       MO #  4
+
+    BASIS/ORB E          -26.27572      -1.58961      -0.73898      -0.63103
+                        ----------    ----------    ----------    ----------
+    1; H     S             0.00030       0.13235      -0.29302       0.00000
+    2; H     S             0.00177      -0.01395      -0.10782      -0.00000
+    3; F     S             0.99551      -0.23052      -0.06174       0.00000
+    4; F     S             0.02137       0.49723       0.13700       0.00000
+    5; F     S            -0.00582       0.52947       0.24410      -0.00000
+    6; F     X            -0.00000       0.00000       0.00000       0.65111
+    7; F     Y            -0.00000       0.00000       0.00000       0.11093
+    8; F     Z            -0.00149      -0.08425       0.54831      -0.00000
+    9; F     X             0.00000      -0.00000       0.00000       0.48324
+   10; F     Y             0.00000      -0.00000      -0.00000       0.08233
+   11; F     Z             0.00140      -0.04709       0.34969      -0.00000
+
+
+                          MO #  5       MO #  6       MO #  7       MO #  8
+
+    BASIS/ORB E           -0.63103       0.20969       1.11682       1.48947
+                        ----------    ----------    ----------    ----------
+    1; H     S            -0.00000       0.09568       1.39426      -0.00000
+    2; H     S             0.00000       1.35943      -0.82971       0.00000
+    3; F     S            -0.00000       0.06304       0.03554      -0.00000
+    4; F     S            -0.00000      -0.07988      -0.12662       0.00000
+    5; F     S             0.00000      -0.73104      -0.00099      -0.00000
+    6; F     X            -0.11093       0.00000      -0.00000      -0.94608
+    7; F     Y             0.65111       0.00000       0.00000       0.03419
+    8; F     Z             0.00000       0.26688       0.41203       0.00000
+    9; F     X            -0.08233      -0.00000       0.00000       1.04439
+   10; F     Y             0.48324       0.00000       0.00000      -0.03774
+   11; F     Z             0.00000       0.44901       0.27924      -0.00000
+
+
+                          MO #  9       MO # 10       MO # 11
+
+    BASIS\\ORB E            1.48947       1.59320       2.00611
+                        ----------    ----------    ----------
+    1; H     S            -0.00000       0.41362      -0.49705
+    2; H     S             0.00000       0.04383      -0.65824
+    3; F     S            -0.00000       0.06362       0.08524
+    4; F     S             0.00000      -0.58077      -1.51073
+    5; F     S            -0.00000       0.37789       2.02686
+    6; F     X            -0.03419      -0.00000       0.00000
+    7; F     Y            -0.94608       0.00000       0.00000
+    8; F     Z             0.00000      -0.82642       0.38811
+    9; F     X             0.03774       0.00000      -0.00000
+   10; F     Y             1.04439      -0.00000      -0.00000
+   11; F     Z            -0.00000       1.16364      -0.92241
+
+
+
+
+      Trace of projected alpha density matrix =   1.000000000
+
+      Alpha part of wavefunction is symmetric.
+
+
+  ORBITAL EIGENVALUES (ALPHA)  (1H = 27.2113957 eV)
+
+       MO #        E(hartree)               E(eV)           FULLSYM    COMPSYM
+       ----   --------------------   --------------------   -------   ---------
+    1     1         -26.2757157305        -714.9988980443     SG+         A (1)
+    2     2          -1.5896069208         -43.2554229294     SG+         A (1)
+    3     3          -0.7389758092         -20.1085631578     SG+         A (1)
+    4     4          -0.6310314322         -17.1712459994      PI         A (1)
+    5     5          -0.6310314322         -17.1712459994      PI         A (1)
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    6     6           0.2096936778           5.7060576433     SG+         A (1)
+    7     7           1.1168150074          30.3900950894     SG+         A (1)
+    8     8           1.4894686970          40.5305220960      PI         A (1)
+    9     9           1.4894686970          40.5305220960      PI         A (1)
+   10    10           1.5932023065          43.3532583926     SG+         A (1)
+   11    11           2.0061121371          54.5891111812     SG+         A (1)
+
+
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.02 (      0.0)   0: 0: 0.01 (      0.0)   0: 0: 0.0 (      0.0)
+  @ACES2: Executing "xvtran"
+  Full RHF integral transformation
+  @GTNRB2-I, There are  1 irreducible representations.
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.00 (      0.0)   0: 0: 0.00 (      0.0)   0: 0: 0.0 (      0.0)
+  @ACES2: Executing "xintprc"
+ 
+ 
+ performing integral processing for standard CC
+  @GMOIAA-I, Processing MO integrals for spin case AA.
+  @GMOIAA-I, Generation of integral list completed.
+                      TYPE            NUMBER
+                      ----           --------
+                      PPPP                 99
+                      PPPH                284
+                      PPHH                216
+                      PHPH                149
+                      PHHH                192
+                      HHHH                 49
+
+                     TOTAL                989
+  @DS25AA-I, PHHHAA integrals will be sorted in core.
+     Words required:      500  Words available: ********
+  @DS25AB-I, PHHHAB integrals will be sorted in core.
+     Words required:     3881  Words available: ********
+  @STT3AA-I, Processing integral type PPHH spin case AAAA.
+  @STT4AA-I, Processing integral type PHPH, spin case AAAA.
+  @DS25AB-I, PPPHAB integrals will be sorted in core.
+     Words required:     4221  Words available: ********
+  Alpha diagonal element of the reference state
+  ---------------------------------------------
+ -26.27572  -1.58961  -0.73898  -0.63103  -0.63103   0.20969   1.11682
+   1.48947   1.48947   1.59320   2.00611
+  Beta  diagonal element of the reference state
+  ---------------------------------------------
+ -26.27572  -1.58961  -0.73898  -0.63103  -0.63103   0.20969   1.11682
+   1.48947   1.48947   1.59320   2.00611
+
+  @FORMT2-I, Second-order MBPT correlation energies:
+              ----------------------------------------------
+              E(SCF)                =  -99.983409018060 a.u.
+@CHECKSUM: @-INTPRC:T2         0.550736512397E-01      0.377589932654E-02
+              E2(AA)                =   -0.016362750434 a.u.
+ The T2-ABAB
+@CHECKSUM: @-INTPRC:T2-ABAB        -0.655312961406E+00      0.227250413590E-01
+              E2(AB)                =   -0.095968815226 a.u.
+              E2(TOT)               =   -0.128694316094 a.u.
+              Total MBPT(2) energy  = -100.112103334154 a.u.
+              ----------------------------------------------
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04151 [  5   5   9   9]-0.04151 [  3   3   7   7]-0.03615
+[  5   4   9   8]-0.03223 [  4   5   8   9]-0.03223 [  3   3   6   6]-0.03189
+[  3   3  10  10]-0.02953 [  4   3   8  10]-0.02617 [  3   4  10   8]-0.02617
+[  5   3   9  10]-0.02617 [  3   5  10   9]-0.02617 [  3   3   7   6]-0.02422
+[  3   3   6   7]-0.02422 [  4   2   8  11]-0.01972 [  2   4  11   8]-0.01972
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1507482715.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2517363
+ 
+------------------------------------------------------------------------
+          Core memory requirement for full matrix algorithms
+
+    Contraction or quantity             Memory needed (words)
+                                      C1                     C1 
+------------------------------------------------------------------------
+  Particle-particle ladder (AB)        3096                    3096
+  Hole-hole ladder (AB)                2425                    2425
+  Fourth-order singles (AB)               0                       0
+  Rings (AB)                           2700                    2700
+  T2 vector (AB)                        900                     900
+  T2 vector (AA)                        150                     150
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+     Floating point operations required for full  matrix algorithms
+
+  Term            spins   method                    FLOP
+                                           C1                 C1 
+------------------------------------------------------------------------
+ a) contributions to the intermediates :
+ 
+ T2 --> W(MNIJ)  (ABAB)   2 - 7            22500             22500
+ 
+ T1 --> W(MNIJ)  (ABAB)     7               3750              3750
+ 
+ T2 --> W(MBEJ)  (AAAA)   3 - 7            54000             54000
+ T2 --> W(MBEJ)  (ABAB)   3 - 7            54000             54000
+ T2 --> W(MBEJ)  (BAAB)   3 - 7            27000             27000
+ 
+ T1 --> W(MBEJ)  (AAAA)     7               9900              9900
+ T1 --> W(MBEJ)  (ABAB)     7               9900              9900
+ T1 --> W(MBEJ)  (BAAB)     7               9900              9900
+ 
+ T1 --> W(ABEF)  (ABAB)     7              31500             31500
+ 
+ T2 --> F(MI)    (AA)     3 - 7             4500              4500
+ 
+ T2 --> F(AE)    (AA)     3 - 7             5400              5400
+ 
+b) contractions
+------------------------------------------------------------------------
+ 
+ W(ABEF) --> T2 (ABAB)    1 - 7            32400             32400
+ 
+ W(MNIJ) --> T2 (ABAB)    1 - 7            22500             22500
+ 
+ W(MBEJ) --> T2 (ABAB)    1 - 7            54000             54000
+ W(MBEJ) --> T2 (BAAB)    1 - 7            27000             27000
+ 
+ F(MI) --> T2   (ABAB)    2 - 7             4500              4500
+ 
+ F(AE) --> T2   (ABAB)    2 - 7             5400              5400
+ 
+c) direct contributions
+------------------------------------------------------------------------
+ 
+ T2 --> T1       (AA)     3,4,6,7          13950             13950
+ 
+ T1 --> T2      (ABAB)     6,7              9900              9900
+ 
+ T1**2 --> T2   (ABAB)      7               9000              9000
+ T1**2 --> T2   (BAAB)      7               9000              9000
+ 
+d) total number of operations for various methods
+------------------------------------------------------------------------
+ 
+ MBPT(3)                        (1)       135900            135900
+ DQ-MBPT(4)                     (2)       416700            416700
+ SDQ-MBPT(4)                    (3)       430650            430650
+ CCD          per iteration     (5)       313200            313200
+ QCISD        per iteration     (6)       337050            337050
+ CCSD         per iteration     (7)       410100            410100
+ 
+------------------------------------------------------------------------
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.01 (      0.0)   0: 0: 0.00 (      0.0)   0: 0: 0.0 (      0.0)
+  @ACES2: Executing "xvcc"
+
+-----------------------------------------------------------------------------
+                                Entering xvcc
+-----------------------------------------------------------------------------
+
+ 
+ 
+   Running standard CC program
+ 
+   The CC damp parameter = 1.0000
+ 
+   pCCD energy will be calculated.
+   Regular CC calculation is performed
+ 
+   The AA contribution to the correlation energy is:   -0.0163628 a.u.
+   The AB contribution to the correlation energy is:   -0.0959688 a.u.
+   The total correlation energy is -0.128694316094 a.u.
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.000000000000E+00      0.000000000000E+00
+ 
+@CHECKSUM: ABAB_MNIJ         0.306042192966E+02      0.522652332042E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: ABAB_MBEJ         0.000000000000E+00      0.000000000000E+00
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174196340799E+02      0.119272792813E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243363801913E+02      0.158687324810E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.113820055578E+00      0.435913013734E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.000000000000E+00      0.000000000000E+00
+ 
+@CHECKSUM: ABAB_MNIJ         0.306042192966E+02      0.522652332042E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174196340799E+02      0.119272792813E+02
+@CHECKSUM: ABAB_MBEJ         0.243363801913E+02      0.158687324810E+02
+@CHECKSUM: FMI              -0.113820055578E+00      0.435913013734E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.153566602576E+00      0.417958950087E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.306042192966E+02      0.522652332042E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174196340799E+02      0.119272792813E+02
+@CHECKSUM: ABAB_MBEJ         0.243363801913E+02      0.158687324810E+02
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.350684592471E+01      0.437954740331E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.347146558867E+01      0.425275156395E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.347146558867E+01      0.425275156395E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.211106187869E+01      0.177108854687E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.211106187869E+01      0.177108854687E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.388017700773E+01      0.487593682213E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04151 [  5   5   9   9]-0.04151 [  3   3   7   7]-0.03615
+[  5   4   9   8]-0.03223 [  4   5   8   9]-0.03223 [  3   3   6   6]-0.03189
+[  3   3  10  10]-0.02953 [  4   3   8  10]-0.02617 [  3   4  10   8]-0.02617
+[  5   3   9  10]-0.02617 [  3   5  10   9]-0.02617 [  3   3   7   6]-0.02422
+[  3   3   6   7]-0.02422 [  4   2   8  11]-0.01972 [  2   4  11   8]-0.01972
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1507482715.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2517363
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: T2-ABAB :         0.388017700773E+01      0.487593682213E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :        -0.727507649090E+00      0.250060652810E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0141613 a.u.
+   The AB contribution to the correlation energy is:   -0.0999151 a.u.
+   The total correlation energy is -0.128237757978 a.u.
+  Convergence information after     1 iterations: 
+  Largest element of residual vector : -0.44434032E-02.
+  Largest element of DIIS residual   : -0.44434032E-02.
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.113820055578E+00      0.435913013734E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.153566602576E+00      0.417958950087E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305906979116E+02      0.522565861557E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174196340799E+02      0.119272792813E+02
+@CHECKSUM: ABAB_MBEJ         0.243363801913E+02      0.158687324810E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174093417601E+02      0.119249850325E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243432468371E+02      0.158728890501E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.113000367112E+00      0.434662804303E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.153566602576E+00      0.417958950087E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305906979116E+02      0.522565861557E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174093417601E+02      0.119249850325E+02
+@CHECKSUM: ABAB_MBEJ         0.243432468371E+02      0.158728890501E+02
+@CHECKSUM: FMI              -0.113000367112E+00      0.434662804303E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.156785843149E+00      0.413877864958E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305906979116E+02      0.522565861557E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174093417601E+02      0.119249850325E+02
+@CHECKSUM: ABAB_MBEJ         0.243432468371E+02      0.158728890501E+02
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.350299344381E+01      0.437508041293E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.346373795853E+01      0.424301985391E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.346373795853E+01      0.424301985391E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.196487222202E+01      0.169547867880E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.196487222202E+01      0.169547867880E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.398787376259E+01      0.513005303380E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04326 [  5   5   9   9]-0.04326 [  3   3   7   7]-0.04060
+[  3   3   6   6]-0.03542 [  5   4   9   8]-0.03109 [  4   5   8   9]-0.03109
+[  3   3  10  10]-0.03088 [  3   3   7   6]-0.02860 [  3   3   6   7]-0.02860
+[  4   3   8  10]-0.02573 [  3   4  10   8]-0.02573 [  5   3   9  10]-0.02573
+[  3   5  10   9]-0.02573 [  4   2   8  11]-0.02018 [  2   4  11   8]-0.02018
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1581330619.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2751527
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.472405659460E-01      0.282441475168E-02
+@CHECKSUM: T2-ABAB :         0.398787376259E+01      0.513005303380E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.459148497735E-01      0.264597523679E-02
+@CHECKSUM: T2-ABAB :        -0.751653669759E+00      0.265389334362E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0137148 a.u.
+   The AB contribution to the correlation energy is:   -0.1024703 a.u.
+   The total correlation energy is -0.129899974699 a.u.
+  Convergence information after     2 iterations: 
+  Largest element of residual vector : -0.21453466E-02.
+  Largest element of DIIS residual   : -0.16431233E-02.
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.113000367112E+00      0.434662804303E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.156785843149E+00      0.413877864958E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305835633669E+02      0.522499139868E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174093417601E+02      0.119249850325E+02
+@CHECKSUM: ABAB_MBEJ         0.243432468371E+02      0.158728890501E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174091564386E+02      0.119233756470E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243468780928E+02      0.158760073980E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114711407993E+00      0.451203674300E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.156785843149E+00      0.413877864958E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305835633669E+02      0.522499139868E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174091564386E+02      0.119233756470E+02
+@CHECKSUM: ABAB_MBEJ         0.243468780928E+02      0.158760073980E+02
+@CHECKSUM: FMI              -0.114711407993E+00      0.451203674300E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.160742946907E+00      0.429412939986E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305835633669E+02      0.522499139868E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174091564386E+02      0.119233756470E+02
+@CHECKSUM: ABAB_MBEJ         0.243468780928E+02      0.158760073980E+02
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.350064280022E+01      0.436812662156E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.345893574854E+01      0.422894068243E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.345893574854E+01      0.422894068243E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.189549096571E+01      0.163247622682E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.189549096571E+01      0.163247622682E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.402897078472E+01      0.524712815026E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04495 [  5   5   9   9]-0.04495 [  3   3   7   7]-0.04242
+[  3   3   6   6]-0.03835 [  3   3  10  10]-0.03181 [  5   4   9   8]-0.03151
+[  4   5   8   9]-0.03151 [  3   3   7   6]-0.03089 [  3   3   6   7]-0.03089
+[  4   3   8  10]-0.02613 [  3   4  10   8]-0.02613 [  5   3   9  10]-0.02613
+[  3   5  10   9]-0.02613 [  4   2   8  11]-0.02066 [  5   2   9  11]-0.02066
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1646624672.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2952584
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.454349365183E-01      0.258296673149E-02
+@CHECKSUM: T2-ABAB :         0.402897078472E+01      0.524712815026E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.451215955199E-01      0.254655041967E-02
+@CHECKSUM: T2-ABAB :        -0.760675799150E+00      0.272796269568E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134617 a.u.
+   The AB contribution to the correlation energy is:   -0.1036260 a.u.
+   The total correlation energy is -0.130549462559 a.u.
+  Convergence information after     3 iterations: 
+  Largest element of residual vector : -0.28511534E-03.
+  Largest element of DIIS residual   :  0.19184478E-03.
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114711407993E+00      0.451203674300E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.160742946907E+00      0.429412939986E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830618820E+02      0.522492132874E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174091564386E+02      0.119233756470E+02
+@CHECKSUM: ABAB_MBEJ         0.243468780928E+02      0.158760073980E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086994881E+02      0.119230482976E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471564954E+02      0.158763649757E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114762024290E+00      0.452380120754E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.160742946907E+00      0.429412939986E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830618820E+02      0.522492132874E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086994881E+02      0.119230482976E+02
+@CHECKSUM: ABAB_MBEJ         0.243471564954E+02      0.158763649757E+02
+@CHECKSUM: FMI              -0.114762024290E+00      0.452380120754E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161024738171E+00      0.430651281889E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830618820E+02      0.522492132874E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086994881E+02      0.119230482976E+02
+@CHECKSUM: ABAB_MBEJ         0.243471564954E+02      0.158763649757E+02
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.350054541006E+01      0.436736776811E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.345874944732E+01      0.422745951063E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.345874944732E+01      0.422745951063E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.189211966460E+01      0.162636095511E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.189211966460E+01      0.162636095511E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.403231160711E+01      0.526503219205E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04519 [  5   5   9   9]-0.04519 [  3   3   7   7]-0.04248
+[  3   3   6   6]-0.03878 [  3   3  10  10]-0.03189 [  5   4   9   8]-0.03157
+[  4   5   8   9]-0.03157 [  3   3   7   6]-0.03125 [  3   3   6   7]-0.03125
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02069 [  5   2   9  11]-0.02069
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1654841892.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2978349
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.450084510037E-01      0.253258101276E-02
+@CHECKSUM: T2-ABAB :         0.403231160711E+01      0.526503219205E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449646351938E-01      0.252915106153E-02
+@CHECKSUM: T2-ABAB :        -0.761273154669E+00      0.274019847283E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134180 a.u.
+   The AB contribution to the correlation energy is:   -0.1038081 a.u.
+   The total correlation energy is -0.130644161189 a.u.
+  Convergence information after     4 iterations: 
+  Largest element of residual vector : -0.72604371E-04.
+  Largest element of DIIS residual   : -0.37836607E-04.
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114762024290E+00      0.452380120754E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161024738171E+00      0.430651281889E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830984944E+02      0.522491613922E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086994881E+02      0.119230482976E+02
+@CHECKSUM: ABAB_MBEJ         0.243471564954E+02      0.158763649757E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086192657E+02      0.119229921698E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471148535E+02      0.158763950750E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114755799181E+00      0.452496586556E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161024738171E+00      0.430651281889E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830984944E+02      0.522491613922E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086192657E+02      0.119229921698E+02
+@CHECKSUM: ABAB_MBEJ         0.243471148535E+02      0.158763950750E+02
+@CHECKSUM: FMI              -0.114755799181E+00      0.452496586556E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161017111237E+00      0.430810083216E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305830984944E+02      0.522491613922E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086192657E+02      0.119229921698E+02
+@CHECKSUM: ABAB_MBEJ         0.243471148535E+02      0.158763950750E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.350059415337E+01      0.436727910139E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.345885299269E+01      0.422729685130E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.345885299269E+01      0.422729685130E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.189346884146E+01      0.162586252611E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.189346884146E+01      0.162586252611E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.403153175347E+01      0.526660231044E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03128 [  3   3   6   7]-0.03128
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655738339.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981092
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449405157430E-01      0.252675088682E-02
+@CHECKSUM: T2-ABAB :         0.403153175347E+01      0.526660231044E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449330774153E-01      0.252657284465E-02
+@CHECKSUM: T2-ABAB :        -0.761031035154E+00      0.274152954809E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134119 a.u.
+   The AB contribution to the correlation energy is:   -0.1038262 a.u.
+   The total correlation energy is -0.130649965809 a.u.
+  Convergence information after     5 iterations: 
+  Largest element of residual vector :  0.91812153E-05.
+  Largest element of DIIS residual   :  0.61795651E-05.
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114755799181E+00      0.452496586556E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161017111237E+00      0.430810083216E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831034093E+02      0.522491595591E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086192657E+02      0.119229921698E+02
+@CHECKSUM: ABAB_MBEJ         0.243471148535E+02      0.158763950750E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086109132E+02      0.119229886788E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471040656E+02      0.158763963527E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114754298738E+00      0.452504677257E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161017111237E+00      0.430810083216E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831034093E+02      0.522491595591E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086109132E+02      0.119229886788E+02
+@CHECKSUM: ABAB_MBEJ         0.243471040656E+02      0.158763963527E+02
+@CHECKSUM: FMI              -0.114754298738E+00      0.452504677257E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013693801E+00      0.430820267700E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831034093E+02      0.522491595591E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086109132E+02      0.119229886788E+02
+@CHECKSUM: ABAB_MBEJ         0.243471040656E+02      0.158763963527E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.350060379418E+01      0.436727355613E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.345887393165E+01      0.422728659779E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.345887393165E+01      0.422728659779E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.189374242453E+01      0.162583645135E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.189374242453E+01      0.162583645135E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.403134211310E+01      0.526666071179E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  5   2   9  11]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655781520.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449307419988E-01      0.252639680485E-02
+@CHECKSUM: T2-ABAB :         0.403134211310E+01      0.526666071179E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449294807997E-01      0.252639357311E-02
+@CHECKSUM: T2-ABAB :        -0.760978104790E+00      0.274160770317E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038272 a.u.
+   The total correlation energy is -0.130650119143 a.u.
+  Convergence information after     6 iterations: 
+  Largest element of residual vector :  0.12651405E-05.
+  Largest element of DIIS residual   :  0.82011529E-06.
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114754298738E+00      0.452504677257E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013693801E+00      0.430820267700E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037148E+02      0.522491600443E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086109132E+02      0.119229886788E+02
+@CHECKSUM: ABAB_MBEJ         0.243471040656E+02      0.158763963527E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093833E+02      0.119229889507E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471013762E+02      0.158763960925E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753835115E+00      0.452503722387E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013693801E+00      0.430820267700E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037148E+02      0.522491600443E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093833E+02      0.119229889507E+02
+@CHECKSUM: ABAB_MBEJ         0.243471013762E+02      0.158763960925E+02
+@CHECKSUM: FMI              -0.114753835115E+00      0.452503722387E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161012827917E+00      0.430818900207E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037148E+02      0.522491600443E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093833E+02      0.119229889507E+02
+@CHECKSUM: ABAB_MBEJ         0.243471013762E+02      0.158763960925E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.350060588788E+01      0.436727402756E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.345887850577E+01      0.422728736651E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.345887850577E+01      0.422728736651E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.189379885564E+01      0.162584197594E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.189379885564E+01      0.162584197594E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.403129659974E+01      0.526664892021E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655777278.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981228
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290558251E-01      0.252639307548E-02
+@CHECKSUM: T2-ABAB :         0.403129659974E+01      0.526664892021E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290599818E-01      0.252639505235E-02
+@CHECKSUM: T2-ABAB :        -0.760965503566E+00      0.274160347914E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650071881 a.u.
+  Convergence information after     7 iterations: 
+  Largest element of residual vector :  0.14981334E-06.
+  Largest element of DIIS residual   : -0.11009856E-06.
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753835115E+00      0.452503722387E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161012827917E+00      0.430818900207E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036279E+02      0.522491598090E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093833E+02      0.119229889507E+02
+@CHECKSUM: ABAB_MBEJ         0.243471013762E+02      0.158763960925E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093915E+02      0.119229889257E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011880E+02      0.158763962065E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753895787E+00      0.452504699436E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161012827917E+00      0.430818900207E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036279E+02      0.522491598090E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093915E+02      0.119229889257E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011880E+02      0.158763962065E+02
+@CHECKSUM: FMI              -0.114753895787E+00      0.452504699436E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013004161E+00      0.430819866803E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036279E+02      0.522491598090E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093915E+02      0.119229889257E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011880E+02      0.158763962065E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.350060604147E+01      0.436727367804E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.345887885022E+01      0.422728666888E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.345887885022E+01      0.422728666888E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.189380332724E+01      0.162583962575E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.189380332724E+01      0.162583962575E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.403129247434E+01      0.526665180569E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779706.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981237
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449289852164E-01      0.252639125679E-02
+@CHECKSUM: T2-ABAB :         0.403129247434E+01      0.526665180569E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290102930E-01      0.252639189757E-02
+@CHECKSUM: T2-ABAB :        -0.760964303939E+00      0.274160577747E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650089360 a.u.
+  Convergence information after     8 iterations: 
+  Largest element of residual vector :  0.31456943E-07.
+  Largest element of DIIS residual   :  0.22079332E-07.
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753895787E+00      0.452504699436E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013004161E+00      0.430819866803E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036938E+02      0.522491598289E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093915E+02      0.119229889257E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011880E+02      0.158763962065E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093840E+02      0.119229889343E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011529E+02      0.158763962005E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753882980E+00      0.452504662830E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013004161E+00      0.430819866803E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036938E+02      0.522491598289E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093840E+02      0.119229889343E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011529E+02      0.158763962005E+02
+@CHECKSUM: FMI              -0.114753882980E+00      0.452504662830E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013010751E+00      0.430819843792E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831036938E+02      0.522491598289E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093840E+02      0.119229889343E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011529E+02      0.158763962005E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.350060606570E+01      0.436727368757E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.345887890224E+01      0.422728669193E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.345887890224E+01      0.422728669193E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.189380399917E+01      0.162583983258E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.189380399917E+01      0.162583983258E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.403129205007E+01      0.526665172127E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  5   2   9  11]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779573.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290117773E-01      0.252639178170E-02
+@CHECKSUM: T2-ABAB :         0.403129205007E+01      0.526665172127E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290179135E-01      0.252639217068E-02
+@CHECKSUM: T2-ABAB :        -0.760964188528E+00      0.274160572161E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650089704 a.u.
+  Convergence information after     9 iterations: 
+  Largest element of residual vector :  0.55813325E-08.
+  Largest element of DIIS residual   : -0.21806035E-08.
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753882980E+00      0.452504662830E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013010751E+00      0.430819843792E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037185E+02      0.522491598408E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093840E+02      0.119229889343E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011529E+02      0.158763962005E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093847E+02      0.119229889369E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011409E+02      0.158763961955E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753878950E+00      0.452504643238E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013010751E+00      0.430819843792E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037185E+02      0.522491598408E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093847E+02      0.119229889369E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011409E+02      0.158763961955E+02
+@CHECKSUM: FMI              -0.114753878950E+00      0.452504643238E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013006193E+00      0.430819828099E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037185E+02      0.522491598408E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093847E+02      0.119229889369E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011409E+02      0.158763961955E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.350060607329E+01      0.436727369602E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.345887891826E+01      0.422728671004E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.345887891826E+01      0.422728671004E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.189380421860E+01      0.162583993649E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.189380421860E+01      0.162583993649E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.403129190133E+01      0.526665151874E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  5   2   9  11]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779470.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290194382E-01      0.252639227259E-02
+@CHECKSUM: T2-ABAB :         0.403129190133E+01      0.526665151874E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290200148E-01      0.252639232340E-02
+@CHECKSUM: T2-ABAB :        -0.760964152985E+00      0.274160560086E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088571 a.u.
+  Convergence information after    10 iterations: 
+  Largest element of residual vector :  0.93946697E-09.
+  Largest element of DIIS residual   :  0.63607467E-09.
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753878950E+00      0.452504643238E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013006193E+00      0.430819828099E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598429E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093847E+02      0.119229889369E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011409E+02      0.158763961955E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093848E+02      0.119229889376E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011399E+02      0.158763961945E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753878348E+00      0.452504637987E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013006193E+00      0.430819828099E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598429E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093848E+02      0.119229889376E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961945E+02
+@CHECKSUM: FMI              -0.114753878348E+00      0.452504637987E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005162E+00      0.430819822969E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598429E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093848E+02      0.119229889376E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961945E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.350060607386E+01      0.436727369825E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.345887891946E+01      0.422728671449E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.345887891946E+01      0.422728671449E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.189380423510E+01      0.162583995544E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.189380423510E+01      0.162583995544E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.403129189119E+01      0.526665148360E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  5   2   9  11]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779448.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290202986E-01      0.252639234785E-02
+@CHECKSUM: T2-ABAB :         0.403129189119E+01      0.526665148360E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290203996E-01      0.252639235797E-02
+@CHECKSUM: T2-ABAB :        -0.760964150948E+00      0.274160557676E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088390 a.u.
+  Convergence information after    11 iterations: 
+  Largest element of residual vector :  0.11688185E-09.
+  Largest element of DIIS residual   : -0.41823653E-10.
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753878348E+00      0.452504637987E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005162E+00      0.430819822969E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093848E+02      0.119229889376E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961945E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093850E+02      0.119229889377E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011399E+02      0.158763961944E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753878361E+00      0.452504637607E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005162E+00      0.430819822969E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+@CHECKSUM: FMI              -0.114753878361E+00      0.452504637607E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005126E+00      0.430819822522E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037209E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.350060607379E+01      0.436727369850E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671497E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671497E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.189380423336E+01      0.162583995697E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.189380423336E+01      0.162583995697E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147859E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  5   2   9  11]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779446.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290204672E-01      0.252639236401E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147859E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204696E-01      0.252639236436E-02
+@CHECKSUM: T2-ABAB :        -0.760964151179E+00      0.274160557269E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088366 a.u.
+  Convergence information after    12 iterations: 
+  Largest element of residual vector :  0.20092289E-10.
+  Largest element of DIIS residual   :  0.78447793E-11.
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753878361E+00      0.452504637607E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005126E+00      0.430819822522E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093850E+02      0.119229889377E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011399E+02      0.158763961944E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753878357E+00      0.452504637547E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005126E+00      0.430819822522E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+@CHECKSUM: FMI              -0.114753878357E+00      0.452504637547E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005120E+00      0.430819822460E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.350060607379E+01      0.436727369852E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671502E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671502E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.189380423339E+01      0.162583995713E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.189380423339E+01      0.162583995713E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147829E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  3   4  10   8]-0.02616 [  5   3   9  10]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779446.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290204747E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147829E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204741E-01      0.252639236478E-02
+@CHECKSUM: T2-ABAB :        -0.760964151184E+00      0.274160557243E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088365 a.u.
+  Convergence information after    13 iterations: 
+  Largest element of residual vector : -0.12735839E-11.
+  Largest element of DIIS residual   : -0.10557031E-11.
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.353937422457E+01      0.450129793340E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After Q1
+@CHECKSUM: FMI              -0.114753878357E+00      0.452504637547E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005120E+00      0.430819822460E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+Entering RHF only block
+ 
+Writing RHF only ABAB to disk:   56
+@CHECKSUM: ABAB        -0.174086093850E+02      0.119229889377E+02
+ 
+The ABBA and BAAB, the target list:  58
+@CHECKSUM: ABBA         0.243471011399E+02      0.158763961944E+02
+ 
+ After Q2
+@CHECKSUM: FMI              -0.114753878357E+00      0.452504637543E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005120E+00      0.430819822460E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+@CHECKSUM: FMI              -0.114753878357E+00      0.452504637543E-02
+@CHECKSUM: FME               0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: FEA               0.161013005119E+00      0.430819822457E-02
+ 
+@CHECKSUM: ABAB_MNIJ         0.305831037210E+02      0.522491598431E+02
+ 
+@CHECKSUM: ABAB_ABCD         0.243730602723E+02      0.110869653616E+02
+ 
+@CHECKSUM: ABBA_AIBC        -0.372902322023E+01      0.605019288951E+00
+ 
+@CHECKSUM: AAAA_IJKA        -0.155486320783E+01      0.151177029713E+01
+@CHECKSUM: ABBA_IJKA        -0.558286576557E+01      0.238956516441E+01
+ 
+@CHECKSUM: AAAA_MBEJ         0.000000000000E+00      0.000000000000E+00
+@CHECKSUM: AABB_MBEJ        -0.174086093850E+02      0.119229889377E+02
+@CHECKSUM: ABAB_MBEJ         0.243471011399E+02      0.158763961944E+02
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.350060607379E+01      0.436727369852E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671502E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.345887891932E+01      0.422728671502E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After mnij+abef
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.189380423339E+01      0.162583995713E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After t1int2
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.189380423339E+01      0.162583995713E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ After       mbej
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147828E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  5   3   9  10]-0.02616 [  3   4  10   8]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779446.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+                     ----------Warning------------
+ A pCCD or pCCD like calculation is being performed and the off-diagonal
+ blocks of T2 is set to zero
+                     -----------------------------
+ 
+@CHECKSUM: T2-AAAA :         0.449290204744E-01      0.252639236481E-02
+@CHECKSUM: T2-ABAB :         0.403129189170E+01      0.526665147828E+00
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+ 
+@CHECKSUM: T2-AAAA :         0.449290204740E-01      0.252639236479E-02
+@CHECKSUM: T2-ABAB :        -0.760964151184E+00      0.274160557241E-01
+@CHECKSUM: T1-AA   :         0.000000000000E+00      0.000000000000E+00
+ 
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088365 a.u.
+  Convergence information after    14 iterations: 
+  Largest element of residual vector : -0.34548189E-12.
+  Largest element of DIIS residual   : -0.21863387E-12.
+  Amplitude equations converged in    14 iterations.
+   The AA contribution to the correlation energy is:   -0.0134115 a.u.
+   The AB contribution to the correlation energy is:   -0.1038271 a.u.
+   The total correlation energy is -0.130650088365 a.u.
+   Largest T2 amplitudes for spin case AB:
+       _       _                 _       _                 _       _
+   i   j   a   b             i   j   a   b             i   j   a   b
+-----------------------------------------------------------------------------
+[  4   4   8   8]-0.04522 [  5   5   9   9]-0.04522 [  3   3   7   7]-0.04245
+[  3   3   6   6]-0.03889 [  3   3  10  10]-0.03190 [  5   4   9   8]-0.03158
+[  4   5   8   9]-0.03158 [  3   3   7   6]-0.03129 [  3   3   6   7]-0.03129
+[  4   3   8  10]-0.02616 [  5   3   9  10]-0.02616 [  3   4  10   8]-0.02616
+[  3   5  10   9]-0.02616 [  4   2   8  11]-0.02068 [  2   4  11   8]-0.02068
+-----------------------------------------------------------------------------
+   Norm of T2AB vector (      900 symmetry allowed elements):  0.1655779446.
+-----------------------------------------------------------------------------
+ 
+ Shannon Index =    0.2981236
+ 
+   The CC iterations have converged.
+
+       Summary of iterative solution of CC equations 
+      -----------------------------------------------------------
+                       Correlation           Total
+       Iteration         Energy              Energy
+      -----------------------------------------------------------
+            0        -0.128694316094    -100.112103334154  DIIS 
+            1        -0.128237757978    -100.111646776037  DIIS 
+            2        -0.129899974699    -100.113308992759  DIIS 
+            3        -0.130549462559    -100.113958480619  DIIS 
+            4        -0.130644161189    -100.114053179249  DIIS 
+            5        -0.130649965809    -100.114058983869  DIIS 
+            6        -0.130650119143    -100.114059137203  DIIS 
+            7        -0.130650071881    -100.114059089941  DIIS 
+            8        -0.130650089360    -100.114059107420  DIIS 
+            9        -0.130650089704    -100.114059107764  DIIS 
+           10        -0.130650088571    -100.114059106631  DIIS 
+           11        -0.130650088390    -100.114059106450  DIIS 
+           12        -0.130650088366    -100.114059106426  DIIS 
+           13        -0.130650088365    -100.114059106425  DIIS 
+           14        -0.130650088365    -100.114059106425  DIIS 
+      -----------------------------------------------------------
+
+                pCCD       energy is    -100.114059106425 a.u. 
+
+      A miracle has come to pass. The CC iterations have converged.
+
+
+ACES ---SYSTEM--- (total sec) ----USER---- (total sec) -WALLCLOCK- (total sec)
+TIME   0: 0: 0.04 (      0.0)   0: 0: 0.01 (      0.0)   0: 0: 0.1 (      0.1)
+
+-----------------------------------------------------------------------------
+                                Exiting xvcc
+-----------------------------------------------------------------------------
+
+ The ACES Member Executable has completed successfully.
+
+
+ @ACES2: The ACES2 program has completed successfully in                      2 
+  seconds.
+
+
+Tue Mar 28 12:23:37 EDT 2023

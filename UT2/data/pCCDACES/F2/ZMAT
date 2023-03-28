@@ -1,0 +1,44 @@
+H2O
+F 0.0 0.0 0.0
+F 0.0 0.0 1.8897259886 
+
+*ACES2(CALC=pCCD,MEM_SIZE=2Gb,UNITS=BOHR,
+BASIS=6-31G,SYM=OFF,REF=RHF,PRINT=1
+scf_conv=12
+cc_conv=12
+scf_extrapo=0
+grad_calc=analytical
+#opt_maxcyc=1
+#Brueckner=on
+#guess=read_so_mos
+#orbital=semicanonical
+#scf_maxcyc=0
+#non-hf=1
+#PROPS=FIRST_ORDER
+#PCCD_REFERENCE=OPTIMIZED
+PROGRAM=PCCD
+#OO_METHOD=BB-SD
+#OO_METHOD=ROTGRAD
+oo_diis=off
+#hess_update=BFGS
+#oo_constrain=1
+#ov_constrain= ridic
+#OO_MAXCYC=2
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
