@@ -28,7 +28,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
         gabab,
         eabij_aa,
         eabij_bb,
-        eabij_ab,
+        eabij_ab,scratch
     ) = convertSCFinfo(mf, mol, orb)
     hf_energy = mf.e_tot
     print("hf energy:", hf_energy)
@@ -221,15 +221,24 @@ def ccd_kernel(
         new_doubles_bbbb = resid_bbbb * eabij_bb  # doubles_res_bbbb * eabij_bb
         new_doubles_abab = resid_abab * eabij_ab  # doubles_res_abab * eabij_ab
         if cc_runtype["ccdType"] == "pCCD":
-            new_doubles_aaaa = new_doubles_aaaa * 0.0
-            new_doubles_bbbb = new_doubles_aaaa
-            tmpT2 = np.zeros((nvirta, nvirta, na, na))
+            #new_doubles_aaaa = new_doubles_aaaa * 0.0
+            #new_doubles_bbbb = new_doubles_aaaa
+            tmpT2aa = np.zeros((nvirta, nvirta, na, na))
+            tmpT2bb = np.zeros((nvirta, nvirta, na, na))
+            tmpT2ab = np.zeros((nvirta, nvirta, na, na))
+
             for a in range(nvirta):
                 for i in range(na):
-                    tmpT2[a, a, i, i] = new_doubles_abab[a, a, i, i]
-
+                    tmpT2ab[a, a, i, i] = new_doubles_abab[a, a, i, i]
+                    tmpT2aa[a, a, i, i] = new_doubles_aaaa[a, a, i, i]
+                    tmpT2bb[a, a, i, i] = new_doubles_bbbb[a, a, i, i]
+                    print('Diagonal of T2:',tmpT2ab[a,a,i,i],tmpT2aa[a,a,i,i])
             new_doubles_abab = new_doubles_abab * 0.0
-            new_doubles_abab = tmpT2
+            new_doubles_aaaa = new_doubles_aaaa * 0.0
+            new_doubles_bbbb = new_doubles_bbbb * 0.0
+            new_doubles_abab = tmpT2ab
+            new_doubles_aaaa = tmpT2aa
+            new_doubles_bbbb = tmpT2bb
         elif cc_runtype["ccdType"] == "DiagCCD":
             matDim = nvirta * na
 
@@ -326,7 +335,7 @@ def ccd_kernel(
             t2abab = new_doubles_abab
             old_energy = current_energy
     else:
-        raise ValueError("CCSDT iterations did not converge")
+        raise ValueError("CC iterations did not converge")
 
     print("\n\n\n")
     if cc_runtype["ccdType"] != "CCD(Qf)":
@@ -391,6 +400,12 @@ def convertSCFinfo(mf, mol, orb):
     epsaa = moE_aa
     epsbb = moE_bb
 
+    # Singles Denom
+    eai_aa = 1.0/ (-epsaa[virt_aa,n] + epsaa[n,occ_aa])
+    eai_bb = 1.0/ (-epsbb[virt_bb,n] + epsaa[n,occ_bb])
+    eai_ab = 1.0/ (-epsab[virt_ab,n] + epsaa[n,occ_ab])
+
+    # Doubles Denom
     eabij_aa = 1.0 / (
         -epsaa[virt_aa, n, n, n]
         - epsaa[n, virt_aa, n, n]
@@ -410,6 +425,78 @@ def convertSCFinfo(mf, mol, orb):
         + epsbb[n, n, n, occ_bb]
     )
 
+
+
+    # Triples Denom
+    eabcijk_aa = 1.0/ (
+        -epsaa[virt_aa, n, n, n, n, n]
+        - epsaa[n, virt_aa, n, n, n, n]
+        - epsaa[n, n,virt_aa, n, n, n]
+        + epsaa[n, n, n, occ_aa, n, n]
+        + epsaa[n, n, n, n, occ_aa, n]
+        + epsaa[n, n, n, n, n, occ_aa]
+    )
+
+
+    eabcijk_bb =1.0/ (
+        -epsbb[virt_bb, n, n, n, n, n]
+        - epsbb[n, virt_bb, n, n, n, n]
+        - epsbb[n, n,virt_bb, n, n, n]
+        + epsbb[n, n, n, occ_bb, n, n]
+        + epsbb[n, n, n, n, occ_bb, n]
+        + epsbb[n, n, n, n, n, occ_bb]
+    )
+
+    eabcijk_ab =1.0/ (
+        -epsaa[virt_aa, n, n, n, n, n]
+        - epsbb[n, virt_bb, n, n, n, n]
+        - epsaa[n, n,virt_aa, n, n, n]
+        + epsaa[n, n, n, occ_aa, n, n]
+        + epsbb[n, n, n, n, occ_bb, n]
+        + epsaa[n, n, n, n, n, occ_aa]
+    )
+
+
+    # Quads Denom
+
+    eabcdijkl_aa = 1.0/ (
+        -epsaa[virt_aa,n,n, n, n, n, n, n]
+        - epsaa[n, virt_aa,n,n, n, n, n, n]
+        - epsaa[n, n,virt_aa, n,n,n, n, n]
+        - epsaa[n, n,n, virt_aa, n,n, n, n]
+        + epsaa[n, n, n, n, occ_aa,n, n, n]
+        + epsaa[n, n, n, n, n,occ_aa, n,n]
+        + epsaa[n, n, n, n, n, n,occ_aa,n]
+        + epsaa[n, n, n, n, n, n,n,occ_aa]
+    )
+
+    eabcdijkl_bb = 1.0/ (
+        -epsbb[virt_bb,n,n, n, n, n, n, n]
+        - epsbb[n, virt_bb,n,n, n, n, n, n]
+        - epsbb[n, n,virt_bb, n,n,n, n, n]
+        - epsbb[n, n,n, virt_bb, n,n, n, n]
+        + epsbb[n, n, n, n, occ_bb,n, n, n]
+        + epsbb[n, n, n, n, n,occ_bb, n,n]
+        + epsbb[n, n, n, n, n, n,occ_bb,n]
+        + epsbb[n, n, n, n, n, n,n,occ_bb]
+    )
+
+    eabcdijkl_ab = 1.0/ (
+        -epsaa[virt_aa,n,n, n, n, n, n, n]
+        - epsbb[n, virt_bb,n,n, n, n, n, n]
+        - epsaa[n, n,virt_aa, n,n,n, n, n]
+        - epsbb[n, n,n, virt_bb, n,n, n, n]
+        + epsaa[n, n, n, n, occ_aa,n, n, n]
+        + epsbb[n, n, n, n, n,occ_bb, n,n]
+        + epsaa[n, n, n, n, n, n,occ_aa,n]
+        + epsbb[n, n, n, n, n, n,n,occ_bb]
+    )
+
+    CCSDT_DenomInfo = {"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
+                      "D2aa":eabij_aa,"D2bb":eabij_bb,"D2ab":eabij_ab,
+                      "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab,
+                       "D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
+                       "D4ab":eabcdijkl_ab}
     print("eabij_aa:", eabij_aa, np.shape(eabij_aa))
     return (
         na,
@@ -428,6 +515,7 @@ def convertSCFinfo(mf, mol, orb):
         eabij_aa,
         eabij_bb,
         eabij_ab,
+        CCSDT_DenomInfo
     )
 
 
