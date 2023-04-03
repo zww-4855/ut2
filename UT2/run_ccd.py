@@ -11,6 +11,17 @@ import UT2.modify_T2resid_T4Qf2 as qf2
 import UT2.modify_T2energy_pertQf as pertQf
 from numpy import linalg
 
+""" ccd_main() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF or UHF orbitals. 
+
+:param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
+:param mol: PySCF object containing info regarding the info regarding the molecule/system in question
+:param orb: Set of - presumably converged - SCF coefficients
+:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods
+
+
+:return: Returns the correlation and full (combined correlation + mean field) energy
+
+"""
 def ccd_main(mf, mol, orb, cc_runtype):
     (
         na,
@@ -29,7 +40,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
         eabij_aa,
         eabij_bb,
         eabij_ab,
-    ) = convertSCFinfo(mf, mol, orb)
+        CCSDT_DenomInfo
+    ) = convertSCFinfo(mf, mol, orb, cc_runtype)
     hf_energy = mf.e_tot
     print("hf energy:", hf_energy)
     nucE = mf.energy_nuc()
@@ -92,6 +104,12 @@ def ccd_kernel(
     t2aaaa = np.zeros((nvirta, nvirta, na, na))
     t2bbbb = np.zeros((nvirtb, nvirtb, nb, nb))
     t2abab = np.zeros((nvirta, nvirtb, na, nb))
+
+    # Initialize t2 amplitudes to 2e- integrals
+    #t2aaaa=gaaaa.transpose(2,3,0,1)[:nvirta,:nvirta,:na,:na]
+    #t2bbbb=gbbbb.transpose(2,3,0,1)[:nvirtb,:nvirtb,:nb,:nb]
+    #t2abab=gabab.transpose(2,3,0,1)[:nvirta,:nvirtb,:na,:nb]
+
 
     if diis_size is not None:
         from UT2.diis import DIIS
@@ -224,12 +242,13 @@ def ccd_kernel(
             new_doubles_aaaa = new_doubles_aaaa * 0.0
             new_doubles_bbbb = new_doubles_aaaa
             tmpT2 = np.zeros((nvirta, nvirta, na, na))
+            tmpResids=resid_abab
             for a in range(nvirta):
                 for i in range(na):
-                    tmpT2[a, a, i, i] = new_doubles_abab[a, a, i, i]
+                    tmpT2[a, a, i, i] = resid_abab[a,a,i,i]#new_doubles_abab[a, a, i, i]
 
             new_doubles_abab = new_doubles_abab * 0.0
-            new_doubles_abab = tmpT2
+            new_doubles_abab = tmpT2* eabij_ab
         elif cc_runtype["ccdType"] == "DiagCCD":
             matDim = nvirta * na
 
@@ -351,7 +370,7 @@ def ccd_kernel(
     return t2aaaa, t2bbbb, t2abab, tfinalEnergy, corrE 
 
 
-def convertSCFinfo(mf, mol, orb):
+def convertSCFinfo(mf, mol, orb,cc_runtype):
     # Means we are running RHF; must generalize data structs for use in UHF code
     if orb.ndim <= 2:
         h1e = np.array((mf.get_hcore(), mf.get_hcore()))
@@ -391,6 +410,14 @@ def convertSCFinfo(mf, mol, orb):
     epsaa = moE_aa
     epsbb = moE_bb
 
+    print('Creating denoms')
+    # Singles Denom
+    eai_aa = 1.0/ (-epsaa[virt_aa,n] + epsaa[n,occ_aa])
+    eai_bb = 1.0/ (-epsbb[virt_bb,n] + epsaa[n,occ_bb])
+    eai_ab = 0.0 #1.0/ (-epsab[virt_bb,n] + epsaa[n,occ_ab])
+ 
+    print('singles done')
+    # Doubles Denom
     eabij_aa = 1.0 / (
         -epsaa[virt_aa, n, n, n]
         - epsaa[n, virt_aa, n, n]
@@ -410,7 +437,83 @@ def convertSCFinfo(mf, mol, orb):
         + epsbb[n, n, n, occ_bb]
     )
 
-    print("eabij_aa:", eabij_aa, np.shape(eabij_aa))
+    print('Doubles done')
+
+    if "fullCCtype" in cc_runtype: #cc_runtype["fullCCtype"]=='CCSDT' or cc_runtype["fullCCtype"]=='CCSDTQ' or cc_runtype["fullCCtype"]=='CCSDTQf':
+        # Triples Denom
+        eabcijk_aa = 1.0/ (
+            -epsaa[virt_aa, n, n, n, n, n]
+            - epsaa[n, virt_aa, n, n, n, n]
+            - epsaa[n, n,virt_aa, n, n, n]
+            + epsaa[n, n, n, occ_aa, n, n]
+            + epsaa[n, n, n, n, occ_aa, n]
+            + epsaa[n, n, n, n, n, occ_aa]
+        )
+    
+    
+        eabcijk_bb =1.0/ (
+            -epsbb[virt_bb, n, n, n, n, n]
+            - epsbb[n, virt_bb, n, n, n, n]
+            - epsbb[n, n,virt_bb, n, n, n]
+            + epsbb[n, n, n, occ_bb, n, n]
+            + epsbb[n, n, n, n, occ_bb, n]
+            + epsbb[n, n, n, n, n, occ_bb]
+        )
+    
+        eabcijk_ab =1.0/ (
+            -epsaa[virt_aa, n, n, n, n, n]
+            - epsbb[n, virt_bb, n, n, n, n]
+            - epsaa[n, n,virt_aa, n, n, n]
+            + epsaa[n, n, n, occ_aa, n, n]
+            + epsbb[n, n, n, n, occ_bb, n]
+            + epsaa[n, n, n, n, n, occ_aa]
+        )
+
+    # Quads Denom
+        eabcdijkl_aa = 1.0/ (
+            -epsaa[virt_aa,n,n, n, n, n, n, n]
+            - epsaa[n, virt_aa,n,n, n, n, n, n]
+            - epsaa[n, n,virt_aa, n,n,n, n, n]
+            - epsaa[n, n,n, virt_aa, n,n, n, n]
+            + epsaa[n, n, n, n, occ_aa,n, n, n]
+            + epsaa[n, n, n, n, n,occ_aa, n,n]
+            + epsaa[n, n, n, n, n, n,occ_aa,n]
+            + epsaa[n, n, n, n, n, n,n,occ_aa]
+        )
+        print('quads alla ')
+        eabcdijkl_bb = 1.0/ (
+            -epsbb[virt_bb,n,n, n, n, n, n, n]
+            - epsbb[n, virt_bb,n,n, n, n, n, n]
+            - epsbb[n, n,virt_bb, n,n,n, n, n]
+            - epsbb[n, n,n, virt_bb, n,n, n, n]
+            + epsbb[n, n, n, n, occ_bb,n, n, n]
+            + epsbb[n, n, n, n, n,occ_bb, n,n]
+            + epsbb[n, n, n, n, n, n,occ_bb,n]
+            + epsbb[n, n, n, n, n, n,n,occ_bb]
+        )
+        print('quads allb')
+        eabcdijkl_ab = 1.0/ (
+            -epsaa[virt_aa,n,n, n, n, n, n, n]
+            - epsbb[n, virt_bb,n,n, n, n, n, n]
+            - epsaa[n, n,virt_aa, n,n,n, n, n]
+            - epsbb[n, n,n, virt_bb, n,n, n, n]
+            + epsaa[n, n, n, n, occ_aa,n, n, n]
+            + epsbb[n, n, n, n, n,occ_bb, n,n]
+            + epsaa[n, n, n, n, n, n,occ_aa,n]
+            + epsbb[n, n, n, n, n, n,n,occ_bb]
+        )
+
+
+        CCSDT_DenomInfo = {"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
+                          "D2aa":eabij_aa,"D2bb":eabij_bb,"D2ab":eabij_ab,
+                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab,
+                           "D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
+                           "D4ab":eabcdijkl_ab}
+
+
+    else:
+        CCSDT_DenomInfo=None
+
     return (
         na,
         nb,
@@ -428,6 +531,7 @@ def convertSCFinfo(mf, mol, orb):
         eabij_aa,
         eabij_bb,
         eabij_ab,
+        CCSDT_DenomInfo
     )
 
 
