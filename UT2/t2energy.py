@@ -26,6 +26,7 @@ def ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, 
     #     0.2500 <j,i||a,b>_aaaa*t2_aaaa(a,b,j,i)
     energy +=  0.250000000000000 * einsum('jiab,abji', g_aaaa[o, o, v, v], t2_aaaa)
 
+
     #     0.2500 <j,i||a,b>_abab*t2_abab(a,b,j,i)
     energy +=  0.250000000000000 * einsum('jiab,abji', g_abab[o, o, v, v], t2_abab)
 

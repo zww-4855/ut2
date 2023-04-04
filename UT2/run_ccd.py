@@ -28,30 +28,54 @@ def ccd_main(mf, mol, orb, cc_runtype):
     print("hf energy:", hf_energy)
     nucE = mf.energy_nuc()
     print("nuclear repulsion:", nucE)
-    print(np.shape(gaaaa))
-    t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
-        na,
-        nb,
-        nvirta,
-        nvirtb,
-        occ_aa,
-        virt_aa,
-        occ_bb,
-        virt_bb,
-        faa,
-        fbb,
-        gaaaa,
-        gbbbb,
-        gabab,
-        eabij_aa,
-        eabij_bb,
-        eabij_ab,
-        hf_energy,
-        nucE,
-        15,
-        4,
-        cc_runtype,
-    )
+    if "ccdType" in cc_runtype: # run all T2 spin-integrt methods
+        na=occupationInfo["nocc_aa"]
+        nb=occupationInfo["nocc_bb"]
+        nvirta=occupationInfo["nvirt_aa"]
+        nvirtb=occupationInfo["nvirt_bb"]
+
+        occ_aa=occupationSliceInfo["occ_aa"]
+        virt_aa=occupationSliceInfo["virt_aa"]
+        occ_bb=occupationSliceInfo["occ_bb"]
+        virt_bb=occupationSliceInfo["virt_bb"]
+
+        faa=integralInfo["faa"]
+        fbb=integralInfo["fbb"]
+        gaaaa=integralInfo["g_aaaa"]
+        gbbbb=integralInfo["g_bbbb"]
+        gabab=integralInfo["g_abab"]
+
+        eabij_aa=denomInfo["D2aa"]
+        eabij_bb=denomInfo["D2bb"]
+        eabij_ab=denomInfo["D2ab"]
+        t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
+            na,
+            nb,
+            nvirta,
+            nvirtb,
+            occ_aa,
+            virt_aa,
+            occ_bb,
+            virt_bb,
+            faa,
+            fbb,
+            gaaaa,
+            gbbbb,
+            gabab,
+            eabij_aa,
+            eabij_bb,
+            eabij_ab,
+            hf_energy,
+            nucE,
+            15,
+            4,
+            cc_runtype,
+        )
+#    elif "fullCCtype" in cc_runtype: # running >T2 spin-integrated code
+
+
+#    elif "ccdTypeSlow" in cc_runtype: # run all T2 spin-orb methods
+
 
     return currentE, corrE
 
@@ -87,6 +111,7 @@ def ccd_kernel(
     t2bbbb = np.zeros((nvirtb, nvirtb, nb, nb))
     t2abab = np.zeros((nvirta, nvirtb, na, nb))
 
+    print(t2aaaa.shape, t2bbbb.shape, t2abab.shape)
     # Initialize t2 amplitudes to 2e- integrals
     #t2aaaa=gaaaa.transpose(2,3,0,1)[:nvirta,:nvirta,:na,:na]
     #t2bbbb=gbbbb.transpose(2,3,0,1)[:nvirtb,:nvirtb,:nb,:nb]
@@ -455,43 +480,23 @@ def convertSCFinfo(mf, mol, orb,cc_runtype):
 
     occupationInfo={"nocc_aa":na, "nocc_bb":nb,"nvirt_aa":nvirta,"nvirt_bb":nvirtb}
     integralInfo = generalUHF(mf, mol, h1e, f, na, nb, orb)
-    print("moE:", moE_aa, moE_bb)
 
     #n = np.newaxis
-    #occ_aa = slice(None, na)
-    #virt_aa = slice(na, None)
-    #occ_bb = slice(None, nb)
-    #virt_bb = slice(nb, None)
+    occ_aa = slice(None, na)
+    virt_aa = slice(na, None)
+    occ_bb = slice(None, nb)
+    virt_bb = slice(nb, None)
     #epsaa = moE_aa
     #epsbb = moE_bb
     eps={'eps_aa':moE_aa,'eps_bb':moE_bb}
-    occupationSliceInfo={"occ_aa":  slice(None, na), "virt_aa":slice(na, None), 
-                     "occ_bb": slice(None, nb), "virt_bb":slice(nb, None)}
+    occupationSliceInfo={"occ_aa":  occ_aa, "virt_aa":virt_aa, 
+                     "occ_bb": occ_bb, "virt_bb":virt_bb}
 
     denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps) 
 
     return occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo
 
 
-    return (
-        na,
-        nb,
-        nvirta,
-        nvirtb,
-        occ_aa,
-        occ_bb,
-        virt_aa,
-        virt_bb,
-        faa,
-        fbb,
-        g_aaaa,
-        g_bbbb,
-        g_abab,
-        eabij_aa,
-        eabij_bb,
-        eabij_ab,
-        CCSDT_DenomInfo
-    )
 
 
 """ get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.  
@@ -507,13 +512,22 @@ def convertSCFinfo(mf, mol, orb,cc_runtype):
 """
 def get_denoms(cc_runtype,occupationSliceInfo,eps):
     set_spinIntegrt=set(["ccdType", "fullCCtype"])
-    if set_spinIntegrt.issubset(cc_runtype.keys()): # spin-integrated formalisms
+    denomInfo={}
+    n = np.newaxis
+    if "ccdTypeSlow" in cc_runtype: # spin-orb formalism
+        virt_aa=occupationSliceInfo["virt_aa"]
+        occ_aa=occupationSliceInfo["occ_aa"]
+        epsaa=eps['occ_aa']
+        print('inside two')
+
+    elif "ccdType" in cc_runtype: # spin-integrated formalisms
+        print('inside one')
         virt_aa=occupationSliceInfo["virt_aa"]
         virt_bb=occupationSliceInfo["virt_bb"]
         occ_aa=occupationSliceInfo["occ_aa"]
         occ_bb=occupationSliceInfo["occ_bb"]
-        eps_aa=eps['eps_aa']
-        eps_bb=eps['eps_bb']
+        epsaa=eps['eps_aa']
+        epsbb=eps['eps_bb']
 
         eabij_bb = 1.0 / (
             -epsbb[virt_bb, n, n, n]
@@ -529,18 +543,13 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
         )
         denomInfo = {"D2ab":eabij_ab,"D2bb":eabij_bb}
 
-    elif "ccdTypeSlow" in cc_runtype.keys(): #spin-orbital formulation
-        virt_aa=occupationSliceInfo["virt_aa"]
-        occ_aa=occupationSliceInfo["occ_aa"]
-        eps_aa=eps['occ_aa']
-
     eabij_aa = 1.0 / (
         -epsaa[virt_aa, n, n, n]
         - epsaa[n, virt_aa, n, n]
         + epsaa[n, n, occ_aa, n]
         + epsaa[n, n, n, occ_aa]
     )
-    denomInfo{"D2aa":eabij_aa}
+    denomInfo.update({"D2aa":eabij_aa})
 
     if "fullCCtype" in cc_runtype: 
    # Singles Denom
@@ -577,8 +586,8 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
             + epsbb[n, n, n, n, occ_bb, n]
             + epsaa[n, n, n, n, n, occ_aa]
         )
-        denomInfo = {"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
-                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab}
+        denomInfo.update({"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
+                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab})
         if "CCSDTQ" in cc_runtype.values():
             eabcdijkl_aa = 1.0/ (
                 -epsaa[virt_aa,n,n, n, n, n, n, n]
@@ -614,8 +623,8 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
             )
 
 
-            denomInfo = {"D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
-                           "D4ab":eabcdijkl_ab}
+            denomInfo.update({"D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
+                           "D4ab":eabcdijkl_ab})
 
     return denomInfo
 
