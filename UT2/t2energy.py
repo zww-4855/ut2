@@ -1,6 +1,31 @@
 import numpy as np
 from numpy import einsum
 
+
+def ccd_energyMain(ccd_kernel):
+    sliceInfo=ccd_kernel.sliceInfo
+    oa=sliceInfo["occ_aa"]
+    ob=sliceInfo["occ_bb"]
+    va=sliceInfo["virt_aa"]
+    vb=sliceInfo["virt_bb"]
+
+    t2_aaaa=ccd_kernel.tamps["t2aa"]
+    t2_bbbb=ccd_kernel.tamps["t2bb"]
+    t2_abab=ccd_kernel.tamps["t2ab"]
+
+    fock=ccd_kernel.ints["oei"]
+    tei=ccd_kernel.ints["tei"]
+
+    f_aa=fock["faa"]
+    f_bb=fock["fbb"]
+
+
+    g_aaaa=tei["g_aaaa"]
+    g_bbbb=tei["g_bbbb"]
+    g_abab=tei["g_abab"]
+
+    return ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+
 def ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
 
     #    < 0 | e(-T) H e(T) | 0> :
