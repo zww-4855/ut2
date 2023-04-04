@@ -23,25 +23,7 @@ from numpy import linalg
 
 """
 def ccd_main(mf, mol, orb, cc_runtype):
-    (
-        na,
-        nb,
-        nvirta,
-        nvirtb,
-        occ_aa,
-        occ_bb,
-        virt_aa,
-        virt_bb,
-        faa,
-        fbb,
-        gaaaa,
-        gbbbb,
-        gabab,
-        eabij_aa,
-        eabij_bb,
-        eabij_ab,
-        CCSDT_DenomInfo
-    ) = convertSCFinfo(mf, mol, orb, cc_runtype)
+    occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo = convertSCFinfo(mf, mol, orb, cc_runtype)
     hf_energy = mf.e_tot
     print("hf energy:", hf_energy)
     nucE = mf.energy_nuc()
@@ -428,6 +410,23 @@ def ccd_kernel(
     return t2aaaa, t2bbbb, t2abab, tfinalEnergy, corrE 
 
 
+
+""" convertSCFinfo() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Harvests relevant information, such as number of alpha/beta electrons, from PySCF mf and mol objects. 
+
+:param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
+:param mol: PySCF object containing info regarding the info regarding the molecule/system in question
+:param orb: Set of - presumably converged - SCF coefficients
+:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods
+
+:param occupationInfo: Dict of number of alpha/beta occupied/virtual orbitals. Callable with keys "nocc_aa", "nocc_bb", "nvirt_aa", and "nirt_bb".
+:param integralInfo: Dict of (transformed) integral information, indexed by "faa", "fbb", "g_aaaa", "g_bbbb", and "g_abab" 
+:param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals, indexed by "occ_aa", "virt_aa", "occ_bb", and "virt_bb"
+:param eps: Dict containing alpha/beta molecular orbital energies, indexed by "eps_aa" or "eps_bb"
+:param denomInfo: Dict containing denominators for all CC methods, indexed by "D2aa", "D2ab", "D2bb", and so on for arbitrary CC method. 
+
+:return: Returns dictionaries of occupationInfo,integralInfo, eps, denomInfo, occupationSliceInfo
+
+"""
 def convertSCFinfo(mf, mol, orb,cc_runtype):
     # Means we are running RHF; must generalize data structs for use in UHF code
     if orb.ndim <= 2:
@@ -453,51 +452,103 @@ def convertSCFinfo(mf, mol, orb,cc_runtype):
 
     faa = f[0]
     fbb = f[1]
-    # import sys
-    # print(na,nb,nvirta,nvirtb,faa.shape,fbb.shape)
-    # sys.exit()
-    faa, fbb, g_aaaa, g_bbbb, g_abab = generalUHF(mf, mol, h1e, f, na, nb, orb)
+
+    occupationInfo={"nocc_aa":na, "nocc_bb":nb,"nvirt_aa":nvirta,"nvirt_bb":nvirtb}
+    integralInfo = generalUHF(mf, mol, h1e, f, na, nb, orb)
     print("moE:", moE_aa, moE_bb)
 
-    n = np.newaxis
-    occ_aa = slice(None, na)
-    virt_aa = slice(na, None)
-    occ_bb = slice(None, nb)
-    virt_bb = slice(nb, None)
-    print(occ_aa, virt_aa)
-    epsaa = moE_aa
-    epsbb = moE_bb
+    #n = np.newaxis
+    #occ_aa = slice(None, na)
+    #virt_aa = slice(na, None)
+    #occ_bb = slice(None, nb)
+    #virt_bb = slice(nb, None)
+    #epsaa = moE_aa
+    #epsbb = moE_bb
+    eps={'eps_aa':moE_aa,'eps_bb':moE_bb}
+    occupationSliceInfo={"occ_aa":  slice(None, na), "virt_aa":slice(na, None), 
+                     "occ_bb": slice(None, nb), "virt_bb":slice(nb, None)}
 
-    print('Creating denoms')
-    # Singles Denom
-    eai_aa = 1.0/ (-epsaa[virt_aa,n] + epsaa[n,occ_aa])
-    eai_bb = 1.0/ (-epsbb[virt_bb,n] + epsaa[n,occ_bb])
-    eai_ab = 0.0 #1.0/ (-epsab[virt_bb,n] + epsaa[n,occ_ab])
- 
-    print('singles done')
-    # Doubles Denom
+    denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps) 
+
+    return occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo
+
+
+    return (
+        na,
+        nb,
+        nvirta,
+        nvirtb,
+        occ_aa,
+        occ_bb,
+        virt_aa,
+        virt_bb,
+        faa,
+        fbb,
+        g_aaaa,
+        g_bbbb,
+        g_abab,
+        eabij_aa,
+        eabij_bb,
+        eabij_ab,
+        CCSDT_DenomInfo
+    )
+
+
+""" get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.  
+
+:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods
+
+:param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals
+:param eps: Dict containing alpha/beta molecular orbital energies
+
+
+:return: Dictionary of denominator info 
+
+"""
+def get_denoms(cc_runtype,occupationSliceInfo,eps):
+    set_spinIntegrt=set(["ccdType", "fullCCtype"])
+    if set_spinIntegrt.issubset(cc_runtype.keys()): # spin-integrated formalisms
+        virt_aa=occupationSliceInfo["virt_aa"]
+        virt_bb=occupationSliceInfo["virt_bb"]
+        occ_aa=occupationSliceInfo["occ_aa"]
+        occ_bb=occupationSliceInfo["occ_bb"]
+        eps_aa=eps['eps_aa']
+        eps_bb=eps['eps_bb']
+
+        eabij_bb = 1.0 / (
+            -epsbb[virt_bb, n, n, n]
+            - epsbb[n, virt_bb, n, n]
+            + epsbb[n, n, occ_bb, n]
+            + epsbb[n, n, n, occ_bb]
+        )
+        eabij_ab = 1.0 / (
+            -epsaa[virt_aa, n, n, n]
+            - epsbb[n, virt_bb, n, n]
+            + epsaa[n, n, occ_aa, n]
+            + epsbb[n, n, n, occ_bb]
+        )
+        denomInfo = {"D2ab":eabij_ab,"D2bb":eabij_bb}
+
+    elif "ccdTypeSlow" in cc_runtype.keys(): #spin-orbital formulation
+        virt_aa=occupationSliceInfo["virt_aa"]
+        occ_aa=occupationSliceInfo["occ_aa"]
+        eps_aa=eps['occ_aa']
+
     eabij_aa = 1.0 / (
         -epsaa[virt_aa, n, n, n]
         - epsaa[n, virt_aa, n, n]
         + epsaa[n, n, occ_aa, n]
         + epsaa[n, n, n, occ_aa]
     )
-    eabij_bb = 1.0 / (
-        -epsbb[virt_bb, n, n, n]
-        - epsbb[n, virt_bb, n, n]
-        + epsbb[n, n, occ_bb, n]
-        + epsbb[n, n, n, occ_bb]
-    )
-    eabij_ab = 1.0 / (
-        -epsaa[virt_aa, n, n, n]
-        - epsbb[n, virt_bb, n, n]
-        + epsaa[n, n, occ_aa, n]
-        + epsbb[n, n, n, occ_bb]
-    )
+    denomInfo{"D2aa":eabij_aa}
 
-    print('Doubles done')
+    if "fullCCtype" in cc_runtype: 
+   # Singles Denom
+        eai_aa = 1.0/ (-epsaa[virt_aa,n] + epsaa[n,occ_aa])
+        eai_bb = 1.0/ (-epsbb[virt_bb,n] + epsaa[n,occ_bb])
+        eai_ab = 0.0 #1.0/ (-epsab[virt_bb,n] + epsaa[n,occ_ab])
 
-    if "fullCCtype" in cc_runtype: #cc_runtype["fullCCtype"]=='CCSDT' or cc_runtype["fullCCtype"]=='CCSDTQ' or cc_runtype["fullCCtype"]=='CCSDTQf':
+
         # Triples Denom
         eabcijk_aa = 1.0/ (
             -epsaa[virt_aa, n, n, n, n, n]
@@ -526,71 +577,48 @@ def convertSCFinfo(mf, mol, orb,cc_runtype):
             + epsbb[n, n, n, n, occ_bb, n]
             + epsaa[n, n, n, n, n, occ_aa]
         )
+        denomInfo = {"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
+                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab}
+        if "CCSDTQ" in cc_runtype.values():
+            eabcdijkl_aa = 1.0/ (
+                -epsaa[virt_aa,n,n, n, n, n, n, n]
+                - epsaa[n, virt_aa,n,n, n, n, n, n]
+                - epsaa[n, n,virt_aa, n,n,n, n, n]
+                - epsaa[n, n,n, virt_aa, n,n, n, n]
+                + epsaa[n, n, n, n, occ_aa,n, n, n]
+                + epsaa[n, n, n, n, n,occ_aa, n,n]
+                + epsaa[n, n, n, n, n, n,occ_aa,n]
+                + epsaa[n, n, n, n, n, n,n,occ_aa]
+            )
+            print('quads alla ')
+            eabcdijkl_bb = 1.0/ (
+                -epsbb[virt_bb,n,n, n, n, n, n, n]
+                - epsbb[n, virt_bb,n,n, n, n, n, n]
+                - epsbb[n, n,virt_bb, n,n,n, n, n]
+                - epsbb[n, n,n, virt_bb, n,n, n, n]
+                + epsbb[n, n, n, n, occ_bb,n, n, n]
+                + epsbb[n, n, n, n, n,occ_bb, n,n]
+                + epsbb[n, n, n, n, n, n,occ_bb,n]
+                + epsbb[n, n, n, n, n, n,n,occ_bb]
+            )
+            print('quads allb')
+            eabcdijkl_ab = 1.0/ (
+                -epsaa[virt_aa,n,n, n, n, n, n, n]
+                - epsbb[n, virt_bb,n,n, n, n, n, n]
+                - epsaa[n, n,virt_aa, n,n,n, n, n]
+                - epsbb[n, n,n, virt_bb, n,n, n, n]
+                + epsaa[n, n, n, n, occ_aa,n, n, n]
+                + epsbb[n, n, n, n, n,occ_bb, n,n]
+                + epsaa[n, n, n, n, n, n,occ_aa,n]
+                + epsbb[n, n, n, n, n, n,n,occ_bb]
+            )
 
-    # Quads Denom
-        eabcdijkl_aa = 1.0/ (
-            -epsaa[virt_aa,n,n, n, n, n, n, n]
-            - epsaa[n, virt_aa,n,n, n, n, n, n]
-            - epsaa[n, n,virt_aa, n,n,n, n, n]
-            - epsaa[n, n,n, virt_aa, n,n, n, n]
-            + epsaa[n, n, n, n, occ_aa,n, n, n]
-            + epsaa[n, n, n, n, n,occ_aa, n,n]
-            + epsaa[n, n, n, n, n, n,occ_aa,n]
-            + epsaa[n, n, n, n, n, n,n,occ_aa]
-        )
-        print('quads alla ')
-        eabcdijkl_bb = 1.0/ (
-            -epsbb[virt_bb,n,n, n, n, n, n, n]
-            - epsbb[n, virt_bb,n,n, n, n, n, n]
-            - epsbb[n, n,virt_bb, n,n,n, n, n]
-            - epsbb[n, n,n, virt_bb, n,n, n, n]
-            + epsbb[n, n, n, n, occ_bb,n, n, n]
-            + epsbb[n, n, n, n, n,occ_bb, n,n]
-            + epsbb[n, n, n, n, n, n,occ_bb,n]
-            + epsbb[n, n, n, n, n, n,n,occ_bb]
-        )
-        print('quads allb')
-        eabcdijkl_ab = 1.0/ (
-            -epsaa[virt_aa,n,n, n, n, n, n, n]
-            - epsbb[n, virt_bb,n,n, n, n, n, n]
-            - epsaa[n, n,virt_aa, n,n,n, n, n]
-            - epsbb[n, n,n, virt_bb, n,n, n, n]
-            + epsaa[n, n, n, n, occ_aa,n, n, n]
-            + epsbb[n, n, n, n, n,occ_bb, n,n]
-            + epsaa[n, n, n, n, n, n,occ_aa,n]
-            + epsbb[n, n, n, n, n, n,n,occ_bb]
-        )
 
-
-        CCSDT_DenomInfo = {"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
-                          "D2aa":eabij_aa,"D2bb":eabij_bb,"D2ab":eabij_ab,
-                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab,
-                           "D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
+            denomInfo = {"D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
                            "D4ab":eabcdijkl_ab}
 
+    return denomInfo
 
-    else:
-        CCSDT_DenomInfo=None
-
-    return (
-        na,
-        nb,
-        nvirta,
-        nvirtb,
-        occ_aa,
-        occ_bb,
-        virt_aa,
-        virt_bb,
-        faa,
-        fbb,
-        g_aaaa,
-        g_bbbb,
-        g_abab,
-        eabij_aa,
-        eabij_bb,
-        eabij_ab,
-        CCSDT_DenomInfo
-    )
 
 
 def generalUHF(mf, mol, h1e, f, na, nb, orb):
@@ -635,7 +663,8 @@ def generalUHF(mf, mol, h1e, f, na, nb, orb):
     e2 = 0.5 * np.einsum("ii", faa[:na, :na]) + 0.5 * np.einsum("ii", fbb[:nb, :nb])
     totSCFenergy = e1 + e2 + mf.energy_nuc()
     print("final rhf/uhf energy:", totSCFenergy)
-    return faa, fbb, g_aaaa, g_bbbb, g_abab
+    integralInfo={"faa":faa,"fbb":fbb,"g_aaaa":g_aaaa,"g_bbbb":g_bbbb,"g_abab":g_abab}
+    return integralInfo #faa, fbb, g_aaaa, g_bbbb, g_abab
 
 
 #def test_rhf_energy(mol, mf, orb):
