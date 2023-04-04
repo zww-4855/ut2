@@ -1,6 +1,7 @@
 from numpy import einsum
 import UT2.modify_T2resid_T4Qf1 as qf1
 import UT2.modify_T2resid_T4Qf2 as qf2
+import numpy as np
 
 def residMain(ccd_kernel):
     sliceInfo=ccd_kernel.sliceInfo
@@ -64,6 +65,11 @@ def residMain(ccd_kernel):
         resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
         resid_bbbb += 0.5 * qf1_bbbb + (1.0 / 6.0) * qf2_bbbb
         resid_abab += 0.5 * qf1_abab + (1.0 / 6.0) * qf2_abab
+
+
+    resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa
+    resid_bbbb=resid_bbbb+np.reciprocal(eabij_bb)*t2_bbbb
+    resid_abab=resid_abab+np.reciprocal(eabij_ab)*t2_abab
 
     final_resid={"resT2aa":resid_aaaa,"resT2bb":resid_bbbb,"resT2ab":resid_abab}
     ccd_kernel.set_resid(final_resid)

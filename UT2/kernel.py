@@ -119,6 +119,7 @@ class UltT2CC():
         print("     Iter              Corr. Energy                 |dE|    ")
         print(flush=True)
 
+
         old_energy = t2energy.ccd_energyMain(self)
 
         for idx in range(self.max_iter):
