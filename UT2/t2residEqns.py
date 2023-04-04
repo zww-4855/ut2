@@ -1,6 +1,70 @@
 from numpy import einsum
+import UT2.modify_T2resid_T4Qf1 as qf1
+import UT2.modify_T2resid_T4Qf2 as qf2
+
+def residMain(ccd_kernel):
+    sliceInfo=ccd_kernel.get_occSliceInfo()
+    oa=sliceInfo["occ_aa"]
+    ob=sliceInfo["occ_bb"]
+    va=sliceInfo["virt_aa"]
+    vb=sliceInfo["virt_bb"]
+
+    t2_aaaa=ccd_kernel.get_tamps("t2aa")
+    t2_bbbb=ccd_kernel.get_tamps("t2bb")
+    t2_abab=ccd_kernel.get_tamps("t2ab")
+
+    fock=ccd_kernel.ints["oei"]
+    tei=ccd_kernel.ints["tei"]
+
+    f_aa=fock["faa"]
+    f_bb=fock["fbb"]
+ 
+
+    g_aaaa=tei["g_aaaa"]
+    g_bbbb=tei["g_bbbb"]
+    g_abab=tei["g_abab"]
+
+    eabij_aa=ccd_kernel.denom["D2aa"]
+    eabij_bb=ccd_kernel.denom["D2bb"]
+    eabij_ab=ccd_kernel.denom["D2ab"]
+
+    resid_aa=ccd_t2_aaaa_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb,cc_runtype)
+    resid_bb=ccd_t2_bbbb_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb,cc_runtype)
+    resid_ab=ccd_t2_abab_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb, cc_runtype)
 
 
+    if cc_runtype["ccdType"] == "CCDQf-1":
+
+        qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
+        qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
+        qf1_abab = qf1.residQf1_abab(g, l2, t2, occaa, virtaa)
+        resid_aaaa += 0.5 * qf1_aaaa
+        resid_bbbb += 0.5 * qf1_bbbb
+        resid_abab += 0.5 * qf1_abab
+
+    elif cc_runtype["ccdType"] == "CCDQf-2":
+
+        qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
+        qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
+        qf1_abab = qf1.residQf1_abab(g, l2, t2, occaa, virtaa)
+
+        qf2_aaaa = qf2.residQf2_aaaa(g, l2, t2, occaa, virtaa)
+        qf2_bbbb = qf2.residQf2_bbbb(g, l2, t2, occaa, virtaa)
+        qf2_abab = qf2.residQf2_abab(g, l2, t2, occaa, virtaa)
+
+        resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
+        resid_bbbb += 0.5 * qf1_bbbb + (1.0 / 6.0) * qf2_bbbb
+        resid_abab += 0.5 * qf1_abab + (1.0 / 6.0) * qf2_abab
+
+
+     final_resid={"resT2aa":resid_aaaa,"resT2bb":resid_bbbb,"resT2ab":resid_abab}
+     ccd_kernel.set_resid(final_resid)
+
+     ccd_kernel.set_tamps("t2aa")=resid_aaaa*eabij_aa
+     ccd_kernel.set_tamps("t2bb")=resid_bbbb*eabij_bb 
+     ccd_kernel.set_tamps("t2ab")=resid_abab*eabij_ab
+
+     return ccd_kernel
 
 def ccd_t2_aaaa_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb,cc_runtype):
     

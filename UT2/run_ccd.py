@@ -55,7 +55,10 @@ class StoredInfo():
         self.integralInfo=integralInfo
 
     def get_denoms(self,dataString):
-        return self.denomInfo[str(dataString)]
+        if dataString==None:
+            return self.denomInfo
+        else:
+            return self.denomInfo[str(dataString)]
 
     def get_occInfo(self,dataString):
         return self.occInfo[str(dataString)]

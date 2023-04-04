@@ -27,7 +27,7 @@ class UltT2CC():
         self.noccb=storedInfo.get_occInfo("nocc_bb")
         self.nvrta=storedInfo.get_occInfo("nvirt_aa")
         self.nvrtb=storedInfo.get_occInfo("nvirt_bb")
-
+        self.denom=storedInfo.get_denomInfo()
         self.sliceInfo=storedInfo.get_occSliceInfo()
         self.ints=storedInfo.get_integralInfo()
         if "ccdType" in storedInfo.get_cc_runtype(None):
@@ -63,10 +63,16 @@ class UltT2CC():
 
 
     def set_tamps(self,tamps_spin,label):
-        self.tamps[str(label)]=tamps_spin
+        if label==None:
+            self.tamps=tamps_spin
+        else:
+            self.tamps[str(label)]=tamps_spin
 
     def set_resid(self, resid_spin,label):
-        self.resid[str(label)]=resid_spin
+        if label==None:
+            self.resid=resid_spin
+        else:
+            self.resid[str(label)]=resid_spin
 
     def kernel():
         print("    ==> ", self.cc_runtype["ccdType"], " amplitude equations <==")
@@ -82,3 +88,87 @@ class UltT2CC():
             # Updates all of aaaa,abab,bbbb spin residuals
             t2residEqns.residMain(self,self.tamps,self.ints,self.sliceInfo,self.cc_runtype)
 
+
+
+        # diis update
+            if diis_size is not None:
+                vectorized_iterate = np.hstack(
+                    (
+                        self.tamps["t2aa"].flatten(),
+                        self.tamps["t2bb"].flatten(),
+                        self.tamps["t2ab"].flatten(),
+                    )
+                )
+                error_vec = old_vec - vectorized_iterate
+                new_vectorized_iterate = diis_update.compute_new_vec(
+                    vectorized_iterate, error_vec
+                )
+                self.tamps["t2aa"] = new_vectorized_iterate[:t2aaaa_dim].reshape(t2aaaa.shape)
+                self.tamps["t2bb"] = new_vectorized_iterate[
+                    t2aaaa_dim : t2aaaa_dim + t2bbbb_dim
+                ].reshape(t2bbbb.shape)
+                self.tamps["t2ab"] = new_vectorized_iterate[
+                    t2aaaa_dim + t2bbbb_dim :
+                ].reshape(t2abab.shape)
+                old_vec = new_vectorized_iterate
+
+
+
+        current_energy = t2energy.ccd_energy_with_spin(
+            new_doubles_aaaa,
+            new_doubles_bbbb,
+            new_doubles_abab,
+            faa,
+            fbb,
+            gaaaa,
+            gbbbb,
+            gabab,
+            occaa,
+            occbb,
+            virtaa,
+            virtbb,
+        )
+        delta_e = np.abs(old_energy - current_energy)
+
+        print(
+            "    {: 5d} {: 20.12f} {: 20.12f} ".format(
+                idx, nucE + current_energy - hf_energy, delta_e
+            )
+        )
+        print(flush=True)
+        if delta_e < stopping_eps:  # and res_norm < stopping_eps:
+            # assign t1 and t2 variables for future use before breaking
+         #   t2aaaa = new_doubles_aaaa
+         #   t2bbbb = new_doubles_bbbb
+         #   t2abab = new_doubles_abab
+            break
+        else:
+            # assign t1 and t2 and old_energy for next iteration
+          #  t2aaaa = new_doubles_aaaa
+          #  t2bbbb = new_doubles_bbbb
+          #  t2abab = new_doubles_abab
+            old_energy = current_energy
+    else:
+        raise ValueError("CC iterations did not converge")
+
+    print("\n\n\n")
+    if cc_runtype["ccdType"] != "CCD(Qf)":
+        print(
+            cc_runtype["ccdType"],
+            " correlation contribution:",
+            nucE + current_energy - hf_energy,
+        )
+        corrE=nucE+current_energy
+        print(cc_runtype["ccdType"], " energy:", nucE + current_energy)
+        tfinalEnergy=current_energy+nucE
+    if cc_runtype["ccdType"] == "CCD(Qf)":
+
+        qf_corr = pertQf.energy_pertQf(g, l2, t2, occaa, virtaa)
+        print("CCD correlation contribution: ", nucE + current_energy - hf_energy)
+        print("(Qf) perturbative energy correction: ", qf_corr)
+        print(cc_runtype["ccdType"], " energy:", nucE + current_energy + qf_corr)
+        tfinalEnergy=current_energy+nucE+qf_corr
+        corrE=qf_corr
+    print("\n\n\n")
+
+    return tamps,tfinalEnergy, corrE
