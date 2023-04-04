@@ -345,7 +345,6 @@ def ccd_kernel(
             t2abab = diag_t2matrix(t2abab, nvirta, na)
             t2aaaa = diag_t2matrix(t2aaaa, nvirta, na)
             t2bbbb = diag_t2matrix(t2bbbb, nvirta, na)
->>>>>>> RestructureCode
 
         # diis update
         if diis_size is not None:
