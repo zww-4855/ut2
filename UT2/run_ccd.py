@@ -107,59 +107,59 @@ def ccd_main(mf, mol, orb, cc_runtype):
     storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
 
     if "ccdType" in cc_runtype: # run all T2 spin-integrt methods
-        na=storedInfo.occInfo["nocc_aa"]
-        nb=storedInfo.occInfo["nocc_bb"]
-        nvirta=storedInfo.occInfo["nvirt_aa"]
-        nvirtb=storedInfo.occInfo["nvirt_bb"]
+#        na=storedInfo.occInfo["nocc_aa"]
+#        nb=storedInfo.occInfo["nocc_bb"]
+#        nvirta=storedInfo.occInfo["nvirt_aa"]
+#        nvirtb=storedInfo.occInfo["nvirt_bb"]
+#
+#        occ_aa=storedInfo.occSliceInfo["occ_aa"]
+#        virt_aa=storedInfo.occSliceInfo["virt_aa"]
+#        occ_bb=storedInfo.occSliceInfo["occ_bb"]
+#        virt_bb=storedInfo.occSliceInfo["virt_bb"]
+#
+#
+#        #ints=storedInfo.get_integralInfo
+#        oei=storedInfo.get_integralInfo("oei")
+#        tei=storedInfo.get_integralInfo("tei")
+#        faa=oei["faa"]
+#        fbb=oei["fbb"]
+#        gaaaa=tei["g_aaaa"]
+#        gbbbb=tei["g_bbbb"]
+#        gabab=tei["g_abab"]
+#
+#        eabij_aa=storedInfo.get_denoms("D2aa")
+#        eabij_bb=storedInfo.get_denoms("D2bb")
+#        eabij_ab=storedInfo.get_denoms("D2ab")
 
-        occ_aa=storedInfo.occSliceInfo["occ_aa"]
-        virt_aa=storedInfo.occSliceInfo["virt_aa"]
-        occ_bb=storedInfo.occSliceInfo["occ_bb"]
-        virt_bb=storedInfo.occSliceInfo["virt_bb"]
-
-
-        #ints=storedInfo.get_integralInfo
-        oei=storedInfo.get_integralInfo("oei")
-        tei=storedInfo.get_integralInfo("tei")
-        faa=oei["faa"]
-        fbb=oei["fbb"]
-        gaaaa=tei["g_aaaa"]
-        gbbbb=tei["g_bbbb"]
-        gabab=tei["g_abab"]
-
-        eabij_aa=storedInfo.get_denoms("D2aa")
-        eabij_bb=storedInfo.get_denoms("D2bb")
-        eabij_ab=storedInfo.get_denoms("D2ab")
-
-        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":4})
+        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
 
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
 
-        t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
-            na,
-            nb,
-            nvirta,
-            nvirtb,
-            occ_aa,
-            virt_aa,
-            occ_bb,
-            virt_bb,
-            faa,
-            fbb,
-            gaaaa,
-            gbbbb,
-            gabab,
-            eabij_aa,
-            eabij_bb,
-            eabij_ab,
-            hf_energy,
-            nucE,
-            15,
-            4,
-            cc_runtype,
-        )
+#        t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
+#            na,
+#            nb,
+#            nvirta,
+#            nvirtb,
+#            occ_aa,
+#            virt_aa,
+#            occ_bb,
+#            virt_bb,
+#            faa,
+#            fbb,
+#            gaaaa,
+#            gbbbb,
+#            gabab,
+#            eabij_aa,
+#            eabij_bb,
+#            eabij_ab,
+#            hf_energy,
+#            nucE,
+#            15,
+#            4,
+#            cc_runtype,
+#        )
 #    elif "fullCCtype" in cc_runtype: # running >T2 spin-integrated code
 
 

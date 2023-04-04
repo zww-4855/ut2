@@ -1,8 +1,9 @@
 import numpy as np
 from numpy import einsum
 
+import UT2.modify_T2energy_pertQf as pertQf
 
-def ccd_energyMain(ccd_kernel):
+def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     sliceInfo=ccd_kernel.sliceInfo
     oa=sliceInfo["occ_aa"]
     ob=sliceInfo["occ_bb"]
@@ -24,7 +25,16 @@ def ccd_energyMain(ccd_kernel):
     g_bbbb=tei["g_bbbb"]
     g_abab=tei["g_abab"]
 
-    return ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+    ggg={"aaaa":g_aaaa,"bbbb":g_bbbb,"abab":g_abab}
+    t2={"aaaa":t2_aaaa,"bbbb":t2_bbbb,"abab":t2_abab}
+
+    if get_perturbCorr==True:
+        l2dic=ccd_kernel.get_l2amps()
+        ll2={"aaaa":l2dic["l2aa"],"bbbb":l2dic["l2bb"],"abab":l2dic["l2ab"]}
+        qf_corr=pertQf.energy_pertQf(ggg,ll2,t2,oa,va)
+        return qf_corr
+    else:    
+        return ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
 def ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
 

@@ -8,6 +8,8 @@ def residMain(ccd_kernel):
     ob=sliceInfo["occ_bb"]
     va=sliceInfo["virt_aa"]
     vb=sliceInfo["virt_bb"]
+    occaa=oa
+    virtaa=va
 
     t2_aaaa=ccd_kernel.tamps["t2aa"]
     t2_bbbb=ccd_kernel.tamps["t2bb"]
@@ -28,6 +30,12 @@ def residMain(ccd_kernel):
     eabij_bb=ccd_kernel.denom["D2bb"]
     eabij_ab=ccd_kernel.denom["D2ab"]
 
+
+
+    g={"aaaa":g_aaaa,"bbbb":g_bbbb,"abab":g_abab}
+    t2={"aaaa":t2_aaaa,"bbbb":t2_bbbb,"abab":t2_abab}
+    l2dic=ccd_kernel.get_l2amps()
+    l2={"aaaa":l2dic["l2aa"],"bbbb":l2dic["l2bb"],"abab":l2dic["l2ab"]}
     
     resid_aaaa=ccd_t2_aaaa_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb,None)
     resid_bbbb=ccd_t2_bbbb_residual(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb,None)

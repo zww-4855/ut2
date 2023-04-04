@@ -22,7 +22,9 @@ class UltT2CC():
         self.diis_start_cycle=storedInfo.get_cc_runtype("diis_start_cycle")
 
         self.cc_type=storedInfo.get_cc_runtype("ccdType")
-    
+        self.nucE=storedInfo.get_cc_runtype("nuclear_energy")
+        self.hf_energy=storedInfo.get_cc_runtype("hf_energy") 
+
         self.nocca=storedInfo.get_occInfo("nocc_aa")
         self.noccb=storedInfo.get_occInfo("nocc_bb")
         self.nvrta=storedInfo.get_occInfo("nvirt_aa")
@@ -30,6 +32,7 @@ class UltT2CC():
         self.denom=storedInfo.get_denoms()
         self.sliceInfo=storedInfo.get_occSliceInfo()
         self.ints=storedInfo.get_integralInfo()
+        self.l2={}
 
         print(self.nvrta)
         if "ccdType" in storedInfo.get_cc_runtype(None):
@@ -76,6 +79,40 @@ class UltT2CC():
         else:
             self.resid[str(label)]=resid_spin
 
+    def set_l2amps(self):
+        self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
+
+    def get_l2amps(self):
+        return self.l2
+
+    def finalize(self,nucE,current_energy,hf_energy):
+        print("\n\n\n")
+        width=15
+        precision=10
+        print("************************************************************")
+        print("************************************************************\n\n")
+        print('Total SCF energy: \t {: 20.12f}'.format(hf_energy))
+        print('Nuclear repulsion energy: \t {: 20.12f}'.format(nucE))
+        print(f"\n \t**** Results for {self.cc_type}: ****")
+        if self.cc_type != "CCD(Qf)":
+            corrE=nucE+current_energy-hf_energy
+            print('Correlation energy: \t {: 20.12f}'.format(corrE))
+            corrE=nucE+current_energy
+            tfinalEnergy=current_energy+nucE
+
+        if self.cc_type == "CCD(Qf)":
+            corrE=nucE+current_energy-hf_energy
+            qf_corr = t2energy.ccd_energyMain(self,get_perturbCorr=True)
+            print("CCD correlation contribution: \t {: 20.12f}".format(corrE))
+            print("(Qf) perturbative energy correction: \t {: 20.12f}".format(qf_corr)) 
+            tfinalEnergy=current_energy+nucE+qf_corr
+            corrE=qf_corr
+        self.tfinalEnergy=tfinalEnergy
+        self.corrE=corrE
+        print('Final CC energy: \t {: 20.12f}'.format(self.tfinalEnergy))
+        print("\n\n\n")
+        return self
+
     def kernel(self):
         print("    ==> ", self.cc_type, " amplitude equations <==")
         print("")
@@ -85,7 +122,8 @@ class UltT2CC():
         old_energy = t2energy.ccd_energyMain(self)
 
         for idx in range(self.max_iter):
-            self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
+            self.set_l2amps()
+            #self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
 
             # Updates all of aaaa,abab,bbbb spin residuals
             t2residEqns.residMain(self)
@@ -127,35 +165,17 @@ class UltT2CC():
 
             print(
                 "    {: 5d} {: 20.12f} {: 20.12f} ".format(
-                    idx, nucE + current_energy - hf_energy, delta_e
+                    idx, self.nucE + current_energy - self.hf_energy, delta_e
                 )
             )
             print(flush=True)
-            if delta_e < stopping_eps:  # and res_norm < stopping_eps:
+            if delta_e < self.stopping_eps:  # and res_norm < stopping_eps:
                 break
             else:
                 old_energy = current_energy
             if idx > self.max_iter: 
                 raise ValueError("CC iterations did not converge")
 
-        print("\n\n\n")
-        if cc_runtype["ccdType"] != "CCD(Qf)":
-            print(
-                cc_runtype["ccdType"],
-                " correlation contribution:",
-                nucE + current_energy - hf_energy,
-            )
-            corrE=nucE+current_energy
-            print(cc_runtype["ccdType"], " energy:", nucE + current_energy)
-            tfinalEnergy=current_energy+nucE
-        if cc_runtype["ccdType"] == "CCD(Qf)":
-    
-            qf_corr = pertQf.energy_pertQf(g, l2, t2, occaa, virtaa)
-            print("CCD correlation contribution: ", nucE + current_energy - hf_energy)
-            print("(Qf) perturbative energy correction: ", qf_corr)
-            print(cc_runtype["ccdType"], " energy:", nucE + current_energy + qf_corr)
-            tfinalEnergy=current_energy+nucE+qf_corr
-            corrE=qf_corr
-        print("\n\n\n")
-    
-        return tamps,tfinalEnergy, corrE
+        self.finalize(self.nucE,current_energy,self.hf_energy)
+ 
+        return self.tamps,self.tfinalEnergy, self.corrE

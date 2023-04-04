@@ -12,14 +12,14 @@ from UT2.run_ccd import *
 Test to verify that RHF T2 methods give the same energy as UHF T2 methods before the bifurcation point of F2 
 '''
 
-#@pytest.mark.parametrize("Basis,Method",[('ccpvdz',{"ccdType":"CCD"}),
-#    ('ccpvtz',{"ccdType":"CCD"}),
-#    ('ccpvdz',{"ccdType":"CCDQf-1"}),
-#    ('ccpvtz',{"ccdType":"CCDQf-1"}),
-#    ('ccpvdz',{"ccdType":"CCDQf-2"}),
-#    ('ccpvtz',{"ccdType":"CCDQf-2"}),
-#    ('ccpvdz',{"ccdType":"CCD(Qf)"}),
-#    ('ccpvtz',{"ccdType":"CCD(Qf)"}),])
+@pytest.mark.parametrize("Basis,Method",[('ccpvdz',{"ccdType":"CCD"}),
+    ('ccpvtz',{"ccdType":"CCD"}),
+    ('ccpvdz',{"ccdType":"CCDQf-1"}),
+    ('ccpvtz',{"ccdType":"CCDQf-1"}),
+    ('ccpvdz',{"ccdType":"CCDQf-2"}),
+    ('ccpvtz',{"ccdType":"CCDQf-2"}),
+    ('ccpvdz',{"ccdType":"CCD(Qf)"}),
+    ('ccpvtz',{"ccdType":"CCD(Qf)"}),])
 
 def test_RHFequalUHF(Basis,Method):
     atomString = 'F 0 0 0; F 0 0 1.1'
@@ -53,7 +53,7 @@ def test_RHFequalUHF(Basis,Method):
             print('Final energy:', correlatedEnergy)
 
 
-Basis='ccpvdz'
-Method={"ccdType":"CCD"}
-test_RHFequalUHF(Basis,Method)
+#Basis='ccpvdz'
+#Method={"ccdType":"CCD"}
+#test_RHFequalUHF(Basis,Method)
 
