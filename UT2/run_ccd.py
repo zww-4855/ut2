@@ -296,7 +296,6 @@ def ccd_kernel(
 #            t2abab = diag_t2matrix(t2abab, nvirta, na)
 #            t2aaaa = diag_t2matrix(t2aaaa, nvirta, na)
 #            t2bbbb = diag_t2matrix(t2bbbb, nvirta, na)
-=======
         if cc_runtype["ccdType"] == "pCCD":
             new_doubles_aaaa = new_doubles_aaaa * 0.0
             new_doubles_bbbb = new_doubles_aaaa
