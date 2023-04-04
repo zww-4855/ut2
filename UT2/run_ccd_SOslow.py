@@ -235,68 +235,9 @@ def ccd_kernel(
 #        elif cc_runtype["ccdType"] == "CCDQfHf-1":
 
 
-        #new_doubles_aaaa = resid_aaaa * eabij_aa  # doubles_res_aaaa * eabij_aa
-        #new_doubles_bbbb = resid_bbbb * eabij_bb  # doubles_res_bbbb * eabij_bb
-        #new_doubles_abab = resid_abab * eabij_ab  # doubles_res_abab * eabij_ab
-        elif cc_runtype["ccdType"] == "pCCD":
-            #new_doubles_aaaa = new_doubles_aaaa * 0.0
-            #new_doubles_bbbb = new_doubles_aaaa
-            tmpT2aa = np.zeros((nvirta, nvirta, na, na))
-            tmpT2bb = np.zeros((nvirta, nvirta, na, na))
-            tmpT2ab = np.zeros((nvirta, nvirta, na, na))
-
-            for a in range(nvirta):
-                for i in range(na):
-                    tmpT2ab[a, a, i, i] = resid_abab[a, a, i, i]
-                    tmpT2aa[a, a, i, i] = resid_aaaa[a, a, i, i]
-                    tmpT2bb[a, a, i, i] = resid_bbbb[a, a, i, i]
-
-            resid_aaaa=0.0*resid_aaaa
-            resid_bbbb=0.0*resid_bbbb
-            resid_abab=0.0*resid_abab
-            resid_abab=tmpT2ab
         new_doubles_aaaa = resid_aaaa * eabij_aa  # doubles_res_aaaa * eabij_aa
         new_doubles_bbbb = resid_bbbb * eabij_bb  # doubles_res_bbbb * eabij_bb
         new_doubles_abab = resid_abab * eabij_ab  # doubles_res_abab * eabij_ab
-#        elif cc_runtype["ccdType"] == "DiagCCD":
-#            matDim = nvirta * na
-#
-#            def reshape(new_doubles_abab, new_doubles_aaaa, new_doubles_bbbb, matDim):
-#                abab = new_doubles_abab.transpose(0, 2, 1, 3)
-#                aaaa = new_doubles_aaaa.transpose(0, 2, 1, 3)
-#                bbbb = new_doubles_bbbb.transpose(0, 2, 1, 3)
-#                t2abab = np.reshape(abab, (matDim, matDim), order="F")
-#                t2aaaa = np.reshape(aaaa, (matDim, matDim), order="F")
-#                t2bbbb = np.reshape(bbbb, (matDim, matDim), order="F")
-#                return t2abab, t2aaaa, t2bbbb
-#
-#            t2abab, t2aaaa, t2bbbb = reshape(
-#                new_doubles_abab, new_doubles_aaaa, new_doubles_bbbb, matDim
-#            )
-#
-#
-#            def place_tensorDiag(eps, nv, no):
-#                t2 = np.zeros((nv, nv, no, no))
-#                count = 0
-#                for a in range(nv):
-#                    for i in range(no):
-#                        t2[a][a][i][i] = eps[count]
-#                        count += 1
-#                return t2
-#
-#            def diag_t2matrix(t2, nv, no):
-#                roots, vec = linalg.eig(t2)
-#                indx = roots.argsort()
-#                roots = roots[indx]
-#                print("roots", roots)
-#                newt2 = place_tensorDiag(roots, nv, no)
-#
-#                return newt2
-#
-#            t2abab = diag_t2matrix(t2abab, nvirta, na)
-#            t2aaaa = diag_t2matrix(t2aaaa, nvirta, na)
-#            t2bbbb = diag_t2matrix(t2bbbb, nvirta, na)
-=======
         if cc_runtype["ccdType"] == "pCCD":
             new_doubles_aaaa = new_doubles_aaaa * 0.0
             new_doubles_bbbb = new_doubles_aaaa
@@ -346,7 +287,6 @@ def ccd_kernel(
             t2abab = diag_t2matrix(t2abab, nvirta, na)
             t2aaaa = diag_t2matrix(t2aaaa, nvirta, na)
             t2bbbb = diag_t2matrix(t2bbbb, nvirta, na)
->>>>>>> RestructureCode
 
         # diis update
         if diis_size is not None:
@@ -405,7 +345,7 @@ def ccd_kernel(
             t2abab = new_doubles_abab
             old_energy = current_energy
     else:
-        raise ValueError("CC iterations did not converge")
+        raise ValueError("CCSDT iterations did not converge")
 
     print("\n\n\n")
     if cc_runtype["ccdType"] != "CCD(Qf)":

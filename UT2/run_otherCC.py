@@ -33,7 +33,6 @@ def otherCC_main(mf, mol, orb, cc_runtype):
         otherCCDenomInfo
     ) = hlp.convertSCFinfo(mf, mol, orb)
 
-
 def otherCC_kernel(
     na,
     nb,
@@ -57,13 +56,3 @@ def otherCC_kernel(
     diis_start_cycle=4,
     cc_runtype=None,otherCCDenomInfo):
 
-
-
-def initialize_Tamps(highest_order):
-    t_amps={}
-    spinStr=['aa','bb','ab']
-    for i in range(1,highest_order+1):
-        for j in range(3):
-            dicStr="t"+str(i)+spinStr[j]
-            t_amps{dicStr:}
-        

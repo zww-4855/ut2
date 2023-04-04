@@ -1,0 +1,67 @@
+import pytest
+
+import UT2
+
+import numpy as np
+import pyscf
+from pyscf import ao2mo
+import itertools
+from UT2.run_ccd import * 
+
+''' Test that ensures all higher order T2 methods beyond CCD reduces to CCD whenever    terms associated with T4, T6, etc are 0 by construction. In this case, the test     involves H2, where we know effects associated with T4, etc are zero because 
+    there are only 2 electrons. CCD reference energy taken from ACES2 result. '''
+
+@pytest.mark.parametrize("Basis,Method",[('6-31G',{"ccdType":"pCCD"}),])
+
+def test_pCCD(Basis,Method):
+    if Basis=="6-31G":
+        aces2CCD= -100.114059106425  #-198.546656393962
+    atomString = 'H 0 0 0; F 0 0 1.73287873154'
+    mol = pyscf.M(
+        atom=atomString,
+        verbose=5,
+        unit='B',
+        basis=Basis)
+    mf = mol.RHF()
+    mf.conv_tol_grad=1E-10
+    mf.run()
+    orb=mf.mo_coeff
+    cc_runtype=Method   
+    correlatedEnergy,corrCo=ccd_main(mf,mol,orb,cc_runtype)
+    diff=abs(abs(aces2CCD)-abs(correlatedEnergy))
+    assert diff <= 10**-6
+    print('Final energy:', correlatedEnergy)
+
+
+@pytest.mark.parametrize("Basis,Method",[('6-31G',{"ccdType":"pCCD"}),])
+def test_compareRHFUHF_pCCD(Basis,Method):
+    value=[]
+    atomString = 'H 0 0 0; F 0 0 1.73287873154'
+    for i in range(2):
+        mol = pyscf.M(
+            atom=atomString,
+            verbose=5,
+            unit='B',
+            basis=Basis)
+        if i==0:
+            mf = mol.RHF()
+        else:
+            mf = mol.RHF()
+        mf.conv_tol_grad=1E-10
+        mf.run()
+        orb=mf.mo_coeff
+        cc_runtype=Method
+        correlatedEnergy,corrCo=ccd_main(mf,mol,orb,cc_runtype)
+        
+        value.append(correlatedEnergy)
+    print(value)
+    diff=abs(abs(value[0])-abs(value[1]))
+    assert diff <= 10**-5
+
+Basis='6-31G'
+Method={"ccdType":"pCCD"}
+test_compareRHFUHF_pCCD(Basis,Method)
+#test_pCCD(Basis,Method)
+#Basis='ccpvdz'
+#Method={"ccdType":"CCDQf-1"}
+#test_H2energy(Basis,Method)
