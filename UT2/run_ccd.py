@@ -167,6 +167,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
         cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
 
+        print('exiting run_ccd for ccdTypeSlow')
+        sys.exit()
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
@@ -598,9 +600,10 @@ def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
 
 def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     occ = mf.mo_occ
+    print('occ:',occ)
     nele = int(sum(occ))
     nocc = nele // 2
-    norbs = oei.shape[0]
+    norbs = mf.get_fock().shape[0] #oei.shape[0]
     global nsvirt, nsocc
     
     nsvirt = 2 * (norbs - nocc)
@@ -628,7 +631,7 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     twoEints=ao2mo.kernel(mol,mf.mo_coeff)
     two_electron_integrals = ao2mo.restore(
             1, # no permutation symmetry
-            twoEints, hf_C.shape[0])
+            twoEints, orb.shape[0])
         # See PQRS convention in OpenFermion.hamiltonians._molecular_data
         # h[p,q,r,s] = (ps|qr)
     two_electron_integrals = np.asarray(
@@ -640,7 +643,7 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     
     fock = soei + np.einsum('piiq->pq', astei[:, o, o, :])
     
-    IntegralInfo={"oei":fock,"tei":gtei}
+    integralInfo={"oei":fock,"tei":gtei}
     storedInfo.set_cc_runtype(cc_runtype)
     storedInfo.set_integralInfo(integralInfo)
     return storedInfo
@@ -663,7 +666,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
     if "ccdTypeSlow" in cc_runtype: # spin-orb formalism
         virt_aa=occupationSliceInfo["virt_aa"]
         occ_aa=occupationSliceInfo["occ_aa"]
-        epsaa=eps['occ_aa']
+        epsaa=eps['eps_aa']
         print('inside two')
 
     elif "ccdType" in cc_runtype: # spin-integrated formalisms
@@ -823,6 +826,39 @@ def generalUHF(mf, mol, h1e, f, na, nb, orb):
     integralInfo={"oei":fock,"tei":tei}#{"faa":faa,"fbb":fbb,"g_aaaa":g_aaaa,"g_bbbb":g_bbbb,"g_abab":g_abab}
     return integralInfo #faa, fbb, g_aaaa, g_bbbb, g_abab
 
+def spinorb_from_spatial(one_body_integrals, two_body_integrals):
+    n_qubits = 2 * one_body_integrals.shape[0]
+
+    # Initialize Hamiltonian coefficients.
+    one_body_coefficients = np.zeros((n_qubits, n_qubits))
+    two_body_coefficients = np.zeros(
+        (n_qubits, n_qubits, n_qubits, n_qubits))
+    # Loop through integrals.
+    for p in range(n_qubits // 2):
+        for q in range(n_qubits // 2):
+
+            # Populate 1-body coefficients. Require p and q have same spin.
+            one_body_coefficients[2 * p, 2 * q] = one_body_integrals[p, q]
+            one_body_coefficients[2 * p + 1, 2 * q +
+                                  1] = one_body_integrals[p, q]
+            # Continue looping to prepare 2-body coefficients.
+            for r in range(n_qubits // 2):
+                for s in range(n_qubits // 2):
+
+                    # Mixed spin
+                    two_body_coefficients[2 * p, 2 * q + 1, 2 * r + 1, 2 *
+                                          s] = (two_body_integrals[p, q, r, s])
+                    two_body_coefficients[2 * p + 1, 2 * q, 2 * r, 2 * s +
+                                          1] = (two_body_integrals[p, q, r, s])
+
+                    # Same spin
+                    two_body_coefficients[2 * p, 2 * q, 2 * r, 2 *
+                                          s] = (two_body_integrals[p, q, r, s])
+                    two_body_coefficients[2 * p + 1, 2 * q + 1, 2 * r +
+                                          1, 2 * s +
+                                          1] = (two_body_integrals[p, q, r, s])
+
+    return one_body_coefficients, two_body_coefficients
 
 #def test_rhf_energy(mol, mf, orb):
 #    eri = ao2mo.full(mol, orb, verbose=0)
