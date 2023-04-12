@@ -6,7 +6,7 @@ import UT2.t2energy as t2energy
 import UT2.t2residEqns as t2residEqns
 
 import UT2.t2energySlow as t2energySlow
-#import UT2.t2residEqnsSlow as t2residEqnsSlow
+import UT2.t2residEqnsSlow as t2residEqnsSlow
 
 import sys
 
@@ -152,8 +152,10 @@ class UltT2CC():
             #self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
 
             # Updates all of aaaa,abab,bbbb spin residuals
-            t2residEqns.residMain(self)
-
+            if self.cc_label == "ccdType":
+                t2residEqns.residMain(self)
+            elif self.cc_label == "ccdTypeSlow":
+                t2residEqnsSlow.residMain(self)
 
 
         # diis update
@@ -185,8 +187,13 @@ class UltT2CC():
                 self.old_vec = new_vectorized_iterate
 
 
+            if self.cc_label == "ccdType":
+                current_energy = t2energy.ccd_energyMain(self)
+            elif self.cc_label =="ccdTypeSlow":
+                current_energy = t2energySlow.ccd_energyMain(self)
 
-            current_energy = t2energy.ccd_energyMain(self)
+
+#            current_energy = t2energy.ccd_energyMain(self)
             delta_e = np.abs(old_energy - current_energy)
 
             print(
