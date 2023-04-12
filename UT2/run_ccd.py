@@ -104,7 +104,6 @@ class StoredInfo():
 def ccd_main(mf, mol, orb, cc_runtype):
     storedInfo=StoredInfo()
     cc_runtype.update({"hf_energy":mf.e_tot,"nuclear_energy":mf.energy_nuc()})
-    storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
 
     if "ccdType" in cc_runtype: # run all T2 spin-integrt methods
 #        na=storedInfo.occInfo["nocc_aa"]
@@ -131,6 +130,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
 #        eabij_bb=storedInfo.get_denoms("D2bb")
 #        eabij_ab=storedInfo.get_denoms("D2ab")
 
+        storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
         cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
 
         CCDobj=kernel.UltT2CC(storedInfo)
@@ -163,7 +163,12 @@ def ccd_main(mf, mol, orb, cc_runtype):
 #    elif "fullCCtype" in cc_runtype: # running >T2 spin-integrated code
 
 
-#    elif "ccdTypeSlow" in cc_runtype: # run all T2 spin-orb methods
+    elif "ccdTypeSlow" in cc_runtype: # run all T2 spin-orb methods
+        storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
+        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
+
+        CCDobj=kernel.UltT2CC(storedInfo)
+        t2, currentE, corrE = CCDobj.kernel()
 
 
     return currentE, corrE
@@ -591,8 +596,54 @@ def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
     storedInfo.set_integralInfo(integralInfo)
     return storedInfo #occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo
 
-
-
+def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
+    occ = mf.mo_occ
+    nele = int(sum(occ))
+    nocc = nele // 2
+    norbs = oei.shape[0]
+    global nsvirt, nsocc
+    
+    nsvirt = 2 * (norbs - nocc)
+    nsocc = 2 * nocc
+    
+    occupationInfo={"nocc_aa":nsocc,"nvirt_aa":nsvirt}
+    storedInfo.set_occInfo(occupationInfo)
+    
+    n = np.newaxis
+    o = slice(None, nsocc)
+    v = slice(nsocc, None)
+    occupationSliceInfo={"occ_aa":o,"virt_aa":v}
+    storedInfo.set_occSliceInfo(occupationSliceInfo)
+    
+    moE_aa = mf.mo_energy
+    eps_aa=np.kron(moE_aa,np.ones(2))
+    eps={"eps_aa":eps_aa}
+    denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps)
+    storedInfo.set_denoms(denomInfo)
+    
+    
+    hcore=mf.get_hcore()
+    hcoreMO=(orb.T@hcore)@orb
+    
+    twoEints=ao2mo.kernel(mol,mf.mo_coeff)
+    two_electron_integrals = ao2mo.restore(
+            1, # no permutation symmetry
+            twoEints, hf_C.shape[0])
+        # See PQRS convention in OpenFermion.hamiltonians._molecular_data
+        # h[p,q,r,s] = (ps|qr)
+    two_electron_integrals = np.asarray(
+            two_electron_integrals.transpose(0, 2, 3, 1), order='C')
+    
+    soei, stei = spinorb_from_spatial(hcoreMO,two_electron_integrals) #oei, tei)
+    astei = np.einsum('ijkl', stei) - np.einsum('ijlk', stei)
+    gtei = astei.transpose(0, 1, 3, 2)
+    
+    fock = soei + np.einsum('piiq->pq', astei[:, o, o, :])
+    
+    IntegralInfo={"oei":fock,"tei":gtei}
+    storedInfo.set_cc_runtype(cc_runtype)
+    storedInfo.set_integralInfo(integralInfo)
+    return storedInfo
 
 """ get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.  
 

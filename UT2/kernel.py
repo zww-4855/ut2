@@ -11,7 +11,14 @@ import UT2.modify_T2resid_T4Qf2 as qf2
 import UT2.modify_T2energy_pertQf as pertQf
 from numpy import linalg
 
-    
+
+"""
+UltT2CC class contains all the necessary routines to setup and run the various CC implementations. Current implementation is tested for spin-integrated version of T2 methods only. 
+
+:param storedInfo: A dictionary-based Class containing all the pertinent background information required to setup the CC calculation. See StoredInfo() class in run_ccd.py for further information.
+
+
+"""    
 class UltT2CC():
     def __init__(self,storedInfo):
         self.tamps={}
@@ -65,6 +72,9 @@ class UltT2CC():
 
             self.tamps=tamps
             self.resid=resid
+
+        #elif "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
+        
 
 
     def set_tamps(self,tamps_spin,label=None):
