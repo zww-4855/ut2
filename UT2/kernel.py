@@ -4,6 +4,10 @@ from pyscf import ao2mo
 from pyscf import cc
 import UT2.t2energy as t2energy
 import UT2.t2residEqns as t2residEqns
+
+import UT2.t2energySlow as t2energySlow
+#import UT2.t2residEqnsSlow as t2residEqnsSlow
+
 import sys
 
 import UT2.modify_T2resid_T4Qf1 as qf1
@@ -16,7 +20,7 @@ from numpy import linalg
 def get_calc(storedInfo,calc_list):
     for calcType in calc_list:
         try:
-            return storedInfo.get_cc_runtype(calcType)
+            return calcType, storedInfo.get_cc_runtype(calcType)
         except:
             continue
 """
@@ -28,7 +32,7 @@ UltT2CC class contains all the necessary routines to setup and run the various C
 """    
 class UltT2CC():
     def __init__(self,storedInfo):
-        calc_list=["ccdType","ccdTypeSlow","fullCCtype"]
+        self.calc_list=["ccdType","ccdTypeSlow","fullCCtype"]
         self.tamps={}
         self.resid={}
         self.max_iter=storedInfo.get_cc_runtype("max_iter")
@@ -36,7 +40,7 @@ class UltT2CC():
         self.diis_size=storedInfo.get_cc_runtype("diis_size")
         self.diis_start_cycle=storedInfo.get_cc_runtype("diis_start_cycle")
 
-        self.cc_type=get_calc(storedInfo,calc_list) #storedInfo.get_cc_runtype("ccdType")
+        self.cc_label, self.cc_type=get_calc(storedInfo,self.calc_list) #storedInfo.get_cc_runtype("ccdType")
         self.nucE=storedInfo.get_cc_runtype("nuclear_energy")
         self.hf_energy=storedInfo.get_cc_runtype("hf_energy") 
 
@@ -48,7 +52,6 @@ class UltT2CC():
         self.sliceInfo=storedInfo.get_occSliceInfo()
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
-        sys.exit()
         print(self.nvrta)
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
@@ -137,8 +140,12 @@ class UltT2CC():
         print("     Iter              Corr. Energy                 |dE|    ")
         print(flush=True)
 
+        print(self.cc_label)
+        if self.cc_label == "ccdType":
+            old_energy = t2energy.ccd_energyMain(self)
+        elif self.cc_label =="ccdTypeSlow":
+            old_energy = t2energySlow.ccd_energyMain(self) 
 
-        old_energy = t2energy.ccd_energyMain(self)
 
         for idx in range(self.max_iter):
             self.set_l2amps()

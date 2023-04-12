@@ -13,20 +13,12 @@ Test to verify that T2 methods yield consistent energies. Intends to verify that
 '''
 
 
-@pytest.mark.parametrize("Basis,Method,Answer",[('6-31G',{"ccdType":"CCD"},-100.114058950498),
-    ('6-31G',{"ccdType":"CCDQf-1"},-100.114512316484),
-    ('6-31G',{"ccdType":"CCDQf-2"},-100.114494929544),
-    ('6-31G',{"ccdType":"CCD(Qf)"},-100.114950279379),])
+#@pytest.mark.parametrize("Basis,Method,Answer",[('6-31G',{"ccdType":"CCD"},-100.114058950498),
+#    ('6-31G',{"ccdType":"CCDQf-1"},-100.114512316484),
+#    ('6-31G',{"ccdType":"CCDQf-2"},-100.114494929544),
+#    ('6-31G',{"ccdType":"CCD(Qf)"},-100.114950279379),])
 
 def test_ConsistentEnergy(Basis,Method,Answer):
-#    if Method=="CCD":
-#        recordedE=-100.114058950498
-#    elif Method=="CCDQf-1":
-#        recordedE=-100.114512316484
-#    elif Method=="CCDQf-2":
-#        recordedE=-100.114494929544
-#    elif Method=="CCD(Qf)":
-#        recordedE=-100.114950279379
 
     atomString = 'H 0 0 0; F 0 0 0.917'
     mol = pyscf.M(
@@ -36,7 +28,8 @@ def test_ConsistentEnergy(Basis,Method,Answer):
 
 
 
-    mf = mol.UHF()
+    #mf = mol.UHF()
+    mf = mol.RHF()
     mf.conv_tol_grad=1E-10
     mf.run()
     
@@ -50,7 +43,8 @@ def test_ConsistentEnergy(Basis,Method,Answer):
     assert diff <= 10**-10
 
 
-#Basis='6-31G'
-#Method={"ccdType":"CCD(Qf)"}
-#test_ConsistentEnergy(Basis,Method)
+Basis='6-31G'
+Method={"ccdTypeSlow":"CCD"}
+Answer=-100.114058950498
+test_ConsistentEnergy(Basis,Method,Answer)
 

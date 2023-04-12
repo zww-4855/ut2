@@ -60,9 +60,6 @@ class StoredInfo():
         else:
             return self.denomInfo[str(dataString)]
 
-'''
-Tries to return occupation number info if the data is present in dictionary, otherwise returns None
-'''
     def get_occInfo(self,dataString):
         try:
             return self.occInfo[str(dataString)]
