@@ -60,8 +60,14 @@ class StoredInfo():
         else:
             return self.denomInfo[str(dataString)]
 
+'''
+Tries to return occupation number info if the data is present in dictionary, otherwise returns None
+'''
     def get_occInfo(self,dataString):
-        return self.occInfo[str(dataString)]
+        try:
+            return self.occInfo[str(dataString)]
+        except:
+            return None
 
     def get_occSliceInfo(self,dataString=None):
         if dataString==None:
@@ -167,8 +173,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
         cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
 
-        print('exiting run_ccd for ccdTypeSlow')
-        sys.exit()
+        #print('exiting run_ccd for ccdTypeSlow')
+        #sys.exit()
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
