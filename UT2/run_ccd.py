@@ -13,25 +13,28 @@ from numpy import linalg
 
 import UT2.kernel as kernel
 
-""" StoredInfo() is a class that holds all data necessary for a CC calculation. Similar in design to C-struct
-
-
-:param occupationInfo: A dictionary containing information regarding the occupation of occupied/virtual orbitals
-
-:param occupationSliceInfo: A dictionary containing information regarding the slicing structure of occupied/virtual orbitals
-
-:param denomInfo: A dictionary containing information on the relevant denominators for any CC
-
-:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods. Also contains information such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
-
-
-:param tamps: A dictionary containing the current iterations T-amplitude
-
-:param resid: A Dictionary containing the current iterations residuals
-
-:return: An archive object that can be queried for the various quantities in question
-"""
 class StoredInfo():
+    """ StoredInfo() is a class that holds all data necessary for a CC calculation. Similar in design to C-struct
+    
+    
+    :param occupationInfo: A dictionary containing information regarding the occupation of occupied/virtual orbitals
+    
+    :param occupationSliceInfo: A dictionary containing information regarding the slicing structure of occupied/virtual orbitals
+    
+    :param denomInfo: A dictionary containing information on the relevant denominators for any CC
+    
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains information such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
+    
+    
+    :param tamps: A dictionary containing the current iterations T-amplitude
+    
+    :param resid: A Dictionary containing the current iterations residuals
+    
+    :return: An archive object that can be queried for the various quantities in question
+    """
+
+
+
     def __init__(self,occupationInfo={},occupationSliceInfo={},denomInfo={},cc_runtype={},tamps={},resid={},integralInfo={}):
         self.occInfo=occupationInfo
         self.occSliceInfo=occupationSliceInfo
@@ -40,45 +43,55 @@ class StoredInfo():
         self.integralInfo=integralInfo
 
     def set_occInfo(self,occInfo):
+        ''' Sets the occupation for occupied/virtual orbitals'''
         self.occInfo=occInfo
 
     def set_occSliceInfo(self,occSliceInfo):
+        ''' Sets the occupation slice information to be used in subsequent CC tensor contractions'''
         self.occSliceInfo=occSliceInfo
 
     def set_denoms(self,denomInfo):
+        ''' Sets the energy denominators'''
         self.denomInfo=denomInfo
 
     def set_cc_runtype(self,cc_runtype):
+        ''' Sets the cc_runtype dictionary that dictates specifics of the CC calculation'''
         self.cc_runtype=cc_runtype
 
     def set_integralInfo(self,integralInfo):
+        ''' Sets the fock matrix and set of 2electron integrals'''
         self.integralInfo=integralInfo
 
     def get_denoms(self,dataString=None):
+        ''' Returns set of energy denominators to turn residual into T amplitudes '''
         if dataString==None:
             return self.denomInfo
         else:
             return self.denomInfo[str(dataString)]
 
     def get_occInfo(self,dataString):
+        ''' Returns occupation info of the occupied/virtual orbitals '''
         try:
             return self.occInfo[str(dataString)]
         except:
             return None
 
     def get_occSliceInfo(self,dataString=None):
+        ''' Returns occupational slice info '''
         if dataString==None:
             return self.occSliceInfo
         else:
             return self.occSliceInfo[str(dataString)]
 
     def get_cc_runtype(self,dataString=None):
+        ''' Returns cc_runtype dictionary '''
         if dataString==None:
             return self.cc_runtype
         else:
             return self.cc_runtype[str(dataString)]
 
     def get_integralInfo(self,elec_spec=None,dataString=None):
+        ''' Returns set of fock and two electron integrals in dictionary '''
         if elec_spec==None:
             return self.integralInfo
 
@@ -89,49 +102,26 @@ class StoredInfo():
             return dic[str(dataString)]
 
 
-#    fock={"faa":faa,"fbb":fbb}
-#    tei={"g_aaaa":g_aaaa,"g_bbbb":g_bbbb,"g_abab":g_abab}
-#    integralInfo={"oei":fock,"tei":tei}
 
-""" ccd_main() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF or UHF orbitals. 
-
-:param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
-:param mol: PySCF object containing info regarding the info regarding the molecule/system in question
-:param orb: Set of - presumably converged - SCF coefficients
-:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods. Also contains such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
-
-
-:return: Returns the correlation and full (combined correlation + mean field) energy
-
-"""
 def ccd_main(mf, mol, orb, cc_runtype):
+    """ ccd_main() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF or UHF orbitals. Serves as a driver for both the spin-integrated and spin-orbital based CC codes.
+    
+    :param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
+    :param mol: PySCF object containing info regarding the info regarding the molecule/system in question
+    :param orb: Set of - presumably converged - SCF coefficients
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
+    
+    
+    :return: Returns the correlation and full (combined correlation + mean field) energy
+    
+    """
+
+
+
+
     storedInfo=StoredInfo()
     cc_runtype.update({"hf_energy":mf.e_tot,"nuclear_energy":mf.energy_nuc()})
-
-    if "ccdType" in cc_runtype: # run all T2 spin-integrt methods
-#        na=storedInfo.occInfo["nocc_aa"]
-#        nb=storedInfo.occInfo["nocc_bb"]
-#        nvirta=storedInfo.occInfo["nvirt_aa"]
-#        nvirtb=storedInfo.occInfo["nvirt_bb"]
-#
-#        occ_aa=storedInfo.occSliceInfo["occ_aa"]
-#        virt_aa=storedInfo.occSliceInfo["virt_aa"]
-#        occ_bb=storedInfo.occSliceInfo["occ_bb"]
-#        virt_bb=storedInfo.occSliceInfo["virt_bb"]
-#
-#
-#        #ints=storedInfo.get_integralInfo
-#        oei=storedInfo.get_integralInfo("oei")
-#        tei=storedInfo.get_integralInfo("tei")
-#        faa=oei["faa"]
-#        fbb=oei["fbb"]
-#        gaaaa=tei["g_aaaa"]
-#        gbbbb=tei["g_bbbb"]
-#        gabab=tei["g_abab"]
-#
-#        eabij_aa=storedInfo.get_denoms("D2aa")
-#        eabij_bb=storedInfo.get_denoms("D2bb")
-#        eabij_ab=storedInfo.get_denoms("D2ab")
+    if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
 
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
         cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
@@ -140,38 +130,13 @@ def ccd_main(mf, mol, orb, cc_runtype):
         t2, currentE, corrE = CCDobj.kernel()
 
 
-#        t2aaaa, t2bbbb, t2abab, currentE,corrE = ccd_kernel(
-#            na,
-#            nb,
-#            nvirta,
-#            nvirtb,
-#            occ_aa,
-#            virt_aa,
-#            occ_bb,
-#            virt_bb,
-#            faa,
-#            fbb,
-#            gaaaa,
-#            gbbbb,
-#            gabab,
-#            eabij_aa,
-#            eabij_bb,
-#            eabij_ab,
-#            hf_energy,
-#            nucE,
-#            15,
-#            4,
-#            cc_runtype,
-#        )
 #    elif "fullCCtype" in cc_runtype: # running >T2 spin-integrated code
 
 
-    elif "ccdTypeSlow" in cc_runtype: # run all T2 spin-orb methods
+    elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
         cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
 
-        #print('exiting run_ccd for ccdTypeSlow')
-        #sys.exit()
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
@@ -537,23 +502,24 @@ def ccd_kernel(
 
 
 
-""" convertSCFinfo() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Harvests relevant information, such as number of alpha/beta electrons, from PySCF mf and mol objects. 
-
-:param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
-:param mol: PySCF object containing info regarding the info regarding the molecule/system in question
-:param orb: Set of - presumably converged - SCF coefficients
-:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods
-
-:param occupationInfo: Dict of number of alpha/beta occupied/virtual orbitals. Callable with keys "nocc_aa", "nocc_bb", "nvirt_aa", and "nirt_bb".
-:param integralInfo: Dict of (transformed) integral information, indexed by "faa", "fbb", "g_aaaa", "g_bbbb", and "g_abab" 
-:param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals, indexed by "occ_aa", "virt_aa", "occ_bb", and "virt_bb"
-:param eps: Dict containing alpha/beta molecular orbital energies, indexed by "eps_aa" or "eps_bb"
-:param denomInfo: Dict containing denominators for all CC methods, indexed by "D2aa", "D2ab", "D2bb", and so on for arbitrary CC method. 
-
-:return: Returns dictionaries of occupationInfo,integralInfo, eps, denomInfo, occupationSliceInfo
-
-"""
 def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
+    """ convertSCFinfo() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Harvests relevant information, such as number of alpha/beta electrons, from PySCF mf and mol objects.
+    
+    :param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
+    :param mol: PySCF object containing info regarding the info regarding the molecule/system in question
+    :param orb: Set of - presumably converged - SCF coefficients
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
+    
+    :param occupationInfo: Dict of number of alpha/beta occupied/virtual orbitals. Callable with keys "nocc_aa", "nocc_bb", "nvirt_aa", and "nirt_bb".
+    :param integralInfo: Dict of (transformed) integral information, indexed by "faa", "fbb", "g_aaaa", "g_bbbb", and "g_abab"
+    :param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals, indexed by "occ_aa", "virt_aa", "occ_bb", and "virt_bb"
+    :param eps: Dict containing alpha/beta molecular orbital energies, indexed by "eps_aa" or "eps_bb"
+    :param denomInfo: Dict containing denominators for all CC methods, indexed by "D2aa", "D2ab", "D2bb", and so on for arbitrary CC method.
+    
+    :return: Returns dictionaries of occupationInfo,integralInfo, eps, denomInfo, occupationSliceInfo
+    
+    """
+
     # Means we are running RHF; must generalize data structs for use in UHF code
     if orb.ndim <= 2:
         h1e = np.array((mf.get_hcore(), mf.get_hcore()))
@@ -602,6 +568,18 @@ def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
     return storedInfo #occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo
 
 def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
+    """
+    Transforms relevant integrals into MO framework. Used specifically in the spin-orbital based code.
+    
+    :param mf: PySCF SCF object
+    :param mol: PySCF Molecule object
+    :param orb: SCF coefficients, obtain from PySCF
+    :param cc_runtype: Dictionary containing calculation-specific information on the CC calculation
+    :param storedInfo: Object storing relevant information, by way of dictionaries, to the CC calculation.
+    
+    :return: Returns an updated storedInfo object, where the integrals and denominator information has been updated. 
+    """
+
     occ = mf.mo_occ
     print('occ:',occ)
     nele = int(sum(occ))
@@ -651,18 +629,20 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     storedInfo.set_integralInfo(integralInfo)
     return storedInfo
 
-""" get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.  
-
-:param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "SOccdtype" will lead to spin-orbital formulations of the T2-based methods
-
-:param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals
-:param eps: Dict containing alpha/beta molecular orbital energies
-
-
-:return: Dictionary of denominator info 
-
-"""
 def get_denoms(cc_runtype,occupationSliceInfo,eps):
+    """ get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.
+    
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
+    
+    :param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals
+    :param eps: Dict containing alpha/beta molecular orbital energies
+    
+    
+    :return: Dictionary of denominator info accessible using keys that looks like "D2aa" for T2 alpha/alpha relevant denoms. This naming nomenclature continues beyond T2 methods as well ie "D4aa" for T4, alpha/alpha specific denoms. 
+    
+    """
+
+
     set_spinIntegrt=set(["ccdType", "fullCCtype"])
     denomInfo={}
     n = np.newaxis
@@ -783,6 +763,21 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
 
 
 def generalUHF(mf, mol, h1e, f, na, nb, orb):
+    """
+    Converts UHF/RHF 1 and 2e- integrals into the MO framework. For use in RHF/UHF codes ONLY.
+    
+    :param mf: PySCF SCF object
+    :param mol: PySCF Molecule object
+    :param h1e: Core Hamiltonian
+    :param f: Fock Matrix
+    :param na: Number of alpha occupied orbitals
+    :param nb: Number of beta occupied orbitals
+    :param orb: SCF coefficients
+     
+    :return: Returns MO-transformed fock and two electron integrals in a dictionary that is accessible using keys "oei" and "tei", respectively. 
+    
+    """
+
     # h1e = mf.get_hcore()
     h1aa = orb[0].T @ h1e[0] @ orb[0]
     h1bb = orb[1].T @ h1e[1] @ orb[1]
@@ -830,6 +825,14 @@ def generalUHF(mf, mol, h1e, f, na, nb, orb):
     return integralInfo #faa, fbb, g_aaaa, g_bbbb, g_abab
 
 def spinorb_from_spatial(one_body_integrals, two_body_integrals):
+    """ Converts one and two electron integrals from spatial MOs to spin orbitals. For use in
+    the Slow CC codes 
+   
+    :param one_body_integrals: List of one body (fock) matrices. 
+    :param two_body_integrals: List of two body (2e- integral) tensors.
+
+    :return: one and two body integrals in spin-orbital framework. """
+
     n_qubits = 2 * one_body_integrals.shape[0]
 
     # Initialize Hamiltonian coefficients.
