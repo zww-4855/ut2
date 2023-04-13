@@ -13,10 +13,10 @@ Test to verify that T2 methods yield consistent energies. Intends to verify that
 '''
 
 
-#@pytest.mark.parametrize("Basis,Method,Answer",[('6-31G',{"ccdType":"CCD"},-100.114058950498),
-#    ('6-31G',{"ccdType":"CCDQf-1"},-100.114512316484),
-#    ('6-31G',{"ccdType":"CCDQf-2"},-100.114494929544),
-#    ('6-31G',{"ccdType":"CCD(Qf)"},-100.114950279379),])
+@pytest.mark.parametrize("Basis,Method,Answer",[('6-31G',{"ccdType":"CCD"},-100.114058950498),
+    ('6-31G',{"ccdType":"CCDQf-1"},-100.114512316484),
+    ('6-31G',{"ccdType":"CCDQf-2"},-100.114494929544),
+    ('6-31G',{"ccdType":"CCD(Qf)"},-100.114950279379),])
 
 def test_ConsistentEnergy(Basis,Method,Answer):
 
@@ -43,8 +43,8 @@ def test_ConsistentEnergy(Basis,Method,Answer):
     assert diff <= 10**-10
 
 
-Basis='6-31G'
-Method={"ccdTypeSlow":"CCD"}
-Answer=-100.114058950498
-test_ConsistentEnergy(Basis,Method,Answer)
+#Basis='6-31G'
+#Method={"ccdTypeSlow":"CCD"}
+#Answer=-100.114058950498
+#test_ConsistentEnergy(Basis,Method,Answer)
 
