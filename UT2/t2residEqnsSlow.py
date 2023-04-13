@@ -1,6 +1,6 @@
 from numpy import einsum
-import UT2.modify_T2resid_T4Qf1 as qf1
-import UT2.modify_T2resid_T4Qf2 as qf2
+import UT2.modify_T2resid_T4Qf1Slow as qf1
+import UT2.modify_T2resid_T4Qf2Slow as qf2
 import numpy as np
 
 def residMain(ccd_kernel):
@@ -11,8 +11,6 @@ def residMain(ccd_kernel):
     virtaa=va
 
     t2_aaaa=ccd_kernel.tamps["t2aa"]
-    t2_bbbb=ccd_kernel.tamps["t2bb"]
-    t2_abab=ccd_kernel.tamps["t2ab"]
 
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
@@ -31,28 +29,22 @@ def residMain(ccd_kernel):
     resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
 
 
-#    if ccd_kernel.cc_type == "CCDQf-1":
-#
-#        qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
-#        qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
-#        qf1_abab = qf1.residQf1_abab(g, l2, t2, occaa, virtaa)
-#        resid_aaaa += 0.5 * qf1_aaaa
-#        resid_bbbb += 0.5 * qf1_bbbb
-#        resid_abab += 0.5 * qf1_abab
-#
-#    elif ccd_kernel.cc_type == "CCDQf-2":
-#
-#        qf1_aaaa = qf1.residQf1_aaaa(g, l2, t2, occaa, virtaa)
-#        qf1_bbbb = qf1.residQf1_bbbb(g, l2, t2, occaa, virtaa)
-#        qf1_abab = qf1.residQf1_abab(g, l2, t2, occaa, virtaa)
-#
-#        qf2_aaaa = qf2.residQf2_aaaa(g, l2, t2, occaa, virtaa)
-#        qf2_bbbb = qf2.residQf2_bbbb(g, l2, t2, occaa, virtaa)
-#        qf2_abab = qf2.residQf2_abab(g, l2, t2, occaa, virtaa)
-#
-#        resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
-#        resid_bbbb += 0.5 * qf1_bbbb + (1.0 / 6.0) * qf2_bbbb
-#        resid_abab += 0.5 * qf1_abab + (1.0 / 6.0) * qf2_abab
+    if ccd_kernel.cc_type == "CCDQf-1":
+        l2dic=ccd_kernel.get_l2amps()
+        l2=l2dic["l2aa"]
+
+        qf1_aaaa = qf1.residQf1_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
+        resid_aaaa += 0.5 * qf1_aaaa
+
+    elif ccd_kernel.cc_type == "CCDQf-2":
+        l2dic=ccd_kernel.get_l2amps()
+        l2=l2dic["l2aa"]
+
+        qf1_aaaa = qf1.residQf1_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
+
+        qf2_aaaa = qf2.residQf2_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
+
+        resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
 
 
     resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa

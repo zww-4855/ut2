@@ -44,7 +44,7 @@ def test_ConsistentEnergy(Basis,Method,Answer):
 
 
 Basis='6-31G'
-Method={"ccdTypeSlow":"CCD(Qf)"}
-Answer=-100.114950279379 #-100.114058950498
+Method={"ccdTypeSlow":"CCDQf-2"}
+Answer=-100.114494929544 #-100.114058950498
 test_ConsistentEnergy(Basis,Method,Answer)
 
