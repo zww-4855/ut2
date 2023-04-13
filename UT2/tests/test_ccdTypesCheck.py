@@ -13,7 +13,10 @@ Test to verify that existing spin-integrated T2 methods yield equivalent answers
 '''
 
 
-@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"ccdType":"CCD"},{"ccdTypeSlow":"CCD"})])
+@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"ccdType":"CCD"},{"ccdTypeSlow":"CCD"}),
+                            ('6-31G', {"ccdType":"CCD(Qf)"},{"ccdTypeSlow":"CCD(Qf)"}),
+                            ('6-31G', {"ccdType":"CCDQf-1"},{"ccdTypeSlow":"CCDQf-1"}),
+                            ('6-31G', {"ccdType":"CCDQf-2"},{"ccdTypeSlow":"CCDQf-2"}),])
 
 def test_ccdTypesCheck(Basis,Method1,Method2):
 
