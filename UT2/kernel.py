@@ -108,13 +108,13 @@ class UltT2CC():
 
     def finalize(self,nucE,current_energy,hf_energy):
         print("\n\n\n")
-        width=15
-        precision=10
         print("************************************************************")
         print("************************************************************\n\n")
         print('Total SCF energy: \t {: 20.12f}'.format(hf_energy))
         print('Nuclear repulsion energy: \t {: 20.12f}'.format(nucE))
         print(f"\n \t**** Results for {self.cc_type}: ****")
+
+
         if self.cc_type != "CCD(Qf)":
             corrE=nucE+current_energy-hf_energy
             print('Correlation energy: \t {: 20.12f}'.format(corrE))
@@ -123,11 +123,19 @@ class UltT2CC():
 
         if self.cc_type == "CCD(Qf)":
             corrE=nucE+current_energy-hf_energy
-            qf_corr = t2energy.ccd_energyMain(self,get_perturbCorr=True)
+
+            if self.cc_label == "ccdType":
+                qf_corr = t2energy.ccd_energyMain(self,get_perturbCorr=True)
+
+            elif self.cc_label == "ccdTypeSlow":
+                qf_corr = t2energySlow.ccd_energyMain(self, get_perturbCorr=True)
+
             print("CCD correlation contribution: \t {: 20.12f}".format(corrE))
             print("(Qf) perturbative energy correction: \t {: 20.12f}".format(qf_corr)) 
             tfinalEnergy=current_energy+nucE+qf_corr
             corrE=qf_corr
+
+
         self.tfinalEnergy=tfinalEnergy
         self.corrE=corrE
         print('Final CC energy: \t {: 20.12f}'.format(self.tfinalEnergy))
