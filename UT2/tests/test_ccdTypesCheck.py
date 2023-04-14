@@ -8,9 +8,6 @@ from pyscf import ao2mo
 import itertools
 from UT2.run_ccd import * 
 
-''' 
-Test to verify that existing spin-integrated T2 methods yield equivalent answers to their spin-orbital-based analogs.
-'''
 
 
 @pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"ccdType":"CCD"},{"ccdTypeSlow":"CCD"}),
@@ -19,6 +16,9 @@ Test to verify that existing spin-integrated T2 methods yield equivalent answers
                             ('6-31G', {"ccdType":"CCDQf-2"},{"ccdTypeSlow":"CCDQf-2"}),])
 
 def test_ccdTypesCheck(Basis,Method1,Method2):
+    '''
+    Test to verify that existing spin-integrated T2 methods yield equivalent answers to their spin-orbital-based analogs.
+    '''
 
     value=[]    
     for i in range(2):
