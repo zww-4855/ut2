@@ -18,19 +18,31 @@ from numpy import linalg
 
 
 def get_calc(storedInfo,calc_list):
+    """
+    Determines which among the "ccdType", "ccdTypeSlow", and "fullCCtype" tags are being used in the UT2 call. 
+    
+    :param storedInfo:
+    :param calc_list: list of possible calculation labels
+    
+    :return: Returns the calculation label, and CC calculation type
+    
+    """
     for calcType in calc_list:
         try:
             return calcType, storedInfo.get_cc_runtype(calcType)
         except:
             continue
-"""
-UltT2CC class contains all the necessary routines to setup and run the various CC implementations. Current implementation is tested for spin-integrated version of T2 methods only. 
-
-:param storedInfo: A dictionary-based Class containing all the pertinent background information required to setup the CC calculation. See StoredInfo() class in run_ccd.py for further information.
 
 
-"""    
 class UltT2CC():
+    """
+    UltT2CC class contains all the necessary routines to setup and run the various CC implementations. Current implementation is tested for spin-integrated and spin-orbital T2 methods only.
+    
+    :param storedInfo: A dictionary-based Class containing all the pertinent background information required to setup the CC calculation. See StoredInfo() class in run_ccd.py for further information.
+    
+    :return: Returns the correlation and total energy. If needed, the converged
+    set of T2 amplitudes can also be returned
+    """
     def __init__(self,storedInfo):
         self.calc_list=["ccdType","ccdTypeSlow","fullCCtype"]
         self.tamps={}
@@ -53,6 +65,7 @@ class UltT2CC():
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
         print(self.nvrta)
+
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
             self.tamps = {"t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab}
@@ -89,12 +102,22 @@ class UltT2CC():
 
 
     def set_tamps(self,tamps_spin,label=None):
+        """
+        Updates the set of T amplitudes. Options for specific amplitudes (ie T2aa) or simply stores a dictionary of T amplitude information.
+        
+        :param tamps_spin: dictionary that stores requiste T amplitudes
+        :param label: Optional argument that, if present, dictates which specific ampltiudes are going to be reset
+        
+        """
         if label==None:
             self.tamps=tamps_spin
         else:
             self.tamps[str(label)]=tamps_spin
 
     def set_resid(self, resid_spin,label=None):
+        """
+        Updates dictionary of residual equations using dictionary using same philosophy as set_tamps method
+        """
         if label==None:
             self.resid=resid_spin
         else:
@@ -107,6 +130,10 @@ class UltT2CC():
         return self.l2
 
     def finalize(self,nucE,current_energy,hf_energy):
+        """
+        Handles final printing when CC iterations are converged. Also extract perturbative corrections based on converged T ampltitudes (ie CCD(Qf) ) if necessary
+        
+        """
         print("\n\n\n")
         print("************************************************************")
         print("************************************************************\n\n")
@@ -143,6 +170,12 @@ class UltT2CC():
         return self
 
     def kernel(self):
+        """
+        Driver routine that iterates the CC equations. Handles all background tasks such as setting intermediate T amplitudes, etc, for the spin-integrated and spin-orbital, T2-based methods. No functionality built for higher order methods that incorporate amplitudes other than T2. 
+        
+        :return: Returns set of converged T amplitudes, as well as the correlation and final total energy
+        
+        """
         print("    ==> ", self.cc_type, " amplitude equations <==")
         print("")
         print("     Iter              Corr. Energy                 |dE|    ")
