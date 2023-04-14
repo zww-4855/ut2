@@ -4,6 +4,13 @@ import UT2.modify_T2resid_T4Qf2Slow as qf2
 import numpy as np
 
 def residMain(ccd_kernel):
+    """
+    Drives the determination of the spin-orbital, CCD-based residual equations. This includes calls to subroutines that serve to augment the baseline CCDresidual equations using higher order clusters (ie CCDQf-1, CCDQf-2, etc), if requested by the user.
+
+    :param ccd_kernel: Object of the UltT2CC class.
+
+    :return: Updated Object of the UltT2CC class, equipped with new T amps and residuals
+    """
     sliceInfo=ccd_kernel.sliceInfo
     oa=sliceInfo["occ_aa"]
     va=sliceInfo["virt_aa"]

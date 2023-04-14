@@ -4,6 +4,15 @@ from numpy import einsum
 import UT2.modify_T2energy_pertQf as pertQf
 
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
+    """
+    Drives the determination of spin-integrated, CCD energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections. 
+    
+    :param ccd_kernel: Object of the UltT2CC class. 
+    :param get_perturbCorr: Boolean flag to determine if perturbative corrections to the energy are called for
+    
+    :return: Returns either the baseline CCD energy, or factorization based perturbative energy corrections 
+    """
+
     sliceInfo=ccd_kernel.sliceInfo
     oa=sliceInfo["occ_aa"]
     ob=sliceInfo["occ_bb"]
@@ -38,6 +47,10 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
 
 def ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
 
+    """
+    Exclusively handles the calculation of the CCD-like energy, given set of integrals and T amplitudes.
+    
+    """
     #    < 0 | e(-T) H e(T) | 0> :
 
     o = oa

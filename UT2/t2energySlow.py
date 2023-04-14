@@ -4,6 +4,14 @@ from numpy import einsum
 import UT2.modify_T2energy_pertQfSlow as pertQf
 
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
+    """
+    Drives the determination of spin-orbital, CCD energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections.
+
+    :param ccd_kernel: Object of the UltT2CC class.
+    :param get_perturbCorr: Boolean flag to determine if perturbative corrections to the energy are called for
+
+    :return: Returns either the baseline CCD energy, or factorization based perturbative energy corrections
+    """
     sliceInfo=ccd_kernel.sliceInfo
     oa=sliceInfo["occ_aa"]
     va=sliceInfo["virt_aa"]
@@ -23,7 +31,10 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         return ccdEnery(t2_aaaa,fock,tei,oa,va) 
 
 def ccdEnery(t2,f,g,o,v):
-  
+    """
+    Exclusively handles the calculation of the CCD-like energy, given set of integrals and T amplitudes.
+
+    """
     #         1.0000 f(i,i)
     energy =  1.000000000000000 * einsum('ii', f[o, o])
     #        -0.5000 <j,i||j,i>
