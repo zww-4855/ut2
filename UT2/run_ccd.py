@@ -23,7 +23,7 @@ class StoredInfo():
     
     :param denomInfo: A dictionary containing information on the relevant denominators for any CC
     
-    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains information such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCType" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains information such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
     
     
     :param tamps: A dictionary containing the current iterations T-amplitude
@@ -109,7 +109,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
     :param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
     :param mol: PySCF object containing info regarding the info regarding the molecule/system in question
     :param orb: Set of - presumably converged - SCF coefficients
-    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCType" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods. Also contains such as convergence criteria, number of diis vectors & length, type of CC calculation, and max. number of iterations allowed in a given CC calculation
     
     
     :return: Returns the correlation and full (combined correlation + mean field) energy
@@ -130,8 +130,11 @@ def ccd_main(mf, mol, orb, cc_runtype):
         t2, currentE, corrE = CCDobj.kernel()
 
 
-#    elif "fullCCtype" in cc_runtype: # running >T2 spin-integrated code
-
+    elif "fullCCType" in cc_runtype: # running >T2 spin-integrated code
+        storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
+        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":None, "diis_start_cycle":None})
+        CCDobj=kernel.UltT2CC(storedInfo)
+        t2, currentE, corrE = CCDobj.kernel()
 
     elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
@@ -508,7 +511,7 @@ def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
     :param mf: A PySCF SCF object, containing pertinent info regarding SCF calculation
     :param mol: PySCF object containing info regarding the info regarding the molecule/system in question
     :param orb: Set of - presumably converged - SCF coefficients
-    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCType" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
     
     :param occupationInfo: Dict of number of alpha/beta occupied/virtual orbitals. Callable with keys "nocc_aa", "nocc_bb", "nvirt_aa", and "nirt_bb".
     :param integralInfo: Dict of (transformed) integral information, indexed by "faa", "fbb", "g_aaaa", "g_bbbb", and "g_abab"
@@ -632,7 +635,7 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
 def get_denoms(cc_runtype,occupationSliceInfo,eps):
     """ get_denoms() is a general function that performs the background tasks necessary for a general CC calculation to take place, based on either RHF, UHF, or spin-orbital formalisms. Constructs the denominators based on the CC theory being used.
     
-    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCtype" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
+    :param cc_runtype: Dictionary specifying information regarding the correlation calculation that is requested. Has two callable options; "ccdType" which refers to any of the T2-based methods that are implemented, and "fullCCType" which calls one of CCSDT, CCSDTQ, or CCSDTQf calculations. A third option, "ccdTypeSlow" will lead to spin-orbital formulations of the T2-based methods
     
     :param occupationSliceInfo: Dict containing slices for the occupied/virtual alpha/beta orbitals
     :param eps: Dict containing alpha/beta molecular orbital energies
@@ -643,7 +646,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
     """
 
 
-    set_spinIntegrt=set(["ccdType", "fullCCtype"])
+    set_spinIntegrt=set(["ccdType", "fullCCType"])
     denomInfo={}
     n = np.newaxis
     if "ccdTypeSlow" in cc_runtype: # spin-orb formalism
@@ -652,7 +655,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
         epsaa=eps['eps_aa']
         print('inside two')
 
-    elif "ccdType" in cc_runtype: # spin-integrated formalisms
+    elif "ccdType" in cc_runtype or "fullCCType" in cc_runtype: # spin-integrated formalisms
         print('inside one')
         virt_aa=occupationSliceInfo["virt_aa"]
         virt_bb=occupationSliceInfo["virt_bb"]
@@ -683,7 +686,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
     )
     denomInfo.update({"D2aa":eabij_aa})
 
-    if "fullCCtype" in cc_runtype: 
+    if "fullCCType" in cc_runtype: 
    # Singles Denom
         eai_aa = 1.0/ (-epsaa[virt_aa,n] + epsaa[n,occ_aa])
         eai_bb = 1.0/ (-epsbb[virt_bb,n] + epsaa[n,occ_bb])
@@ -710,16 +713,26 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
             + epsbb[n, n, n, n, n, occ_bb]
         )
     
-        eabcijk_ab =1.0/ (
+        eabcijk_aab =1.0/ (
+            -epsaa[virt_aa, n, n, n, n, n]
+            - epsbb[n, virt_aa, n, n, n, n]
+            - epsaa[n, n,virt_bb, n, n, n]
+            + epsaa[n, n, n, occ_aa, n, n]
+            + epsbb[n, n, n, n, occ_aa, n]
+            + epsaa[n, n, n, n, n, occ_bb]
+        )
+
+        eabcijk_abb =1.0/ (
             -epsaa[virt_aa, n, n, n, n, n]
             - epsbb[n, virt_bb, n, n, n, n]
-            - epsaa[n, n,virt_aa, n, n, n]
+            - epsaa[n, n,virt_bb, n, n, n]
             + epsaa[n, n, n, occ_aa, n, n]
             + epsbb[n, n, n, n, occ_bb, n]
-            + epsaa[n, n, n, n, n, occ_aa]
+            + epsaa[n, n, n, n, n, occ_bb]
         )
         denomInfo.update({"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
-                          "D3aa":eabcijk_aa,"D3bb":eabcijk_bb,"D3ab":eabcijk_ab})
+                          "D3aaa":eabcijk_aa,"D3bbb":eabcijk_bb,"D3aab":eabcijk_aab,
+                          "D3abb":eabcijk_abb})
         if "CCSDTQ" in cc_runtype.values():
             eabcdijkl_aa = 1.0/ (
                 -epsaa[virt_aa,n,n, n, n, n, n, n]

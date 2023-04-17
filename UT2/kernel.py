@@ -4,9 +4,12 @@ from pyscf import ao2mo
 from pyscf import cc
 import UT2.t2energy as t2energy
 import UT2.t2residEqns as t2residEqns
+import UT2.fullCCenergy as fullCCenergy
 
 import UT2.t2energySlow as t2energySlow
 import UT2.t2residEqnsSlow as t2residEqnsSlow
+import UT2.fullCCresidEqns as fullCCresidEqns
+
 
 import sys
 
@@ -19,7 +22,7 @@ from numpy import linalg
 
 def get_calc(storedInfo,calc_list):
     """
-    Determines which among the "ccdType", "ccdTypeSlow", and "fullCCtype" tags are being used in the UT2 call. 
+    Determines which among the "ccdType", "ccdTypeSlow", and "fullCCType" tags are being used in the UT2 call. 
     
     :param storedInfo:
     :param calc_list: list of possible calculation labels
@@ -44,7 +47,7 @@ class UltT2CC():
     set of T2 amplitudes can also be returned
     """
     def __init__(self,storedInfo):
-        self.calc_list=["ccdType","ccdTypeSlow","fullCCtype"]
+        self.calc_list=["ccdType","ccdTypeSlow","fullCCType"]
         self.tamps={}
         self.resid={}
         self.max_iter=storedInfo.get_cc_runtype("max_iter")
@@ -77,20 +80,24 @@ class UltT2CC():
                 self.diis_update = DIIS(self.diis_size, start_iter=self.diis_start_cycle)
                 self.old_vec = np.hstack((self.tamps["t2aa"].flatten(), self.tamps["t2bb"].flatten(), self.tamps["t2ab"].flatten()))
      
-        elif "fullCCtype" in storedInfo.get_cc_runtype(None):
-            t1aa,t1bb,resT1aa,resT1bb=np.zeros((nvrta,nocca)) 
-            t2aa,t2bb,t2ab,resT2aa,resT2bb,resT2ab=np.zeros((nvrta,nvrta,nocca,nocca))
-            t3aa,t3bb,t3ab,resT3aa,resT3bb,resT3ab=np.zeros((nvrta,nvrta,nvrta,nocca,nocca,nocca))
+        elif "fullCCType" in storedInfo.get_cc_runtype(None):
+            nvrta=self.nvrta
+            nocca=self.nocca
+            t1aa=t1bb=resT1aa=resT1bb=np.zeros((nvrta,nocca)) 
+            t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((nvrta,nvrta,nocca,nocca))
+            t3aaa=t3bbb=t3aab=t3abb=resT3aaa=resT3bbb=resT3aab=resT3abb=np.zeros((nvrta,nvrta,nvrta,nocca,nocca,nocca))
+            
+
             tamps={"t1aa":t1aa,"t1bb":t1bb,
                    "t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab,
-                   "t3aa":t3aa,"t3bb":t3bb,"t3ab":t3ab}
+                   "t3aaa":t3aaa,"t3bbb":t3bbb,"t3aab":t3aab,"t3abb":t3abb}
 
             resid={"resT1aa":resT1aa,"resT1bb":resT1bb,
                    "resT2aa":resT2aa,"resT2bb":resT2bb,"resT2ab":resT2ab,
-                   "resT3aa":resT3aa,"resT3bb":resT3bb,"resT3ab":resT3ab}
+                   "resT3aaa":resT3aaa,"resT3bbb":resT3bbb,"resT3aab":resT3aab,"resT3abb":resT3abb}
 
-            if storedInfo.get_cc_runtype("fullCCtype") == "CCSDTQ":
-                t4aa,t4bb,t4ab,resT4aa,resT4bb,resT4ab=np.zeros((nvrta,nvrta,nvrta,nvrta,nocca,nocca,nocca,nocca))
+            if storedInfo.get_cc_runtype("fullCCType") == "CCSDTQ":
+                t4aa=t4bb=t4ab=resT4aa=resT4bb=resT4ab=np.zeros((nvrta,nvrta,nvrta,nvrta,nocca,nocca,nocca,nocca))
                 tamps.update({"t4aa":t4aa,"t4bb":t4bb,"t4ab":t4ab})       
                 resid.update({"resT4aa":resT4aa,"resT4bb":resT4bb,"resT4ab":resT4ab})
 
@@ -187,6 +194,9 @@ class UltT2CC():
         elif self.cc_label =="ccdTypeSlow":
             old_energy = t2energySlow.ccd_energyMain(self) 
 
+        elif self.cc_label == "fullCCType":
+            old_energy = fullCCenergy.fullCC_energyMain(self) 
+
 
         for idx in range(self.max_iter):
             self.set_l2amps()
@@ -197,6 +207,9 @@ class UltT2CC():
                 t2residEqns.residMain(self)
             elif self.cc_label == "ccdTypeSlow":
                 t2residEqnsSlow.residMain(self)
+
+            elif self.cc_label == "fullCCType":
+                fullCCresidEqns.residMain(self)
 
 
         # diis update
@@ -232,7 +245,8 @@ class UltT2CC():
                 current_energy = t2energy.ccd_energyMain(self)
             elif self.cc_label =="ccdTypeSlow":
                 current_energy = t2energySlow.ccd_energyMain(self)
-
+            elif self.cc_label == "fullCCType":
+                current_energy = fullCCenergy.fullCC_energyMain(self)
 
 #            current_energy = t2energy.ccd_energyMain(self)
             delta_e = np.abs(old_energy - current_energy)
