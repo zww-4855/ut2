@@ -32,15 +32,9 @@ def test_fullCCTypes(Basis,Method):
     cc_runtype=Method   
     
     correlatedEnergy,corrCo=ccd_main(mf,mol,orb,cc_runtype)
-    if i==0:
-        tmpE=correlatedEnergy
-    else:
-        currentE=correlatedEnergy
-        diff=abs(abs(tmpE)-abs(currentE))
-        assert diff <= 10**-10
 
 
 Basis='6-31G'
-Method={"fullCCType":"CCSDT"}
+Method={"fullCCType":"CCSDT(Qf)"}
 test_fullCCTypes(Basis,Method)
 

@@ -155,7 +155,7 @@ class UltT2CC():
             corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
-        if self.cc_type == "CCD(Qf)":
+        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCSDT(Qf)":
             corrE=nucE+current_energy-hf_energy
 
             if self.cc_label == "ccdType":
@@ -163,6 +163,10 @@ class UltT2CC():
 
             elif self.cc_label == "ccdTypeSlow":
                 qf_corr = t2energySlow.ccd_energyMain(self, get_perturbCorr=True)
+
+            elif self.cc_label == "fullCCType":
+                qf_corr = fullCCenergy.fullCC_energyMain(self, get_perturbCorr=True)
+
 
             print("CCD correlation contribution: \t {: 20.12f}".format(corrE))
             print("(Qf) perturbative energy correction: \t {: 20.12f}".format(qf_corr)) 
