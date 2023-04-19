@@ -130,8 +130,24 @@ class UltT2CC():
         else:
             self.resid[str(label)]=resid_spin
 
-    def set_l2amps(self):
-        self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
+    def set_l2amps(self,firstOrderT2=None):
+        if firstOrderT2 == None:
+            self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
+        else:
+            sliceInfo=self.sliceInfo
+            o=sliceInfo["occ_aa"]
+            v=sliceInfo["virt_aa"]
+            print('running first order T2 for L2')
+            tei=self.ints["tei"]
+            g_aaaa=tei["g_aaaa"][v,v,o,o]*self.denom["D2aa"]
+            g_bbbb=tei["g_bbbb"][v,v,o,o]*self.denom["D2bb"]
+            g_abab=tei["g_abab"][v,v,o,o]*self.denom["D2ab"]
+          
+            t2aaDag=g_aaaa.transpose(2,3,0,1)
+            t2bbDag=g_bbbb.transpose(2,3,0,1)
+            t2abDag=g_abab.transpose(2,3,0,1)
+ 
+            self.l2={"l2aa":t2aaDag,"l2bb":t2bbDag,"l2ab":t2abDag}
 
     def get_l2amps(self):
         return self.l2

@@ -13,7 +13,7 @@ export PATH=/apps/shared/bartlett/ACESII-2.14.0/bin:$PATH
 #/blue/bartlett/z.windom/incBasisFxnACES/ACESII-2.13.0/bin/:$PATH
 export TESTROOT=$SLURM_SUBMIT_DIR
 
-xjoda >> out.ou
+xjoda > out.ou
 xvmol >> out.ou
 xvmol2ja >> out.ou
 xvscf >> out.ou
