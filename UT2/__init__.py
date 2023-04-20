@@ -2,6 +2,6 @@
 
 # Add imports here
 from .ut2 import *
-
+from .t2energySlow import *
 
 from ._version import __version__

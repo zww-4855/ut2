@@ -23,7 +23,19 @@ from numpy import linalg
 def get_calc(storedInfo,calc_list):
     """
     Determines which among the "ccdType", "ccdTypeSlow", and "fullCCType" tags are being used in the UT2 call. 
-    
+    Parameters
+    ----------
+    storedInfo : bool, Optional, default: True
+        Set whether or not to display who the quote is from.
+
+    calc_list : list of calculation types
+
+    Returns
+    -------
+    calcType : str
+        Compiled string including quote and optional attribution.
+    cc_runtype : str, runtype of coupled cluster calc 
+
     :param storedInfo:
     :param calc_list: list of possible calculation labels
     
@@ -171,7 +183,7 @@ class UltT2CC():
             corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
-        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCSDT(Qf)":
+        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)":
             corrE=nucE+current_energy-hf_energy
 
             if self.cc_label == "ccdType":

@@ -6,6 +6,16 @@ import UT2.modify_T2energy_pertQf as pertQf
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     """
     Drives the determination of spin-integrated, CCD energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections. 
+
+    Parameters
+    ----------
+    with_attribution : bool, Optional, default: True
+        Set whether or not to display who the quote is from.
+
+    Returns
+    -------
+    quote : str
+        Compiled string including quote and optional attribution.
     
     :param ccd_kernel: Object of the UltT2CC class. 
     :param get_perturbCorr: Boolean flag to determine if perturbative corrections to the energy are called for
@@ -91,5 +101,4 @@ def ccd_energy_with_spin(t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, 
     energy +=  0.250000000000000 * einsum('jiab,abji', g_bbbb[o, o, v, v], t2_bbbb)
 
     return energy
-
 
