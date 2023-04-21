@@ -1,3 +1,6 @@
+"""
+Drives the spin-orbital based CCD/T2 energy calculations
+"""
 import numpy as np
 from numpy import einsum
 
@@ -28,12 +31,19 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         qf_corr=pertQf.energy_pertQf(tei,l2dic["l2aa"],t2_aaaa,oa,va)
         return qf_corr
     else:    
-        return ccdEnery(t2_aaaa,fock,tei,oa,va) 
+        return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
 
-def ccdEnery(t2,f,g,o,v):
+def ccdEnergy(t2,f,g,o,v):
     """
     Exclusively handles the calculation of the CCD-like energy, given set of integrals and T amplitudes.
 
+    :param t2: T2 tensor
+    :param f: Fock matrix
+    :param g: 2 electron integral tensor
+    :param o: occupied orbital slice
+    :param v: virtual orbital slice
+
+    :return: CCD energy
     """
     #         1.0000 f(i,i)
     energy =  1.000000000000000 * einsum('ii', f[o, o])

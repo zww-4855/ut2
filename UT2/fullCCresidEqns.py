@@ -1,3 +1,6 @@
+"""
+Drives the solution of - up to - the CCSDT, spin-integrated, residual equations, as well as various truncations - like CCD - by zeroing out the pertinent amplitude tensors
+"""
 from numpy import einsum
 import UT2.modify_T2resid_T4Qf1 as qf1
 import UT2.modify_T2resid_T4Qf2 as qf2

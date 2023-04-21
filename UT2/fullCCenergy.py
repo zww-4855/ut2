@@ -1,15 +1,18 @@
+""" 
+Drives the determination of - up to - the CCSDT quality (spin-integrated) energies. Also handles any added perturbative correction
+"""
 import numpy as np
 from numpy import einsum
 
 
 def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
     """
-    Drives the determination of spin-integrated, CCD energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections. 
+    Drives the determination of spin-integrated, CCSDT energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections. 
     
     :param ccd_kernel: Object of the UltT2CC class. 
     :param get_perturbCorr: Boolean flag to determine if perturbative corrections to the energy are called for
     
-    :return: Returns either the baseline CCD energy, or factorization based perturbative energy corrections 
+    :return: Returns either the baseline CCSDT energy, or factorization based perturbative energy corrections 
     """
 
     sliceInfo=ccd_kernel.sliceInfo

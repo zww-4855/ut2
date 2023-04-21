@@ -1,3 +1,7 @@
+"""
+Handles the iterative solution of the CC residual equations
+"""
+
 import numpy as np
 import pyscf
 from pyscf import ao2mo
