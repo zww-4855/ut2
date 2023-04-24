@@ -127,7 +127,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
     if "max_iter" not in cc_runtype:
         cc_runtype.update({"max_iter":75})
 
-
+    if "dump_tamps" not in cc_runtype:
+        cc_runtype.update({"dump_tamps":False})
 
 
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods

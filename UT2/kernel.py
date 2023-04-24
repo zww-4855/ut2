@@ -70,6 +70,7 @@ class UltT2CC():
         self.stopping_eps=storedInfo.get_cc_runtype("stopping_eps")
         self.diis_size=storedInfo.get_cc_runtype("diis_size")
         self.diis_start_cycle=storedInfo.get_cc_runtype("diis_start_cycle")
+        self.dump_tamps=storedInfo.get_cc_runtype("dump_tamps")
 
         self.cc_label, self.cc_type=get_calc(storedInfo,self.calc_list) #storedInfo.get_cc_runtype("ccdType")
         self.nucE=storedInfo.get_cc_runtype("nuclear_energy")
@@ -300,6 +301,11 @@ class UltT2CC():
             if idx > self.max_iter: 
                 raise ValueError("CC iterations did not converge")
 
+        if self.dump_tamps == True:
+            import pickle
+            with open('tamps.pickle', 'wb') as handle:
+                pickle.dump(self.tamps, handle)
+ 
         self.finalize(self.nucE,current_energy,self.hf_energy)
  
         return self.tamps,self.tfinalEnergy, self.corrE
