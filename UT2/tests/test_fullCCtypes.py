@@ -9,7 +9,7 @@ import itertools
 from UT2.run_ccd import * 
 
 
-#@pytest.mark.parametrize("Basis,Method,Answer",[('cc-pvdz',{"fullCCType":"CCSDT(Qf*)"}, -100.230561268464),])
+@pytest.mark.parametrize("Basis,Method,Answer",[('cc-pvdz',{"fullCCType":"CCSDT(Qf)"}, -100.230561268464),])
 
 def test_fullCCTypes(Basis,Method,Answer):
     '''
@@ -37,7 +37,7 @@ def test_fullCCTypes(Basis,Method,Answer):
     diff=abs(abs(Answer)-abs(correlatedEnergy))
     assert diff <= 10**-8
 
-Basis='cc-pvdz'
-Method={"fullCCType":"CCSDT(Qf*)"}
-test_fullCCTypes(Basis,Method,-100.230561268464)
+#Basis='cc-pvdz'
+#Method={"fullCCType":"CCSDT(Qf*)"}
+#test_fullCCTypes(Basis,Method,-100.230561268464)
 
