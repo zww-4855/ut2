@@ -121,6 +121,15 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
     storedInfo=StoredInfo()
     cc_runtype.update({"hf_energy":mf.e_tot,"nuclear_energy":mf.energy_nuc()})
+    if "stopping_eps" not in cc_runtype:
+        cc_runtype.update({"stopping_eps":10**-10})
+
+    if "max_iter" not in cc_runtype:
+        cc_runtype.update({"max_iter":75})
+
+
+
+
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
 
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
@@ -132,13 +141,20 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
     elif "fullCCType" in cc_runtype: # running >T2 spin-integrated code
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
-        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":None, "diis_start_cycle":None})
+
+        if "stopping_eps" not in cc_runtype:
+            cc_runtype.update({"stopping_eps":10**-10})
+
+        if "max_iter" not in cc_runtype:
+            cc_runtype.update({"max_iter":75})
+        
+        cc_runtype.update({"diis_size":None, "diis_start_cycle":None})
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
     elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
-        cc_runtype.update({"max_iter":75,"stopping_eps":10**-10, "diis_size":10, "diis_start_cycle":1})
+        cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
 
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
