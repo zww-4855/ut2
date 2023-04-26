@@ -5,7 +5,9 @@ UT2
 [![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/UT2/branch/main/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/UT2/branch/main)
 
 
-A suite of coupled-cluster methods designed to converge towards an "ultimate" T2 method
+UT2: A suite of coupled-cluster methods designed to converge towards an "ultimate" T2 method
+
+
 
 ### Copyright
 

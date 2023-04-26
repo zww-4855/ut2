@@ -1,0 +1,87 @@
+import numpy as np
+from numpy import einsum
+
+def ccsdt_t2_aaaa_residual_Qf(t4_aaaaaaaa, t4_bbbbbbbb, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
+    
+    #    < 0 | i* j* b a e(-T) H e(T) | 0> :
+    
+    o = oa
+    v = va
+    
+    #	  0.2500 <l,k||c,d>_aaaa*t4_aaaaaaaa(c,d,a,b,i,j,l,k)
+    doubles_res =  0.250000000000000 * einsum('lkcd,cdabijlk->abij', g_aaaa[o, o, v, v], t4_aaaaaaaa[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <l,k||c,d>_abab*t4_aaabaaab(c,b,a,d,i,j,l,k)
+    doubles_res += -0.250000000000000 * einsum('lkcd,cbadijlk->abij', g_abab[o, o, v, v], t4_aaabaaab[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <k,l||c,d>_abab*t4_aaabaaab(c,b,a,d,i,j,k,l)
+    doubles_res += -0.250000000000000 * einsum('klcd,cbadijkl->abij', g_abab[o, o, v, v], t4_aaabaaab[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <l,k||d,c>_abab*t4_aaabaaab(b,d,a,c,i,j,l,k)
+    doubles_res +=  0.250000000000000 * einsum('lkdc,bdacijlk->abij', g_abab[o, o, v, v], t4_aaabaaab[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <k,l||d,c>_abab*t4_aaabaaab(b,d,a,c,i,j,k,l)
+    doubles_res +=  0.250000000000000 * einsum('kldc,bdacijkl->abij', g_abab[o, o, v, v], t4_aaabaaab[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <l,k||c,d>_bbbb*t4_aabbaabb(a,b,c,d,i,j,l,k)
+    doubles_res +=  0.250000000000000 * einsum('lkcd,abcdijlk->abij', g_bbbb[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    return doubles_res
+
+
+def ccsdt_t2_bbbb_residual_Qf(t4_aaaaaaaa, t4_bbbbbbbb, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
+    
+    #    < 0 | i* j* b a e(-T) H e(T) | 0> :
+    
+    o = oa
+    v = va
+    
+    #	  0.2500 <l,k||c,d>_aaaa*t4_aabbaabb(c,d,a,b,l,k,i,j)
+    doubles_res =  0.250000000000000 * einsum('lkcd,cdablkij->abij', g_aaaa[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <l,k||c,d>_abab*t4_abbbabbb(c,d,a,b,l,j,i,k)
+    doubles_res += -0.250000000000000 * einsum('lkcd,cdabljik->abij', g_abab[o, o, v, v], t4_abbbabbb[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <k,l||c,d>_abab*t4_abbbabbb(c,d,a,b,k,j,l,i)
+    doubles_res +=  0.250000000000000 * einsum('klcd,cdabkjli->abij', g_abab[o, o, v, v], t4_abbbabbb[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <l,k||d,c>_abab*t4_abbbabbb(d,c,a,b,l,j,i,k)
+    doubles_res += -0.250000000000000 * einsum('lkdc,dcabljik->abij', g_abab[o, o, v, v], t4_abbbabbb[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <k,l||d,c>_abab*t4_abbbabbb(d,c,a,b,k,j,l,i)
+    doubles_res +=  0.250000000000000 * einsum('kldc,dcabkjli->abij', g_abab[o, o, v, v], t4_abbbabbb[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <l,k||c,d>_bbbb*t4_bbbbbbbb(c,d,a,b,i,j,l,k)
+    doubles_res +=  0.250000000000000 * einsum('lkcd,cdabijlk->abij', g_bbbb[o, o, v, v], t4_bbbbbbbb[:, :, :, :, :, :, :, :])
+    
+    return doubles_res
+
+
+
+def ccsdt_t2_abab_residual_Qf(t4_aaaaaaaa, t4_bbbbbbbb, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb):
+    
+    #    < 0 | i* j* b a e(-T) H e(T) | 0> :
+    
+    o = oa
+    v = va
+    
+    #	 -0.2500 <l,k||c,d>_aaaa*t4_aaabaaab(c,d,a,b,i,k,l,j)
+    doubles_res = -0.250000000000000 * einsum('lkcd,cdabiklj->abij', g_aaaa[o, o, v, v], t4_aaabaaab[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <l,k||c,d>_abab*t4_aabbaabb(c,a,d,b,i,l,j,k)
+    doubles_res +=  0.250000000000000 * einsum('lkcd,cadbiljk->abij', g_abab[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <k,l||c,d>_abab*t4_aabbaabb(c,a,d,b,i,k,l,j)
+    doubles_res += -0.250000000000000 * einsum('klcd,cadbiklj->abij', g_abab[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <l,k||d,c>_abab*t4_aabbaabb(a,d,c,b,i,l,j,k)
+    doubles_res += -0.250000000000000 * einsum('lkdc,adcbiljk->abij', g_abab[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    #	  0.2500 <k,l||d,c>_abab*t4_aabbaabb(a,d,c,b,i,k,l,j)
+    doubles_res +=  0.250000000000000 * einsum('kldc,adcbiklj->abij', g_abab[o, o, v, v], t4_aabbaabb[:, :, :, :, :, :, :, :])
+    
+    #	 -0.2500 <l,k||c,d>_bbbb*t4_abbbabbb(a,d,c,b,i,j,l,k)
+    doubles_res += -0.250000000000000 * einsum('lkcd,adcbijlk->abij', g_bbbb[o, o, v, v], t4_abbbabbb[:, :, :, :, :, :, :, :])
+    
+    return doubles_res
+
