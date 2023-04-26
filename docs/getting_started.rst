@@ -1,5 +1,9 @@
 Getting Started
 ===============
+.. toctree::
+      :maxdepth: 1 
+   :caption: Getting Started:
+
 
 All UT2 routines rely upon a prior PySCF self-consistent field (SCF) calculation. Unless specifically mentioned otherwise, UT2 can be used in conjunction with RHF or UHF orbitals. After installation of PySCF, this can be accomplished via the following generic script:
 
@@ -22,4 +26,5 @@ After the UT2 module has been loaded, the converged set of SCF orbitals have to 
 >>> correlatedEnergy,corrCo=ccd_main(mf,mol,orb,cc_runtype)
 
 The return values are the final, correlated energy and the correlation correction to the SCF energy, respectively.
+
 

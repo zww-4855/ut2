@@ -7,10 +7,23 @@ Welcome to UT2's documentation!
 =========================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :numbered: 
+   :caption: Overview:
+
+   intro_UT2_overview
+   install_ut2
+   intro_citing_UT2
+   intro_contact_information
+
+.. toctree::
+   :maxdepth: 2 
+   :numbered:
    :caption: Contents:
 
    getting_started
+   calc_setup
+   reusing_tamps
    api
 
 
