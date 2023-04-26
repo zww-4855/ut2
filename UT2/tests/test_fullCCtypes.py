@@ -9,11 +9,13 @@ import itertools
 from UT2.run_ccd import * 
 
 
-@pytest.mark.parametrize("Basis,Method,Answer",[('cc-pvdz',{"fullCCType":"CCSDT(Qf)"}, -100.230561268464),])
+@pytest.mark.parametrize("Basis,Method,Answer",[('cc-pvdz',{"fullCCType":"CCSDT(Qf)"}, -100.230561268464),
+                        ('cc-pvdz',{"fullCCType":"CCSDTQf-1"},-100.230561268464),
+                        ('cc-pvdz',{"fullCCType":"CCSDT"},-100.230179771926)])
 
 def test_fullCCTypes(Basis,Method,Answer):
     '''
-    Test to verify CCSDT and CCSDT(Qf) give ACES2 quality results
+    Test to verify CCSDT and CCSDT(Qf) give ACES2 quality results. Also verifies CCSDTQf-1 is within .002 mHa of CCSDT(Qf), as per Monika and Stan's paper. 
     '''
     atomString = 'H 0 0 0; F 0 0 1.73287873154'
     value=[]
