@@ -5,6 +5,8 @@ import numpy as np
 from numpy import einsum
 
 import UT2.modify_T2energy_pertQfSlow as pertQf
+import UT2.modify_T2resid_T4Qf1Slow as t4resids
+import UT2.antisym_t4resids as antisym
 
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     """
@@ -24,11 +26,27 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 
-
+    print(np.shape(tei),np.shape(t2_aaaa),oa,va)
+    print(np.shape(tei[oa,oa,oa,oa]))
 
     if get_perturbCorr==True:
         l2dic=ccd_kernel.get_l2amps()
-        qf_corr=pertQf.energy_pertQf(tei,l2dic["l2aa"],t2_aaaa,oa,va)
+        #qf_corr=pertQf.energy_pertQf(tei,l2dic["l2aa"],t2_aaaa,oa,va) ZWW 4/26
+        nocc=ccd_kernel.nocca
+        nvirt=ccd_kernel.nvrta
+        t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
+        t4_resid=t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
+
+        if ccd_kernel.cc_type == "CCD(Qf*)":
+            print('doing Qf*')
+            t4_resid+=t4resids.unsym_residQf2(tei,t2_aaaa,oa,va,nocc,nvirt)
+        # antisymmeterize the T4 residual:
+        antisym_t4_resid = antisym.antisym_t4_residual(t4_resid,nocc,nvirt)
+        antisym_t4_resid =  (1.0/32.0)*(antisym_t4_resid.transpose(4,5,6,7,0,1,2,3))
+        t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
+        t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
+
+        qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
         return qf_corr
     else:    
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
