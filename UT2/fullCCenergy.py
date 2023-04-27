@@ -54,6 +54,10 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
         l2_bbbb=l2dic["l2bb"]
         l2_abab=l2dic["l2ab"]
 
+
+        l2_aaaa=ccd_kernel.tamps["t2aa"].transpose(2,3,0,1)
+        l2_bbbb=ccd_kernel.tamps["t2bb"].transpose(2,3,0,1)
+        l2_abab=ccd_kernel.tamps["t2ab"].transpose(2,3,0,1)
         t1_aa=t1_bb=t4_aaaaaaaa=t4_bbbbbbbb=t4_aaabaaab=t4_aabbaabb=t4_abbbabbb=None
 
         t4_aaaa=ccsdtq_t4_aaaaaaaa_residual(t1_aa, t1_bb,
@@ -93,13 +97,22 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
         t2_dag_bb=g_bbbb[v,v,o,o]*ccd_kernel.denom["D2bb"]
         t2_dagger_bb=t2_dag_bb.transpose(2,3,0,1)
 
-        if ccd_kernel.cc_type == "CCSDT(Qf*)":
+        qf_corr=energy_pertQf(t2_dagger_aa,t2_dagger_ab,t2_dagger_bb,t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,l2_aaaa,l2_bbbb,l2_abab,o,v)
+
+
+        print('b4 adding in Qf* energy:', qf_corr)
+
+
+        if ccd_kernel.cc_type == "CCSDT(Qf*)" or ccd_kernel.cc_type == "CCD(Qf*)":
             print('inside residual T2 cubed')
+            print('norm b4:',np.linalg.norm(t4_aaaa))
             t4_aaaa += ccsdtqT2cubed_t4_aaaaaaaa_residual(t1_aa, t1_bb,
                                 t2_aaaa, t2_bbbb, t2_abab,
                                 t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
                                 t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
                                 f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+
+            print('norm after:',np.linalg.norm(t4_aaaa))
             t4_aaab += ccsdtqT2cubed_t4_aaabaaab_residual(t1_aa, t1_bb,
                                 t2_aaaa, t2_bbbb, t2_abab,
                                 t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
@@ -122,7 +135,7 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
                                 f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
    
         qf_corr=energy_pertQf(t2_dagger_aa,t2_dagger_ab,t2_dagger_bb,t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,l2_aaaa,l2_bbbb,l2_abab,o,v)
-
+        print('after calc qf:', qf_corr)
         return qf_corr*0.50000000000000000
     else:    
         return ccsd_energy_with_spin(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)

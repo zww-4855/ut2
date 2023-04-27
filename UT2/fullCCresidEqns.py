@@ -140,7 +140,7 @@ def residMain(ccd_kernel):
     resid_t3_aab+=np.reciprocal(D3aab)*t3_aabaab
     resid_t3_abb+=np.reciprocal(D3abb)*t3_abbabb
 
-    if ccd_kernel.cc_type == "CCD(Qf)":
+    if ccd_kernel.cc_type == "CCD(Qf)" or ccd_kernel.cc_type == "CCD(Qf*)":
         resid_t1_aa=resid_t1_bb=0.0*resid_t1_aa
         resid_t3_aaa=resid_t3_bbb=resid_t3_abb=resid_t3_aab=0.0*resid_t3_aaa
 

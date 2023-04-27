@@ -188,7 +188,7 @@ class UltT2CC():
             corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
-        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)":
+        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCD(Qf*)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)":
             corrE=nucE+current_energy-hf_energy
 
             if self.cc_label == "ccdType":

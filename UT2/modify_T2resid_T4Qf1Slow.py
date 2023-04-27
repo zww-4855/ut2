@@ -19,15 +19,14 @@ def unsym_residQf1(g,t2_aa,o,v,nocc,nvir):
 
 
 def unsym_residQf2(g,t2_aa,o,v,nocc,nvir):
-    t={}
-    t.update({"oovv":t2_aa.transpose(2,3,0,1)})
-    v={}
-    v.update({"oooo":g[o,o,o,o],"vvvv":g[v,v,v,v],"ovov":g[ovov]})
-    # contributions to the residual
-    Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
-    roooovvvv += -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t["oovv"],t["oovv"],t["oovv"],v["vvoo"],optimize="optimal")
-    roooovvvv += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t["oovv"],t["oovv"],t["oovv"],v["vvoo"],optimize="optimal")
-    roooovvvv += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t["oovv"],t["oovv"],t["oovv"],v["vvoo"],optimize="optimal")
+
+    t=t2_aa.transpose(2,3,0,1)
+    g_ov=g[v,v,o,o]
+
+   
+    Roooovvvv = -0.031250000 * np.einsum("imab,jncd,klef,efmn",t,t,t,g_ov)
+    Roooovvvv += 0.250000000 * np.einsum("imab,jkce,lndf,efmn",t,t,t,g_ov)
+    Roooovvvv += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn",t,t,t,g_ov)
     return Roooovvvv
 
 
