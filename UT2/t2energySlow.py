@@ -30,28 +30,70 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     print(np.shape(tei[oa,oa,oa,oa]))
 
     if get_perturbCorr==True:
+        import UT2.outfileA as qf_partA
+        import UT2.outfileB as qf_partB
+        import UT2.outfileC as qf_partC
+        import UT2.outfileBresid as qf_residB
+
+        import UT2.modify_T2resid_T4Qf1Slow as t4resids
         l2dic=ccd_kernel.get_l2amps()
+        l2=t2_aaaa.transpose(2,3,0,1)
+        g2=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
+        g2=g2.transpose(2,3,0,1)
+        t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
+        t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
+        newest_t4_resid=antisym.permute_t4oo_resid(tei[oa,oa,oa,oa],t2_aaaa,None,True)
+        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
+        newest_t4_resid+=antisym.permute_t4vv_resid(tei[va,va,va,va],t2_aaaa,None,True)
+        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
+        newest_t4_resid-=antisym.permute_t4ov_resid(tei[oa,va,oa,va],t2_aaaa,None,True)
+        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
+
+        new_t4resid=qf_partA.partA(tei,t2_aaaa,oa,va)
+
+        new_t4resid+=qf_partB.partB(tei,t2_aaaa,oa,va)
+        custom_oo_qf=einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,qf_partB.partB(tei,t2_aaaa,oa,va))        
+        print('custom oo qf energy:', custom_oo_qf)
+        new_t4resid-=qf_partC.partC(tei,t2_aaaa,oa,va)
+
+
 #        qf_corr=pertQf.energy_pertQf(tei,l2dic["l2aa"],t2_aaaa,oa,va) #ZWW 4/26
         nocc=ccd_kernel.nocca
         nvirt=ccd_kernel.nvrta
         t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
-        t4_resid=t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
+        t4_resid=antisym.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
 
         if ccd_kernel.cc_type == "CCD(Qf*)":
             print('doing Qf*')
             t4_resid+=t4resids.unsym_residQf2(tei,t2_aaaa,oa,va,nocc,nvirt)
 
 #        # antisymmeterize the T4 residual:
-        antisym_t4_resid = antisym.antisym_t4_residual(t4_resid,nocc,nvirt)
-        antisym_t4_resid =  antisym_t4_resid.transpose(4,5,6,7,0,1,2,3)
+        #antisym_t4_resid = antisym.antisym_t4_residual(t4_resid,nocc,nvirt)
+        antisym_t4_resid = t4_resid.transpose(4,5,6,7,0,1,2,3)
         t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
 
         qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
         print('full qf:',qf_corr)
-        return qf_corr*(1.0/32.0)
+        import UT2.pdagq_t4resid as pdag_t4
+        t4_resid_oo,t4_resid=pdag_t4.t4_test_residual(t2_aaaa,tei,oa,va)
+        qf_corr=0.062500000000000 * einsum('lkcd,ijba,cdbaijlk', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t4_resid[:, :, :, :, :, :, :, :])
+        qf_corr_oo=einsum('lkcd,ijba,cdbaijlk', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t4_resid_oo[:, :, :, :, :, :, :, :])
+        print('pdagger q qf :',qf_corr,qf_corr*(1.0/2.0))
+        print('pdagger q qf only oo:', qf_corr_oo,qf_corr_oo*(1./32.))
+        my_testcorr=einsum('lkcd,ijba,cdbaijlk',t2_FO_dagger, t2_aaaa.transpose(2,3,0,1),new_t4resid[:,:,:,:,:,:,:,:])
+        print('5/2 test of qf corr e: ',my_testcorr,my_testcorr*(1./32.))
+        return qf_corr*(1.0/2.0)
+    elif ccd_kernel.cc_type == "pCCD":
+        return ccdEnergy(t2_aaaa,fock,tei,oa,va)
     else:    
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
+
+def pccdEnergy(t2,f,g,o,v):
+    energy = einsum('ii',f[o,o])
+    energy += -0.50000*einsum('jiji', g[o, o, o, o])
+    energy += 0.250000*einsum('iiaa,aaii',g[o,o,v,v],t2)
+    return energy
 
 def ccdEnergy(t2,f,g,o,v):
     """
@@ -71,6 +113,6 @@ def ccdEnergy(t2,f,g,o,v):
     energy += -0.500000000000000 * einsum('jiji', g[o, o, o, o])
     #         0.2500 <j,i||a,b>*t2(a,b,j,i)
     energy +=  0.250000000000000 * einsum('jiab,abji', g[o, o, v, v], t2)
-    
+
     return energy
 

@@ -16,6 +16,8 @@ def residMain(ccd_kernel):
     va=sliceInfo["virt_aa"]
     occaa=oa
     virtaa=va
+    nocc=ccd_kernel.nocca
+    nvirt=ccd_kernel.nvrta
 
     t2_aaaa=ccd_kernel.tamps["t2aa"]
 
@@ -32,8 +34,18 @@ def residMain(ccd_kernel):
  #   t2={"aaaa":t2_aaaa,"bbbb":t2_bbbb,"abab":t2_abab}
  #   l2dic=ccd_kernel.get_l2amps()
  #   l2={"aaaa":l2dic["l2aa"],"bbbb":l2dic["l2bb"],"abab":l2dic["l2ab"]}
-    
-    resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
+    if ccd_kernel.cc_type=="pCCD":
+        #resid_aaaa=pccd_t2resid(t2_aaaa, fock, tei, oa, va)
+        resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
+        if np.linalg.norm(ccd_kernel.tamps['t2aa']) > 10E-8:
+            tmp=np.zeros((nvirt,nvirt,nocc,nocc ))
+            for a in range(nvirt):
+                for i in range(nocc):
+                    tmp[a,a,i,i]=resid_aaaa[a,a,i,i]
+                    print('resid shape',resid_aaaa.shape)
+            resid_aaaa=tmp
+    else: 
+        resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
 
 
     if ccd_kernel.cc_type == "CCDQf-1":
@@ -65,6 +77,23 @@ def residMain(ccd_kernel):
 
     return ccd_kernel
 
+def pccd_t2resid(t2, f, g, o, v):
+    doubles_res=einsum('aaii',g[v,v,o,o])
+    doubles_res+=einsum('aa,aaii',f[v,v],t2)
+    doubles_res-=einsum('ii,aaii',f[o,o],t2)
+ 
+    doubles_res-=einsum('jjaa,aajj,aaii',g[o,o,v,v],t2,t2)
+    doubles_res-=einsum('iibb,bbii,aaii',g[o,o,v,v],t2,t2)
+
+    reduced=2.0*einsum('iaia',g[o,v,o,v]) - einsum('iaai',g[o,v,o,v]) - einsum('iiaa,aaii',g[o,v,o,v],t2)
+
+    doubles_res-=reduced*t2 #einsum('aaii,aaii',reduced,t2)
+    
+
+    doubles_res+=einsum('bbaa,bbii',g[v,v,v,v],t2)
+    doubles_res+=einsum('iijj,aajj',g[o,o,o,o],t2)
+    doubles_res+=einsum("bbjj,aajj,bbii",g[v,o,v,o],t2,t2)
+    return doubles_res
 
 def ccd_t2residual(t2,f,g,o,v):
     #        -1.0000 P(i,j)f(k,j)*t2(a,b,i,k)
