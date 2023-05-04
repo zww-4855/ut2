@@ -42,24 +42,49 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         g2=g2.transpose(2,3,0,1)
         t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
-        newest_t4_resid=antisym.permute_t4oo_resid(tei[oa,oa,oa,oa],t2_aaaa,None,True)
-        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
-        newest_t4_resid+=antisym.permute_t4vv_resid(tei[va,va,va,va],t2_aaaa,None,True)
-        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
-        newest_t4_resid-=antisym.permute_t4ov_resid(tei[oa,va,oa,va],t2_aaaa,None,True)
-        print('newest Zack oo qf energy:',einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,newest_t4_resid))
 
-        new_t4resid=qf_partA.partA(tei,t2_aaaa,oa,va)
-
-        new_t4resid+=qf_partB.partB(tei,t2_aaaa,oa,va)
-        custom_oo_qf=einsum('ijab,klcd,abcdijkl',t2_aaaa.transpose(2,3,0,1),t2_FO_dagger,qf_partB.partB(tei,t2_aaaa,oa,va))        
-        print('custom oo qf energy:', custom_oo_qf)
-        new_t4resid-=qf_partC.partC(tei,t2_aaaa,oa,va)
-
-
-#        qf_corr=pertQf.energy_pertQf(tei,l2dic["l2aa"],t2_aaaa,oa,va) #ZWW 4/26
         nocc=ccd_kernel.nocca
         nvirt=ccd_kernel.nvrta
+
+        
+        def is_antisymmetric(tensor):
+            # Get the shape of the tensor
+            shape = tensor.shape
+            
+            # Check if the tensor is rectangular
+            if len(shape) != 8:
+                raise ValueError('Tensor must have 8 indices')
+            for i in range(4):
+                if shape[i] != shape[i+4]:
+                    raise ValueError('Tensor must be rectangular')
+            
+            # Check if the tensor is antisymmetric
+            for i in range(shape[0]):
+                for j in range(i+1, shape[1]):
+                    for k in range(shape[2]):
+                        for l in range(k+1, shape[3]):
+                            for m in range(shape[4]):
+                                for n in range(m+1, shape[5]):
+                                    for p in range(shape[6]):
+                                        for q in range(p+1, shape[7]):
+                                            if not np.allclose(tensor[i,j,k,l,m,n,p,q],tensor[j,i,k,l,n,m,p,q]):#tensor[i,j,k,l,m,n,p,q] != -tensor[j,i,k,l,n,m,p,q]:
+                                                return False,[i,j,k,l,m,n,p,q],tensor[i,j,k,l,m,n,p,q],tensor[j,i,k,l,n,m,p,q]
+            
+            return True
+
+
+        Roovv=np.einsum('abim,cdnl,mnjk->abcdijkl',t2_aaaa,t2_aaaa,tei[oa,oa,oa,oa])
+        print('test antisymmetry:', Roovv[0,1,2,3,0,1,2,3],Roovv[1,0,2,3,0,1,2,3],Roovv[1,0,2,3,0,1,3,2])
+        antiRes=antisym.permute_t4oo_resid(Roovv)
+        print('testing antisymmetry:',is_antisymmetric(antiRes),antiRes.shape,t2_FO_dagger.shape)
+        print('5/4 ZWW oo energy:', np.einsum('ijab,klcd,abcdijkl->',t2_FO_dagger,t2_aaaa.transpose(2,3,0,1),antiRes))
+        print('test antisymmetry:', antiRes[0,1,2,3,0,1,2,3],antiRes[0,1,2,3,0,1,3,2],Roovv[0,1,2,3,1,0,3,2])
+        tvv=np.einsum('aeij,fdkl,bcef->abcdijkl',t2_aaaa,t2_aaaa,tei[va,va,va,va])
+        anti_tvv=antisym.permute_t4vv_resid(tvv)
+        print('testing antisymmetry of tvv:',is_antisymmetric(anti_tvv))
+        e_vv=np.einsum('ijab,klcd,abcdijkl',t2_FO_dagger,t2_aaaa.transpose(2,3,0,1),anti_tvv)
+        print('e_vv:',e_vv)
+
         t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
         t4_resid=antisym.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
 
@@ -74,7 +99,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
 
         qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
-        print('full qf:',qf_corr)
+        print('full qf: COMPLETE ZWW 5/4',qf_corr,qf_corr/32.0)
         import UT2.pdagq_t4resid as pdag_t4
         t4_resid_oo,t4_resid=pdag_t4.t4_test_residual(t2_aaaa,tei,oa,va)
         qf_corr=0.062500000000000 * einsum('lkcd,ijba,cdbaijlk', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t4_resid[:, :, :, :, :, :, :, :])

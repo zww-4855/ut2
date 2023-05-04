@@ -1,5 +1,543 @@
 import numpy as np
+def is_antisymmetric(tensor):
+    # Get the shape of the tensor
+    shape = tensor.shape
 
+    # Check if the tensor is rectangular
+    if len(shape) != 8:
+        raise ValueError('Tensor must have 8 indices')
+    for i in range(4):
+        if shape[i] != shape[i+4]:
+            raise ValueError('Tensor must be rectangular')
+
+    # Check if the tensor is antisymmetric
+    for i in range(shape[0]):
+        for j in range(i+1, shape[1]):
+            for k in range(shape[2]):
+                for l in range(k+1, shape[3]):
+                    for m in range(shape[4]):
+                        for n in range(m+1, shape[5]):
+                            for p in range(shape[6]):
+                                for q in range(p+1, shape[7]):
+                                    if not np.allclose(tensor[i,j,k,l,m,n,p,q],tensor[j,i,k,l,n,m,p,q]):#tensor[i,j,k,l,m,n,p,q] != -tensor[j,i,k,l,n,m,p,q]:
+                                        return False,[i,j,k,l,m,n,p,q],tensor[i,j,k,l,m,n,p,q],tensor[j,i,k,l,n,m,p,q]
+
+    return True
+
+
+def unsym_residQf1(g,t2_aa,o,v,nocc,nvir,g2=None):
+    # contributions to the residual
+    t=t2_aa.transpose(2,3,0,1)
+ 
+    g_occ=g[o,o,o,o]
+    g_ov=g[o,v,o,v]
+    g_virt=g[v,v,v,v]
+    print(t.shape,g_occ.shape,t2_aa.shape)
+    Roooovvvv = -0.062500000 * np.einsum("imab,jncd,klmn->ijklabcd",t,t,g_occ)
+    print(Roooovvvv.shape)
+    Roooovvvv=Roooovvvv.transpose(4,5,6,7,0,1,2,3)
+    Roooovvvv = permute_t4oo_resid(Roooovvvv)
+    print(is_antisymmetric(Roooovvvv))
+    Roooovvvv=Roooovvvv.transpose(4,5,6,7,0,1,2,3)
+
+
+    if g2 is not None:
+        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
+
+    tmpRoooovvvv = -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,g_ov)
+    tmpRoooovvvv=tmpRoooovvvv.transpose(4,5,6,7,0,1,2,3)
+    tmpRoooovvvv = permute_t4ov_resid(g_ov,t,tmpRoooovvvv)
+    tmpRoooovvvv=tmpRoooovvvv.transpose(4,5,6,7,0,1,2,3)
+    Roooovvvv += tmpRoooovvvv
+
+    if g2 is not None:
+        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
+
+    tmp2Roooovvvv = -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,g_virt)
+    tmp2Roooovvvv=tmp2Roooovvvv.transpose(4,5,6,7,0,1,2,3)
+    tmp2Roooovvvv = permute_t4vv_resid(tmp2Roooovvvv)
+    tmp2Roooovvvv=tmp2Roooovvvv.transpose(4,5,6,7,0,1,2,3)
+    Roooovvvv+=tmp2Roooovvvv
+    if g2 is not None:
+        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
+
+
+    # try permuting again in different order:
+    Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    t=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    Roooovvvv += -0.062500000 * np.einsum("imab,jncd,klmn->ijklabcd",t,t,v_oo,optimize="optimal")
+    Roooovvvv += -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,v_vo,optimize="optimal")
+    Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
+    Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
+    print('test E:', np.einsum('ijklabcd,ijab,klcd->',Roooovvvv,g2,t2_aa))
+    return Roooovvvv
+
+
+def test_permute_t4ov(t4_ov):
+    antisym_t4 = 1 * np.einsum("ijklabcd->ijklabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijklacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijkladbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkladcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklcbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijklcbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijkldbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkldbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijkldcba", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkabcd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijlkabdc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijlkacbd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkacdb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkadbc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijlkadcb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijlkcbad", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkcbda", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkdbac", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijlkdbca", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijlkdcba", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjabcd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjabdc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjacbd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjacdb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjadbc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjadcb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjcbad", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjcbda", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjdbac", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjdbca", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjdcba", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jiklabcd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jiklabdc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jiklacbd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jiklacdb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jikladbc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jikladcb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jiklcbad", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jiklcbda", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jikldbac", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jikldbca", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jikldcba", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkiabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jlkiabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jlkiacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkiacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkiadbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jlkiadcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jlkicbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkicbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkidbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->jlkidbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->jlkidcba", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilabcd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilabdc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilacbd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilacdb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjiladbc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjiladcb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilcbad", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilcbda", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjildbac", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjildbca", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjildcba", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjliabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjliabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjliacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjliacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjliadbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjliadcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjlicbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjlicbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjlidbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjlidbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjlidcba", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijadbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijadcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijcbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijcbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijdbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijdbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijdcba", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->likjabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->likjacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjadbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->likjadcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->likjcbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjcbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjdbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->likjdbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->likjdcba", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikabcd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljikabdc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljikacbd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikacdb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikadbc", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljikadcb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljikcbad", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikcbda", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikdbac", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljikdbca", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljikdcba", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkiabcd", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiabdc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiacbd", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkiacdb", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkiadbc", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiadcb", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkicbad", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkicbda", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkidbac", t4_ov)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkidbca", t4_ov)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkidcba", t4_ov)
+    return antisym_t4
+
+
+def test_permute_t4vv(t4_vv):
+    antisym_t4 = 1 * np.einsum("ijklabcd->ijklabcd", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklacbd", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkladcb", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklcbad", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijklcdab", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkldbca", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ikjlabcd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjlacbd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjladcb", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjlcbad", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ikjlcdab", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjldbca", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjabcd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjacbd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjadcb", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjcbad", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjcdab", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjdbca", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilabcd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilacbd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjiladcb", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilcbad", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilcdab", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjildbca", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkiabcd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiacbd", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiadcb", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkicbad", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkicdab", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkidbca", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->lkjiabcd", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->lkjiacbd", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->lkjiadcb", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->lkjicbad", t4_vv)
+    antisym_t4 += 1 * np.einsum("ijklabcd->lkjicdab", t4_vv)
+    antisym_t4 += -1 * np.einsum("ijklabcd->lkjidbca", t4_vv)
+    return antisym_t4
+
+def test_permute_t4oo(t4_oo):
+    antisym_t4 = 1 * np.einsum("ijklabcd->ijklabcd", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklacbd", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkladcb", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijklcbad", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ijkldbca", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ijkldcba", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ikjlabcd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjlacbd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjladcb", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjlcbad", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ikjldbca", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ikjldcba", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjabcd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjacbd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjadcb", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjcbad", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ilkjdbca", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ilkjdcba", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjilabcd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilacbd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjiladcb", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjilcbad", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->kjildbca", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->kjildcba", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijabcd", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijacbd", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijadcb", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijcbad", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->klijdbca", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->klijdcba", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkiabcd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiacbd", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkiadcb", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkicbad", t4_oo)
+    antisym_t4 += 1 * np.einsum("ijklabcd->ljkidbca", t4_oo)
+    antisym_t4 += -1 * np.einsum("ijklabcd->ljkidcba", t4_oo)
+    return antisym_t4
+
+def permute_t4ov_resid(g_ov,t,residual=None,do_custom=False):
+    if do_custom==True:
+        t4_ov=np.einsum("aeij,bcmk,mdle->abcdijkl",t,t,g_ov)
+    else:
+        t4_ov=residual
+        
+    antisym_t4 = 1 * np.einsum("abcdijkl->abcdijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdiklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdiljk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdilkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdkjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdkjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdljki", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdcijkl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcijlk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcikjl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdciklj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdciljk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcilkj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdckjil", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdckjli", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdcklij", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdcljik", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcljki", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbijkl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbijlk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbikjl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbiklj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbiljk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbilkj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbkjil", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbkjli", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbklij", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbljik", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbljki", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdijkl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdijlk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdikjl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdiklj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdiljk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdilkj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdkjil", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdkjli", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdklij", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdljik", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badcijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badciklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badciljk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcilkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->badckjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badckjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badcklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->badcljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcaijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bdcaijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bdcaikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcaiklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcailjk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bdcailkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bdcakjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcakjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcaklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->bdcaljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->bdcaljki", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadijkl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadijlk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadikjl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadiklj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadiljk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadilkj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadkjil", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadkjli", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadklij", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadljik", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdaijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbdaijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbdaikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdaiklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdailjk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbdailkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbdakjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdakjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdaklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbdaljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbdaljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabiklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabiljk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabilkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabkjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabkjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dacbijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dacbikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbiklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbiljk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dacbilkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dacbkjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbkjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dacbljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dacbljki", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbacijkl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbacijlk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbacikjl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbaciklj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbaciljk", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbacilkj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbackjil", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbackjli", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbacklij", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbacljik", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbacljki", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcaijkl", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcaijlk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcaikjl", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcaiklj", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcailjk", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcailkj", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcakjil", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcakjli", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcaklij", t4_ov)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcaljik", t4_ov)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcaljki", t4_ov)
+    return antisym_t4
+
+def permute_t4vv_resid(t4_vv):
+    antisym_t4 = 1 * np.einsum("abcdijkl->abcdijkl", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdikjl", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdilkj", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdkjil", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdklij", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdljki", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdcijkl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcikjl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcilkj", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdckjil", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->abdcklij", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->abdcljki", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbijkl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbikjl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbilkj", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbkjil", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbklij", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbljki", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdijkl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdikjl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdilkj", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdkjil", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->bacdklij", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->bacdljki", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->badcijkl", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcikjl", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcilkj", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->badckjil", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->badcklij", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->badcljki", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadijkl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadikjl", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadilkj", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadkjil", t4_vv)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadklij", t4_vv)
+    
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadljki", t4_vv)
+    
+    return antisym_t4
+
+def permute_t4oo_resid(t4_oo):
+    antisym_t4 = 1 * np.einsum("abcdijkl->abcdijkl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdijlk", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdilkj", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdjikl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->abcdjilk", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->abcdkjil", t4_oo)
+
+    antisym_t4 += -1 * np.einsum("abcdijkl->acbdijkl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->acbdijlk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->acbdilkj", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->acbdjikl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->acbdjilk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->acbdkjil", t4_oo)
+
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbijkl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbijlk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbilkj", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbjikl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->adcbjilk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->adcbkjil", t4_oo)
+    
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadijkl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadijlk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadilkj", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadjikl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cbadjilk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cbadkjil", t4_oo)
+
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabijkl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabijlk", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabilkj", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabjikl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->cdabjilk", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->cdabkjil", t4_oo)
+
+
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcaijkl", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcaijlk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcailkj", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcajikl", t4_oo)
+    antisym_t4 += -1 * np.einsum("abcdijkl->dbcajilk", t4_oo)
+    antisym_t4 += 1 * np.einsum("abcdijkl->dbcakjil", t4_oo)
+    return antisym_t4
 def antisym_t4_residual(Roooovvvv,nocc,nvirt):
     Roooovvvv_anti = np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
 
