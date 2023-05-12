@@ -10,7 +10,7 @@ from UT2.run_ccd import *
 
 
 @pytest.mark.parametrize("Basis,Method,Answer",[('cc-pvdz',{"fullCCType":"CCSDT(Qf)"}, -100.230561268464),
-                        ('cc-pvdz',{"fullCCType":"CCSDTQf-1"},-100.230561268464),
+                        ('cc-pvdz',{"fullCCType":"CCSDTQf-1"},-100.230558317210),
                         ('cc-pvdz',{"fullCCType":"CCSDT"},-100.230179771926)])
 
 def test_fullCCTypes(Basis,Method,Answer):

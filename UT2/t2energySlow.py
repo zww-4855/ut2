@@ -30,11 +30,6 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     print(np.shape(tei[oa,oa,oa,oa]))
 
     if get_perturbCorr==True:
-        import UT2.outfileA as qf_partA
-        import UT2.outfileB as qf_partB
-        import UT2.outfileC as qf_partC
-        import UT2.outfileBresid as qf_residB
-
         import UT2.modify_T2resid_T4Qf1Slow as t4resids
         l2dic=ccd_kernel.get_l2amps()
         l2=t2_aaaa.transpose(2,3,0,1)
@@ -46,37 +41,18 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         nocc=ccd_kernel.nocca
         nvirt=ccd_kernel.nvrta
 
-        
-
-        Roovv=np.einsum('abim,cdnl,mnjk->abcdijkl',t2_aaaa,t2_aaaa,tei[oa,oa,oa,oa])
-        antiRes=antisym.permute_t4oo_resid(Roovv)
-        print('5/4 ZWW oo energy:', np.einsum('ijab,klcd,abcdijkl->',t2_FO_dagger,t2_aaaa.transpose(2,3,0,1),antiRes))
-        tvv=np.einsum('aeij,fdkl,bcef->abcdijkl',t2_aaaa,t2_aaaa,tei[va,va,va,va])
-        anti_tvv=antisym.permute_t4vv_resid(tvv)
-        e_vv=np.einsum('ijab,klcd,abcdijkl',t2_FO_dagger,t2_aaaa.transpose(2,3,0,1),anti_tvv)
-        print('e_vv:',e_vv)
-
         t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
-        t4_resid=antisym.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
+        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
 
-        if ccd_kernel.cc_type == "CCD(Qf*)":
-            print('doing Qf*')
-            t4_resid+=t4resids.unsym_residQf2(tei,t2_aaaa,oa,va,nocc,nvirt)
+#        if ccd_kernel.cc_type == "CCD(Qf*)":
+#            print('doing Qf*')
+#            t4_resid+=t4resids.unsym_residQf2(tei,t2_aaaa,oa,va,nocc,nvirt)
 
-#        # antisymmeterize the T4 residual:
-        #antisym_t4_resid = antisym.antisym_t4_residual(t4_resid,nocc,nvirt)
         antisym_t4_resid = t4_resid.transpose(4,5,6,7,0,1,2,3)
         t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
 
         qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
-        print('full qf: COMPLETE ZWW 5/4',qf_corr,qf_corr/32.0)
-#        import UT2.pdagq_t4resid as pdag_t4
-#        t4_resid_oo,t4_resid=pdag_t4.t4_test_residual(t2_aaaa,tei,oa,va)
-#        qf_corr=0.062500000000000 * einsum('lkcd,ijba,cdbaijlk', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t4_resid[:, :, :, :, :, :, :, :])
-#        qf_corr_oo=einsum('lkcd,ijba,cdbaijlk', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t4_resid_oo[:, :, :, :, :, :, :, :])
-#        print('pdagger q qf :',qf_corr,qf_corr*(1.0/2.0))
-#        print('pdagger q qf only oo:', qf_corr_oo,qf_corr_oo*(1./32.))
         return qf_corr*(1.0/32.0)
     elif ccd_kernel.cc_type == "pCCD":
         return ccdEnergy(t2_aaaa,fock,tei,oa,va)

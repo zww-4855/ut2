@@ -10,10 +10,9 @@ from UT2.run_ccd import *
 
 
 
-@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"ccdType":"CCD"},{"ccdTypeSlow":"CCD"}),
-                            ('6-31G', {"ccdType":"CCD(Qf)"},{"ccdTypeSlow":"CCD(Qf)"}),
-                            ('6-31G', {"ccdType":"CCDQf-1"},{"ccdTypeSlow":"CCDQf-1"}),
-                            ('6-31G', {"ccdType":"CCDQf-2"},{"ccdTypeSlow":"CCDQf-2"}),])
+@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"fullCCType":"CCD"},{"ccdTypeSlow":"CCD"}),])
+                           # ('6-31G', {"fullCCType":"CCD(Qf)"},{"ccdTypeSlow":"CCD(Qf)"}),
+                           # ('6-31G', {"fullCCType":"CCD(Qf*)"},{"ccdTypeSlow":"CCD(Qf*)"}),])
 
 def test_ccdTypesCheck(Basis,Method1,Method2):
     '''

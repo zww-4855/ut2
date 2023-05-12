@@ -25,16 +25,26 @@ def is_antisymmetric(tensor):
     return True
 
 
-def unsym_residQf1(g,t2_aa,o,v,nocc,nvir,g2=None):
-    # try permuting again in different order:
+def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+
     Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
     t=t2_aa.transpose(2,3,0,1)
     v_oo=g[o,o,o,o]
     v_vo=g[o,v,o,v]
     v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+    # Do base-line (Qf) style of constructing T4
     Roooovvvv += -0.062500000 * np.einsum("imab,jncd,klmn->ijklabcd",t,t,v_oo,optimize="optimal")
     Roooovvvv += -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,v_vo,optimize="optimal")
     Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
+    if ccd_kernel.cc_type == "CCD(Qf*)": # tack on the W-2 T2^3 contrib to T4
+         Roooovvvv += -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+         Roooovvvv += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+         Roooovvvv += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+
+
+
+
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
     return Roooovvvv
 
