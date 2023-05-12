@@ -26,42 +26,6 @@ def is_antisymmetric(tensor):
 
 
 def unsym_residQf1(g,t2_aa,o,v,nocc,nvir,g2=None):
-    # contributions to the residual
-    t=t2_aa.transpose(2,3,0,1)
- 
-    g_occ=g[o,o,o,o]
-    g_ov=g[o,v,o,v]
-    g_virt=g[v,v,v,v]
-    print(t.shape,g_occ.shape,t2_aa.shape)
-    Roooovvvv = -0.062500000 * np.einsum("imab,jncd,klmn->ijklabcd",t,t,g_occ)
-    print(Roooovvvv.shape)
-    Roooovvvv=Roooovvvv.transpose(4,5,6,7,0,1,2,3)
-    Roooovvvv = permute_t4oo_resid(Roooovvvv)
-    print(is_antisymmetric(Roooovvvv))
-    Roooovvvv=Roooovvvv.transpose(4,5,6,7,0,1,2,3)
-
-
-    if g2 is not None:
-        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
-
-    tmpRoooovvvv = -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,g_ov)
-    tmpRoooovvvv=tmpRoooovvvv.transpose(4,5,6,7,0,1,2,3)
-    tmpRoooovvvv = permute_t4ov_resid(g_ov,t,tmpRoooovvvv)
-    tmpRoooovvvv=tmpRoooovvvv.transpose(4,5,6,7,0,1,2,3)
-    Roooovvvv += tmpRoooovvvv
-
-    if g2 is not None:
-        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
-
-    tmp2Roooovvvv = -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,g_virt)
-    tmp2Roooovvvv=tmp2Roooovvvv.transpose(4,5,6,7,0,1,2,3)
-    tmp2Roooovvvv = permute_t4vv_resid(tmp2Roooovvvv)
-    tmp2Roooovvvv=tmp2Roooovvvv.transpose(4,5,6,7,0,1,2,3)
-    Roooovvvv+=tmp2Roooovvvv
-    if g2 is not None:
-        print('roovv energy:',np.einsum('cdlk,abij,ijklabcd->', g2, t2_aa, Roooovvvv))
-
-
     # try permuting again in different order:
     Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
     t=t2_aa.transpose(2,3,0,1)
@@ -72,7 +36,6 @@ def unsym_residQf1(g,t2_aa,o,v,nocc,nvir,g2=None):
     Roooovvvv += -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,v_vo,optimize="optimal")
     Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
-    print('test E:', np.einsum('ijklabcd,ijab,klcd->',Roooovvvv,g2,t2_aa))
     return Roooovvvv
 
 
