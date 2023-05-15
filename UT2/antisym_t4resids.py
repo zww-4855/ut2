@@ -1,4 +1,6 @@
 import numpy as np
+import pickle
+
 def is_antisymmetric(tensor):
     # Get the shape of the tensor
     shape = tensor.shape
@@ -37,13 +39,19 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     Roooovvvv += -0.062500000 * np.einsum("imab,jncd,klmn->ijklabcd",t,t,v_oo,optimize="optimal")
     Roooovvvv += -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,v_vo,optimize="optimal")
     Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
-    if ccd_kernel.cc_type == "CCD(Qf*)": # tack on the W-2 T2^3 contrib to T4
-         Roooovvvv += -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
-         Roooovvvv += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
-         Roooovvvv += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
 
+    Roooovvvv_t2_dump=antisym_t4_residual(Roooovvvv,nocc,nvir)# dump third-order T4
+    with open('roooovvvv_t4_third.pickle', 'wb') as handle:
+        pickle.dump(Roooovvvv_t2_dump, handle) 
 
-
+    if ccd_kernel.cc_type == "CCD(Qf*)":# tack on the W-2 T2^3 contrib to T4
+        Roooovvvv_t23 = -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+        Roooovvvv_t23 += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+        Roooovvvv_t23 += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+        Roooovvvv_t23_dump = antisym_t4_residual(Roooovvvv_t23,nocc,nvir)  # dump fourth-order T4
+        with open('roooovvvv_t4_fourth.pickle', 'wb') as handle:
+            pickle.dump(Roooovvvv_t23_dump, handle)   
+        Roooovvvv +=Roooovvvv_t23
 
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
     return Roooovvvv
