@@ -71,7 +71,10 @@ class UltT2CC():
         self.diis_size=storedInfo.get_cc_runtype("diis_size")
         self.diis_start_cycle=storedInfo.get_cc_runtype("diis_start_cycle")
         self.dump_tamps=storedInfo.get_cc_runtype("dump_tamps")
-
+        self.pert_wvfxn_corr=storedInfo.get_cc_runtype("pert_wvfxn_corr")
+        self.pert_E_corr = storedInfo.get_cc_runtype("pert_E_corr")
+ 
+ 
         self.cc_label, self.cc_type=get_calc(storedInfo,self.calc_list) #storedInfo.get_cc_runtype("ccdType")
         self.nucE=storedInfo.get_cc_runtype("nuclear_energy")
         self.hf_energy=storedInfo.get_cc_runtype("hf_energy") 

@@ -131,6 +131,12 @@ def ccd_main(mf, mol, orb, cc_runtype):
         cc_runtype.update({"dump_tamps":False})
 
 
+    if "pert_wvfxn_corr" not in cc_runtype:
+        cc_runtype.update({"pert_wvfxn_corr":None})
+ 
+    if "pert_E_corr" not in cc_runtype:
+        cc_runtype.update({"pert_E_corr":None})
+
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
 
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
