@@ -3,6 +3,9 @@ import UT2.modify_T2resid_T4Qf1Slow as qf1
 import UT2.modify_T2resid_T4Qf2Slow as qf2
 import numpy as np
 
+
+import UT2.antisym_t4resids as antisym
+
 def residMain(ccd_kernel):
     """
     Drives the determination of the spin-orbital, CCD-based residual equations. This includes calls to subroutines that serve to augment the baseline CCDresidual equations using higher order clusters (ie CCDQf-1, CCDQf-2, etc), if requested by the user.
@@ -47,6 +50,35 @@ def residMain(ccd_kernel):
     else: 
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
 
+
+
+
+    if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
+        import UT2.pdagq_t4resid as pdagq
+        print('modifying T2 ansate w/ T4 ish')
+        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+
+        antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
+        t2_dag=t2_aaaa*ccd_kernel.denom["D2aa"]
+        t2_dag=t2_aaaa.transpose(2,3,0,1)
+        resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
+        #trash,t4_resid=pdagq.t4_test_residual(t2_aaaa,tei,oa,va)
+
+#        tmp_t2=np.zeros((nvirt,nvirt,nocc,nocc))
+#        print(type(tmp_t2),type(t2_dag),type(t4_resid))
+#        for a in range(nvirt):
+#            for b in range(nvirt):
+#                for i in range(nocc): 
+#                    for j in range(nocc):
+#                        for k in range(nocc):
+#                            for l in range(nocc):
+#                                for c in range(nvirt):
+#                                    for d in range(nvirt):
+#                                        tmp_t2[a,b,i,j]+= t2_dag[k,l,c,d]*t4_resid[a,b,c,d,i,j,k,l]
+#
+#        tmp_t2=tmp_t2*(0.5)
+#        resid_aaaa+=tmp_t2
+        #resid_aaaa += (1.0/2.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4_resid)
 
     if ccd_kernel.cc_type == "CCDQf-1":
         l2dic=ccd_kernel.get_l2amps()
