@@ -140,7 +140,7 @@ def residMain(ccd_kernel):
     resid_t3_aab+=np.reciprocal(D3aab)*t3_aabaab
     resid_t3_abb+=np.reciprocal(D3abb)*t3_abbabb
 
-    if ccd_kernel.cc_type == "CCD(Qf)" or ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type =="CCD":
+    if ccd_kernel.cc_type == "CCD(Qf)" or ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type =="CCD" or ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
         resid_t1_aa=resid_t1_bb=0.0*resid_t1_aa
         resid_t3_aaa=resid_t3_bbb=resid_t3_abb=resid_t3_aab=0.0*resid_t3_aaa
 
@@ -148,7 +148,7 @@ def residMain(ccd_kernel):
     #ccd_kernel.set_resid(final_resid)
 
 
-    if ccd_kernel.cc_type == "CCSDTQf-1":
+    if ccd_kernel.cc_type == "CCSDTQf-1" or ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
         from UT2.testing_modifyT2eqns_with_T4 import ccsdt_t2_aaaa_residual_Qf, ccsdt_t2_bbbb_residual_Qf, ccsdt_t2_abab_residual_Qf
         resid_t2_aaaa += 0.5*ccsdt_t2_aaaa_residual_Qf(t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa,t3_bbbbbb,t3_aabaab,t3_abbabb,g_aaaa, g_bbbb, g_abab,  t2_aaaa.transpose(2,3,0,1), t2_bbbb.transpose(2,3,0,1), t2_abab.transpose(2,3,0,1), oa, ob, va, vb)
 
