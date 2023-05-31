@@ -57,6 +57,21 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     return Roooovvvv
 
 
+def xccd_6(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+    Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    t=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+
+    Roooovvvv_t23 = -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+    Roooovvvv_t23 += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+    Roooovvvv_t23 += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
+
+    Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
+    return Roooovvvv
+
 def unsym_resid7(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     #load up D4T4^(3) residual and convert to third-order T4
     t4=np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))

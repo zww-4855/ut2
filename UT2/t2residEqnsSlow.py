@@ -55,9 +55,14 @@ def residMain(ccd_kernel):
 
     #if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
     resid_mod=[ccd_kernel.pert_wvfxn_corr]
+    XCCD_run=5
+    try:
+        XCCD_run=int(ccd_kernel.pert_wvfxn_corr)
+    except:
+        XCCD_run=0
     base_calc=ccd_kernel.cc_type
     print('resid modification is: ', resid_mod,"Qf" in [resid_mod])
-    if "Qf" in resid_mod or "Qf*" in resid_mod or base_calc == "CCDQf" or base_calc == "CCDQf*": 
+    if "Qf" in resid_mod or "Qf*" in resid_mod or XCCD_run>=5 or base_calc == "CCDQf" or base_calc == "CCDQf*": 
         import UT2.pdagq_t4resid as pdagq
         print('modifying T2 ansate w/ T4 ish')
         t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
@@ -65,7 +70,26 @@ def residMain(ccd_kernel):
         antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
         t2_dag=t2_aaaa*ccd_kernel.denom["D2aa"]
         t2_dag=t2_aaaa.transpose(2,3,0,1)
-        resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
+        xcc_t2Dag=t2_aaaa.transpose(2,3,0,1)
+        if XCCD_run>=5:
+            import UT2.xccd_resid as xccd_resid
+            modify_orders=[i for i in range(5,XCCD_run+1)]
+            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,antisym_t4_resid)
+            if 6 in modify_orders:
+                t4_t23=antisym.xccd_6(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+                t4_t23=t4_t23.transpose(4,5,6,7,0,1,2,3)
+                resid_aaaa+=(1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,t4_t23
+)
+            if 7 in modify_orders:
+                t4_t2DagWT23=xccd_resid.xccd_7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+                t4_t2DagWT23=t4_t2DagWT23.transpose(4,5,6,7,0,1,2,3)
+                resid_aaaa+=(1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,t4_t2DagWT23)
+               
+            if 8 in modify_orders:
+ 
+            if 9 in modify_orders:               
+        else:
+            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
         #trash,t4_resid=pdagq.t4_test_residual(t2_aaaa,tei,oa,va)
 
 #        tmp_t2=np.zeros((nvirt,nvirt,nocc,nocc))

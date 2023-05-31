@@ -132,7 +132,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
 
     if "pert_wvfxn_corr" not in cc_runtype:
-        cc_runtype.update({"pert_wvfxn_corr":None})
+        cc_runtype.update({"pert_wvfxn_corr":"0"})
  
     if "pert_E_corr" not in cc_runtype:
         cc_runtype.update({"pert_E_corr":None})
