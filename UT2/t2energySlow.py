@@ -53,7 +53,43 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
 
         qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
-        return qf_corr*(1.0/32.0)
+
+        qf_corr=(1.0/32.0)*qf_corr
+        print('Order 5-6 energy correction:', qf_corr, qf_corr*32.0)
+
+        import UT2.test_qf as test_qf
+        test_t2_qf=test_qf.evaluate_residual_2_2(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
+        test_t2_qf=test_t2_qf.transpose(2,3,0,1)
+        test_qf_corr= einsum('ijab,abij',t2_FO_dagger,test_t2_qf[:,:,:,:])
+        print('tested Qf corr by contract T4 to T2:', test_qf_corr/8.0, 4.0*test_qf_corr)
+
+        order_7E=order_8E=order_9E=0.0
+
+        hgherO=int(ccd_kernel.pert_E_corr)
+        if hgherO >= 7:
+            t4_7=antisym.unsym_resid7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
+            t4_7=t4_7.transpose(4,5,6,7,0,1,2,3)
+            order_7E=einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1),t4_7[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
+            order_7E=(1.0/32.0)*order_7E
+            print('Order 7 energy correction:', order_7E)
+
+            if hgherO >= 8:
+                t6_5O=antisym.unsym_resid8(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
+                t6_5O=t6_5O.transpose(6,7,8,9,10,11,0,1,2,3,4,5)
+                order_8E=einsum('mnef,klcd,ijab,abcdefijklmn', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t2_aaaa.transpose(2,3,0,1),t6_5O[:, :, :, :, :, :, :, :, : ,: ,: ,:], optimize=['einsum_path', (0, 2), (0, 1)])
+                order_8E=(1.0/384.0)*order_8E
+                print('Order 8 energy correction:', order_8E)
+
+                if hgherO == 9:
+                    t6_6O=antisym.unsym_resid9(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
+                    t6_6O=t6_6O.transpose(6,7,8,9,10,11,0,1,2,3,4,5)
+                    order_9E=einsum('mnef,klcd,ijab,abcdefijklmn', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t2_aaaa.transpose(2,3,0,1),t6_6O[:, :, :, :, :, :, :, :, : ,: ,: ,:], optimize=['einsum_path', (0, 2), (0, 1)])
+                    order_9E=(1.0/384.0)*order_9E
+                    print('Order 8 energy correction:', order_8E)
+                                     
+        totalEcorr=qf_corr+order_7E+order_8E+order_9E
+
+        return totalEcorr #qf_corr*(1.0/32.0)
     elif ccd_kernel.cc_type == "pCCD":
         return ccdEnergy(t2_aaaa,fock,tei,oa,va)
     else:    

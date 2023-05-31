@@ -209,6 +209,15 @@ class UltT2CC():
             tfinalEnergy=current_energy+nucE+qf_corr
             corrE=qf_corr
 
+        pertEcorr=self.pert_E_corr
+        if pertEcorr is not None:
+            perturbCorr=t2energySlow.ccd_energyMain(self,get_perturbCorr=True)
+            ccdE=nucE+current_energy-hf_energy
+            print('CCD base energy:', ccdE)
+            print('Perturbative ',pertEcorr,'order energy correction:', perturbCorr)
+            print('Total correlation contribution:', perturbCorr+ccdE)
+            tfinalEnergy=ccdE+perturbCorr
+            corrE=nucE+current_energy-hf_energy
 
         self.tfinalEnergy=tfinalEnergy
         self.corrE=corrE

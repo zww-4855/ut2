@@ -711,29 +711,33 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
     denomInfo.update({"D2aa":eabij_aa})
     hgherO=cc_runtype["ccdTypeSlow"]
     if hgherO == "UT2-CCD(7)" or hgherO == "UT2-CCD(8)" or hgherO == "UT2-CCD(9)":
+        virt_aa=occupationSliceInfo["virt_aa"]
+        occ_aa=occupationSliceInfo["occ_aa"]
+        epsaa=eps['eps_aa']
+        
         D4=1.0/(-epsaa[virt_aa, n, n, n, n, n, n, n]
                 -epsaa[n,      virt_aa, n, n, n, n, n, n]
                 -epsaa[n, n,           virt_aa, n, n, n, n, n]
                 -epsaa[n, n, n,                virt_aa, n, n, n, n]
-                +epsaa[n, n, n, n, virt_aa, n, n, n]
-                +epsaa[n, n, n, n, n,       virt_aa, n, n]
-                +epsaa[n, n, n, n, n, n,            virt_aa, n]
-                +epsaa[n, n, n, n, n, n, n,                 virt_aa])
+                +epsaa[n, n, n, n, occ_aa, n, n, n]
+                +epsaa[n, n, n, n, n,       occ_aa, n, n]
+                +epsaa[n, n, n, n, n, n,            occ_aa, n]
+                +epsaa[n, n, n, n, n, n, n,                 occ_aa])
 
 
-        D6=1.0/(-epsaa[virt_aa, n, n, n, n, n, n, n, n, n, n, n]
-                -epsaa[n,      virt_aa, n, n, n, n, n, n, n, n, n, n]
-                -epsaa[n, n,           virt_aa, n, n, n, n, n, n, n, n, n]
-                -epsaa[n, n, n,                virt_aa, n, n, n, n, n, n, n, n]
-                -epsaa[n, n, n, n,                      virt_aa, n, n, n, n, n, n, n]
-                -epsaa[n, n, n, n, n,                           virt_aa, n, n, n, n, n, n]
-                +epsaa[n, n, n, n, n, n, virt_aa, n, n, n, n, n]
-                +epsaa[n, n, n, n, n, n, n,       virt_aa, n, n, n, n]
-                +epsaa[n, n, n, n, n, n, n, n,            virt_aa, n, n, n]
-                +epsaa[n, n, n, n, n, n, n, n, n,                 virt_aa, n, n]
-                +epsaa[n, n, n, n, n, n, n, n, n, n,                      virt_aa, n]
-                +epsaa[n, n, n, n, n, n, n, n, n, n, n, virt_aa])
-        denomInfo.update({"D4aa":D4, "D6aa":D6})
+#        D6=1.0/(-epsaa[virt_aa, n, n, n, n, n, n, n, n, n, n, n]
+#                -epsaa[n,      virt_aa, n, n, n, n, n, n, n, n, n, n]
+#                -epsaa[n, n,           virt_aa, n, n, n, n, n, n, n, n, n]
+#                -epsaa[n, n, n,                virt_aa, n, n, n, n, n, n, n, n]
+#                -epsaa[n, n, n, n,                      virt_aa, n, n, n, n, n, n, n]
+#                -epsaa[n, n, n, n, n,                           virt_aa, n, n, n, n, n, n]
+#                +epsaa[n, n, n, n, n, n, virt_aa, n, n, n, n, n]
+#                +epsaa[n, n, n, n, n, n, n,       virt_aa, n, n, n, n]
+#                +epsaa[n, n, n, n, n, n, n, n,            virt_aa, n, n, n]
+#                +epsaa[n, n, n, n, n, n, n, n, n,                 virt_aa, n, n]
+#                +epsaa[n, n, n, n, n, n, n, n, n, n,                      virt_aa, n]
+#                +epsaa[n, n, n, n, n, n, n, n, n, n, n, virt_aa])
+        denomInfo.update({"D4aa":D4})
 
     if "fullCCType" in cc_runtype: 
    # Singles Denom

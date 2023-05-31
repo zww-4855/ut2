@@ -57,6 +57,108 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     return Roooovvvv
 
 
+def unsym_resid7(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+    #load up D4T4^(3) residual and convert to third-order T4
+    t4=np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    with open('roooovvvv_t4_third.pickle', 'rb') as handle:
+        t4=pickle.load(handle)
+
+
+    t4=antisym_t4_residual(t4,nocc,nvir) # antisymmeterize T4 prior to contraction
+    t4=t4*ccd_kernel.denom["D4aa"]
+
+    t2=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+
+    Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    Roooovvvv += -0.020833333 * np.einsum("imab,jklncdef,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += 0.002604167 * np.einsum("mnab,ijklcdef,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += -0.020833333 * np.einsum("ijae,klmnbcdf,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += 0.027777778 * np.einsum("imae,jklnbcdf,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += -0.003472222 * np.einsum("mnae,ijklbcdf,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += 0.002604167 * np.einsum("ijef,klmnabcd,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+    Roooovvvv += -0.003472222 * np.einsum("imef,jklnabcd,efmn->ijklabcd",t2,t4,v_m2,optimize="optimal")
+
+
+    Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir) # antisymmeterize resultant T4 prior to E contractin
+
+    return Roooovvvv
+
+
+def unsym_resid8(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+    with open('roooovvvv_t4_third.pickle', 'rb') as handle:
+        t4=pickle.load(handle)
+
+
+    t4=antisym_t4_residual(t4,nocc,nvir)
+    t4=t4*ccd_kernel.denom["D4aa"]
+
+    t2=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+
+    Roooooovvvvvv = np.zeros((nocc,nocc,nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir,nvir,nvir))
+    # R6|(WnT2^4/4!)c|0>
+    Roooooovvvvvv += 0.015625000 * np.einsum("iabc,jdef,klgh,mnop,hpad->ijklmnbcefgo",t2,t2,t2,t2,v_m2,optimize="optimal")
+
+    # R6|Wn0 T4 T2)c|0>
+    Roooooovvvvvv += -0.001736111 * np.einsum("iabc,jkldefgh,mnad->ijklmnbcefgh",t2,t4,v_oo,optimize="optimal")
+    Roooooovvvvvv += -0.003472222 * np.einsum("iabc,jklmdefg,ngah->ijklmnbcdefh",t2,t4,v_vo,optimize="optimal")
+    Roooooovvvvvv += -0.003472222 * np.einsum("ijab,klmcdefg,nbch->ijklmnadefgh",t2,t4,v_vo,optimize="optimal")
+    Roooooovvvvvv += -0.001736111 * np.einsum("ijab,klmncdef,bfgh->ijklmnacdegh",t2,t4,v_vv,optimize="optimal")
+
+
+    import UT2.t6antisym as unsym_t6
+    t6=unsym_t6.antisym_t6_residual(Roooooovvvvvv,nocc,nvirt)
+    return t6
+
+def unsym_resid9(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+    with open('roooovvvv_t4_third.pickle', 'rb') as handle:
+        t4_3O=pickle.load(handle)
+
+    with open('roooovvvv_t4_fourth.pickle', 'rb') as handle:
+        t4_4O=pickle.load(handle)
+
+
+    t4_3O=antisym_t4_residual(t4,nocc,nvir)
+    t4_4O=antisym_t4_residual(t4,nocc,nvir)
+    t4_3O=t4_3O*ccd_kernel.denom["D4aa"]
+    t4_4O=t4_4O*ccd_kernel.denom["D4aa"]
+
+    t2=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+
+    # R6|Wn0 T4 T2)c|0>
+    Roooooovvvvvv += -0.001736111 * np.einsum("iabc,jkldefgh,mnad->ijklmnbcefgh",t2,t4_4O,v_oo,optimize="optimal")
+    Roooooovvvvvv += -0.003472222 * np.einsum("iabc,jklmdefg,ngah->ijklmnbcdefh",t2,t4_4O,v_vo,optimize="optimal")
+    Roooooovvvvvv += -0.003472222 * np.einsum("ijab,klmcdefg,nbch->ijklmnadefgh",t2,t4_4O,v_vo,optimize="optimal")
+    Roooooovvvvvv += -0.001736111 * np.einsum("ijab,klmncdef,bfgh->ijklmnacdegh",t2,t4_4O,v_vv,optimize="optimal")
+
+    # R6|Wn-2 T4 T2^2/2)c|0>
+    
+    Roooooovvvvvv += -0.001302083 * np.einsum("iabc,jdef,klmnghop,opad->ijklmnbcefgh",t2,t2,t4_3O,v_m2,optimize="optimal")
+    Roooooovvvvvv += 0.006944444 * np.einsum("iabc,jkde,lmnfghop,epaf->ijklmnbcdgho",t2,t2,t4_3O,v_m2,optimize="optimal")
+    Roooooovvvvvv += 0.003472222 * np.einsum("iabc,jdef,klmnghop,fpad->ijklmnbcegho",t2,t2,t4_3O,v_m2,optimize="optimal")
+    Roooooovvvvvv += -0.000868056 * np.einsum("iabc,jkde,lmnfghop,deaf->ijklmnbcghop",t2,t2,t4_3O,v_m2,optimize="optimal")
+    Roooooovvvvvv += -0.000868056 * np.einsum("abcd,ijef,klmnghop,fpab->ijklmncdegho",t2,t2,t4_3O,v_m2,optimize="optimal")
+
+    Roooooovvvvvv += -0.001302083 * np.einsum("ijab,klcd,mnefghop,bdef->ijklmnacghop",t2,t2,t4_3O,v_m2,optimize="optimal")
+    Roooooovvvvvv += 0.003472222 * np.einsum("ijab,kcde,lmnfghop,becf->ijklmnadghop",t2,t2,t4_3O,v_m2,optimize="optimal")
+
+
+
+    import UT2.t6antisym as unsym_t6
+    t6=unsym_t6.antisym_t6_residual(Roooooovvvvvv,nocc,nvirt)
+    return t6
+
 def antisym_t4_residual(Roooovvvv,nocc,nvirt):
     Roooovvvv_anti = np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
 

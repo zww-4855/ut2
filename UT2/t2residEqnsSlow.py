@@ -54,9 +54,9 @@ def residMain(ccd_kernel):
 
 
     #if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
-    resid_mod=ccd_kernel.pert_wvfxn_corr
+    resid_mod=[ccd_kernel.pert_wvfxn_corr]
     base_calc=ccd_kernel.cc_type
-    print('resid modification is: ', resid_mod,"Qf" in resid_mod)
+    print('resid modification is: ', resid_mod,"Qf" in [resid_mod])
     if "Qf" in resid_mod or "Qf*" in resid_mod or base_calc == "CCDQf" or base_calc == "CCDQf*": 
         import UT2.pdagq_t4resid as pdagq
         print('modifying T2 ansate w/ T4 ish')
