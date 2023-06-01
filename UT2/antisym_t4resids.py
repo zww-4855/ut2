@@ -53,6 +53,17 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
             pickle.dump(Roooovvvv_t23_dump, handle)   
         Roooovvvv +=Roooovvvv_t23
 
+#    Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
+#    Roovv=np.einsum('klcd,abcdijkl->abij',t2_aa.transpose(2,3,0,1),Roooovvvv.transpose(4,5,6,7,0,1,2,3))
+#    Roovv_anti = np.einsum("ijab->ijab",Roovv)
+#    Roovv_anti -= np.einsum("ijab->jiab",Roovv)
+#    Roovv_anti -= np.einsum("ijab->ijba",Roovv)
+#    Roovv_anti += np.einsum("ijab->jiba",Roovv) 
+#    t2_FO_dag=v_vo*ccd_kernel.denom["D2aa"]
+#    t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
+#
+#    finalTest=np.einsum('ijab,abij',t2_FO_dagger,Roovv_anti)
+#    print('tested Qf energy:',finalTest,finalTest/8.0)
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
     return Roooovvvv
 
