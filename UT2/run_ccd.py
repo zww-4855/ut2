@@ -135,7 +135,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
         cc_runtype.update({"pert_wvfxn_corr":"0"})
  
     if "pert_E_corr" not in cc_runtype:
-        cc_runtype.update({"pert_E_corr":None})
+        cc_runtype.update({"pert_E_corr":"0"})
 
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
 

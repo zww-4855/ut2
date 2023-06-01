@@ -184,10 +184,11 @@ class UltT2CC():
         print('Nuclear repulsion energy: \t {: 20.12f}'.format(nucE))
         print(f"\n \t**** Results for {self.cc_type}: ****")
 
-
+        UT2_run=t2energySlow.extract_UT2(self.cc_type)
+        print('Is this a UT2 run?', UT2_run) 
         if self.cc_type != "CCD(Qf)":
             corrE=nucE+current_energy-hf_energy
-            print('Correlation energy: \t {: 20.12f}'.format(corrE))
+            print('Correlation energy, without perturbative effects: \t {: 20.12f}'.format(corrE))
             corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
@@ -209,15 +210,12 @@ class UltT2CC():
             tfinalEnergy=current_energy+nucE+qf_corr
             corrE=qf_corr
 
-        pertEcorr=self.pert_E_corr
-        if pertEcorr is not None:
-            perturbCorr=t2energySlow.ccd_energyMain(self,get_perturbCorr=True)
-            ccdE=nucE+current_energy-hf_energy
-            print('CCD base energy:', ccdE)
-            print('Perturbative ',pertEcorr,'order energy correction:', perturbCorr)
-            print('Total correlation contribution:', perturbCorr+ccdE)
-            tfinalEnergy=ccdE+perturbCorr
-            corrE=nucE+current_energy-hf_energy
+        if UT2_run:
+            corrE=t2energySlow.ccd_energyMain(self,get_perturbCorr=True)
+            print('ut2 corrE:',corrE)
+            tfinalEnergy=nucE+corrE
+            perturbE=corrE-current_energy
+            print("UT2-CCD perturbative energy correction: \t {: 20.12f}".format(perturbE))
 
         self.tfinalEnergy=tfinalEnergy
         self.corrE=corrE
