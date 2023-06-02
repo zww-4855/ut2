@@ -83,11 +83,12 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
                 print('Order 8 energy correction:', order_8E)
 
                 if hgherO == 9:
-                    t6_6O=antisym.unsym_resid9(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
-                    t6_6O=t6_6O.transpose(6,7,8,9,10,11,0,1,2,3,4,5)
-                    order_9E=einsum('mnef,klcd,ijab,abcdefijklmn', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t2_aaaa.transpose(2,3,0,1),t6_6O[:, :, :, :, :, :, :, :, : ,: ,: ,:], optimize=['einsum_path', (0, 2), (0, 1)])
+                    t4_9=xccd_resid.xccd9_resid(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,None)
+                    t4_9=t4_9.transpose(4,5,6,7,0,1,2,3)
+                    order_9E=einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1),t4_9[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
                     order_9E=(1.0/384.0)*order_9E
-                    print('Order 8 energy correction:', order_8E)
+                    print('Order 9 energy correction:', order_9E)
+
                                      
         totalEcorr=qf_corr+order_7E+order_8E+order_9E
 

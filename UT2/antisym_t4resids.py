@@ -83,6 +83,113 @@ def xccd_6(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
     return Roooovvvv
 
+def xccd_8(ccd_kernel,g,gD_dag,t2,t2_dag,o,v,nocc,nvir,doUT2=False):
+    if doUT2:
+        cap=gD_dag
+    else:
+        cap=t2_dag
+
+    midA=midB=np.zeros((nvir,nvir,nvir,nvir,nocc,nocc,nocc,nocc))
+    midSum=lambda b,c,e,g,j,k,n,o,a,h,i,l: t[a,h,i,j]*t[b,c,l,k]*cap[i,n,a,e]*cap[l,o,h,g]
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+                                    
+                                    for a in range(nvir):
+                                        for h in range(nvir):
+                                            for i in range(nocc):
+                                                for l in range(nocc):
+                                                    midA[b,c,e,g,j,k,n,o]=midSum(b,c,e,g,j,k,n,o,a,h,i,l)
+                                                
+
+
+    aftSum=lambda g,e,b,c,n,o,j,k,d,f,m,p: t[d,g,m,n]*t[e,f,o,p]*cap[m,p,d,f]*cap[j,k,b,c]
+    for g in range(nvir):
+        for e in range(nvir):
+            for b in range(nvir):
+                for c in range(nvir):
+                    for n in range(nocc):
+                        for o in range(nocc):
+                            for j in range(nocc):
+                                for k in range(nocc):
+
+                                    for d in range(nvir):
+                                        for f in range(nvir):
+                                            for m in range(nocc):
+                                                for p in range(nocc):
+                                                    midB[g,e,b,c,n,o,j,k]=aftSum(d,f,m,p)
+
+    energy=0.0
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+                                    energy+=midA[b,c,e,g,j,k,n,o]*midB[g,e,b,c,n,o,j,k]
+
+    energy=(1.0/384.0)*energy
+    return energy
+
+
+def xccd8_resid(ccd_kernel,g,gD_dag,t2,t2_dag,o,v,nocc,nvir,doUT2=False):
+    if doUT2:
+        cap=gD_dag
+    else:
+        cap=t2_dag
+
+    midA=np.zeros((nvir,nvir,nvir,nvir,nocc,nocc,nocc,nocc))
+    midB=np.zeros((nvir,nvir,nocc,nocc))
+    midSum=lambda b,c,e,g,j,k,n,o,a,h,i,l: t[a,h,i,j]*t[b,c,l,k]*cap[i,n,a,e]*cap[l,o,h,g]
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+
+                                    for a in range(nvir):
+                                        for h in range(nvir):
+                                            for i in range(nocc):
+                                                for l in range(nocc):
+                                                    midA[b,c,e,g,j,k,n,o]=midSum(b,c,e,g,j,k,n,o,a,h,i,l)
+
+
+    aftSum=lambda g,e,n,o,d,f,m,p: t[d,g,m,n]*t[e,f,o,p]*cap[m,p,d,f]
+    for g in range(nvir):
+        for e in range(nvir):
+            for n in range(nocc):
+                for o in range(nocc):
+                    for d in range(nvir):
+                        for f in range(nvir):
+                            for m in range(nocc):
+                                for p in range(nocc):
+                                    midB[g,e,n,o]=aftSum(d,f,m,p)
+
+    t2_resid=np.zeros((nvir,nvir,nocc,nocc))
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+                                    t2_resid[b,c,j,k]=midA[b,c,e,g,j,k,n,o]*midB[g,e,n,o]
+
+    t2_resid=(1.0/96.0)*t2_resid
+    return t2_resid
+
+
 def unsym_resid7(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     #load up D4T4^(3) residual and convert to third-order T4
     t4=np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))

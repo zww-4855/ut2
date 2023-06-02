@@ -435,4 +435,6 @@ def xccd9_resid(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     roooovvvv += 0.003472222 * np.einsum("imef,nabc,jkldghop,ebna,fcmd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
     roooovvvv += 0.006944444 * np.einsum("mnef,iabc,jkldghop,cpmn,efad->ijklbgho",t,t,t4,t_dag,v_m2,optimize="optimal")
     roooovvvv += -0.000868056 * np.einsum("mnef,iabc,jkldghop,bcmn,efad->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+
+    roooovvvv=antisym.antisym_t4_residual(roooovvvv,nocc,nvir)
     return roooovvvv
