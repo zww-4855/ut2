@@ -115,6 +115,12 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         if energy_mod <= 8:
             order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,t22_dag,oa,va,nocc,nvirt)
 
+
+        if energy_mod == 9:
+            t4_t2DagWT22T4=xccd_resid.xccd9_resid(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+            t4_t2DagWT22T4=t4_t2DagWT22T4.transpose(4,5,6,7,0,1,2,3)
+            order_9E=(1.0/96.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT22T4)
+
         XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
         return XCCD_energy
     else:    
