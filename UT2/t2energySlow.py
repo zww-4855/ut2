@@ -54,7 +54,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
 
         t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
-
+        t22_dag=t2_aaaa.transpose(2,3,0,1)
         qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
 
         qf_corr=(1.0/32.0)*qf_corr
@@ -79,10 +79,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
             print('Order 7 energy correction:', order_7E)
 
             if hgherO >= 8:
-                t6_5O=antisym.unsym_resid8(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
-                t6_5O=t6_5O.transpose(6,7,8,9,10,11,0,1,2,3,4,5)
-                order_8E=einsum('mnef,klcd,ijab,abcdefijklmn', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), t2_aaaa.transpose(2,3,0,1),t6_5O[:, :, :, :, :, :, :, :, : ,: ,: ,:], optimize=['einsum_path', (0, 2), (0, 1)])
-                order_8E=(1.0/384.0)*order_8E
+                order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,t22_dag,oa,va,nocc,nvirt)
                 print('Order 8 energy correction:', order_8E)
 
                 if hgherO == 9:
@@ -113,6 +110,9 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
             t4_t2DagWT23=xccd_resid.xccd_7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
             t4_t2DagWT23=t4_t2DagWT23.transpose(4,5,6,7,0,1,2,3)
             order_7E=(1.0/128.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT23)
+
+        if energy_mod <= 8:
+            order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,t22_dag,oa,va,nocc,nvirt)
 
         XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
         return XCCD_energy

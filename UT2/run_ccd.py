@@ -118,7 +118,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
 
 
-
+    print('starting Ut2...')
+    print(flush=True)
     storedInfo=StoredInfo()
     cc_runtype.update({"hf_energy":mf.e_tot,"nuclear_energy":mf.energy_nuc()})
     if "stopping_eps" not in cc_runtype:
@@ -709,7 +710,10 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
         + epsaa[n, n, n, occ_aa]
     )
     denomInfo.update({"D2aa":eabij_aa})
-    hgherO=cc_runtype["ccdTypeSlow"]
+    if "ccdTypeSlow" in cc_runtype:
+        hgherO=cc_runtype["ccdTypeSlow"]
+    else:
+        hgherO=0
     if hgherO == "UT2-CCD(7)" or hgherO == "UT2-CCD(8)" or hgherO == "UT2-CCD(9)":
         virt_aa=occupationSliceInfo["virt_aa"]
         occ_aa=occupationSliceInfo["occ_aa"]
