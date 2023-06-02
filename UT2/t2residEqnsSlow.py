@@ -88,7 +88,11 @@ def residMain(ccd_kernel):
             if 8 in modify_orders:
                 resid_aaaa += xccd_resid.xccd8_resid(ccd_kernel,tei,None,t2_aaaa,xcc_t2Dag,oa,va,nocc,nvirt) 
 
-            #if 9 in modify_orders:               
+            if 9 in modify_orders: 
+                t4_t2DagWT22T4=xccd_resid.xccd9_resid(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+                t4_t2DagWT22T4=t4_t2DagWT22T4.transpose(4,5,6,7,0,1,2,3)
+                resid_aaaa += (1.0/24.0)*einsum('klcd,abcdijkl',xcc_t2Dag,t4_t2DagWT22T4)
+ 
         else:
             resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
         #trash,t4_resid=pdagq.t4_test_residual(t2_aaaa,tei,oa,va)
