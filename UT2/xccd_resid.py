@@ -1,6 +1,7 @@
 import numpy as np
 import UT2.antisym_t4resids as antisym
 
+
 def xccd_7(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     t=t2_aa.transpose(2,3,0,1)
     v_oo=g[o,o,o,o]
@@ -209,4 +210,229 @@ def xccd_7(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
 
 
     roooovvvv=antisym.antisym_t4_residual(roooovvvv,nocc,nvir)
+    return roooovvvv
+
+def xccd8_resid(ccd_kernel,g,gD_dag,t2,t2_dag,o,v,nocc,nvir,doUT2=False):
+    if doUT2:
+        cap=gD_dag
+    else:
+        cap=t2_dag
+
+    midA=np.zeros((nvir,nvir,nvir,nvir,nocc,nocc,nocc,nocc))
+    midB=np.zeros((nvir,nvir,nocc,nocc))
+    midSum=lambda b,c,e,g,j,k,n,o,a,h,i,l: t[a,h,i,j]*t[b,c,l,k]*cap[i,n,a,e]*cap[l,o,h,g]
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+
+                                    for a in range(nvir):
+                                        for h in range(nvir):
+                                            for i in range(nocc):
+                                                for l in range(nocc):
+                                                    midA[b,c,e,g,j,k,n,o]=midSum(b,c,e,g,j,k,n,o,a,h,i,l)
+
+
+    aftSum=lambda g,e,n,o,d,f,m,p: t[d,g,m,n]*t[e,f,o,p]*cap[m,p,d,f]
+    for g in range(nvir):
+        for e in range(nvir):
+            for n in range(nocc):
+                for o in range(nocc):
+                    for d in range(nvir):
+                        for f in range(nvir):
+                            for m in range(nocc):
+                                for p in range(nocc):
+                                    midB[g,e,n,o]=aftSum(d,f,m,p)
+
+    t2_resid=np.zeros((nvir,nvir,nocc,nocc))
+    for b in range(nvir):
+        for c in range(nvir):
+            for e in range(nvir):
+                for g in range(nvir):
+                    for j in range(nocc):
+                        for k in range(nocc):
+                            for n in range(nocc):
+                                for o in range(nocc):
+                                    t2_resid[b,c,j,k]=midA[b,c,e,g,j,k,n,o]*midB[g,e,n,o]
+
+    t2_resid=(1.0/96.0)*t2_resid
+    return t2_resid
+
+def xccd9_resid(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
+    t=t2_aa.transpose(2,3,0,1)
+    v_oo=g[o,o,o,o]
+    v_vo=g[o,v,o,v]
+    v_vv=g[v,v,v,v]
+    v_m2=g[v,v,o,o]
+
+    t4=np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    with open('roooovvvv_t4_third.pickle', 'rb') as handle:
+        t4=pickle.load(handle)
+
+    t4=antisym_t4_residual(t4,nocc,nvir)
+    t4=t4*ccd_kernel.denom["D4aa"] # valid only for UT2-CCD(9); need to check if valid for XCCD(9)
+    
+    t_dag=t2_aa
+
+    # contributions to the residual
+    roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    roooovvvv += -0.007812500 * np.einsum("imab,jncd,klefghop,ghef,opmn->ijklabcd",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("imab,ncde,jklfghop,ghnf,opmc->ijklabde",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jkce,lndfghop,hond,epmf->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imab,jnce,kldfghop,hond,epmf->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jnce,kldfghop,ehdf,opmn->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jnce,kldfghop,hodf,epmn->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("imab,ncde,jklfghop,honc,epmf->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imab,ncde,jklfghop,ehnf,opmc->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imab,ncde,jklfghop,honf,epmc->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jkef,lncdghop,eonc,fpmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("imab,jkef,lncdghop,opnc,efmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imab,jnef,klcdghop,eonc,fpmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.031250000 * np.einsum("imab,jnef,klcdghop,opnc,efmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("imab,jnef,klcdghop,efcd,opmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jnef,klcdghop,eocd,fpmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("imab,ncef,jkldghop,eonc,fpmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("imab,ncef,jkldghop,opnc,efmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("imab,ncef,jkldghop,efnd,opmc->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imab,ncef,jkldghop,eond,fpmc->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.001302083 * np.einsum("mnab,cdef,ijklghop,ghmc,opnd->ijklabef",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("mnab,ijce,kldfghop,homd,epnf->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("mnab,ijce,kldfghop,hodf,epmn->ijklabcg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("mnab,icde,jklfghop,homc,epnf->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("mnab,icde,jklfghop,ehmf,opnc->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("mnab,icde,jklfghop,homf,epnc->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("mnab,icde,jklfghop,hocf,epmn->ijklabdg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("mnab,cdef,ijklghop,fhmc,opnd->ijklabeg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("mnab,cdef,ijklghop,homc,fpnd->ijklabeg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("mnab,cdef,ijklghop,hocd,fpmn->ijklabeg",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("mnab,ijef,klcdghop,eomc,fpnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("mnab,ijef,klcdghop,opmc,efnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("mnab,ijef,klcdghop,eocd,fpmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("mnab,icef,jkldghop,eomc,fpnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("mnab,icef,jkldghop,opmc,efnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.010416667 * np.einsum("mnab,icef,jkldghop,efmd,opnc->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("mnab,icef,jkldghop,eomd,fpnc->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("mnab,icef,jkldghop,eocd,fpmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("mnab,cdef,ijklghop,efmc,opnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("mnab,cdef,ijklghop,eomc,fpnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("mnab,cdef,ijklghop,eocd,fpmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("ijkmabcd,lnefghop,ghne,opmf->ijklabcd",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("ijmnabcd,klefghop,ghme,opnf->ijklabcd",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.000651042 * np.einsum("ijmnabcd,klefghop,ghef,opmn->ijklabcd",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("imnabcde,jklfghop,ghmn,opaf->ijklbcde",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("imnabcde,jklfghop,ghmf,opna->ijklbcde",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.000108507 * np.einsum("mnabcdef,ijklghop,ghmn,opab->ijklcdef",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("ijklabce,mndfghop,homn,epdf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("ijkmabce,lndfghop,homn,epdf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("ijkmabce,lndfghop,ehnd,opmf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("ijkmabce,lndfghop,hond,epmf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijmnabce,kldfghop,homn,epdf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijmnabce,kldfghop,ehmd,opnf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijmnabce,kldfghop,homd,epnf->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijmnabce,kldfghop,ehdf,opmn->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijmnabce,kldfghop,hodf,epmn->ijklabcg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imnabcde,jklfghop,ehmn,opaf->ijklbcdg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imnabcde,jklfghop,homn,epaf->ijklbcdg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imnabcde,jklfghop,ehmf,opna->ijklbcdg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imnabcde,jklfghop,homf,epna->ijklbcdg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("mnabcdef,ijklghop,fhmn,opab->ijklcdeg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("mnabcdef,ijklghop,homn,fpab->ijklcdeg",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("ijklabef,mncdghop,eomn,fpcd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.000651042 * np.einsum("ijklabef,mncdghop,opmn,efcd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijkmabef,lncdghop,eomn,fpcd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijkmabef,lncdghop,opmn,efcd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijkmabef,lncdghop,eonc,fpmd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijkmabef,lncdghop,opnc,efmd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.003906250 * np.einsum("ijmnabef,klcdghop,opmn,efcd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.031250000 * np.einsum("ijmnabef,klcdghop,eomc,fpnd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("ijmnabef,klcdghop,opmc,efnd->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("ijmnabef,klcdghop,eocd,fpmn->ijklabgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("imnabcef,jkldghop,opmn,efad->ijklbcgh",t4,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.007812500 * np.einsum("ijae,klbf,mncdghop,opmn,efcd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("ijae,kmbf,lncdghop,opmn,efcd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("ijae,kmbf,lncdghop,fonc,epmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("ijae,kmbf,lncdghop,opnc,efmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.015625000 * np.einsum("ijae,mnbf,klcdghop,opmn,efcd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("ijae,mnbf,klcdghop,fomc,epnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("ijae,mnbf,klcdghop,opmc,efnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.031250000 * np.einsum("ijae,mnbf,klcdghop,focd,epmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("ijae,klfb,mncdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("ijae,kmfb,lncdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijae,kmfb,lncdghop,fbnc,epmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("ijae,kmfb,lncdghop,fpnc,ebmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("ijae,mnfb,klcdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijae,mnfb,klcdghop,fbmc,epnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("ijae,mnfb,klcdghop,fpmc,ebnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("ijae,mnfb,klcdghop,fbcd,epmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.031250000 * np.einsum("imae,jnbf,klcdghop,opmn,efcd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.250000000 * np.einsum("imae,jnbf,klcdghop,fomc,epnd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imae,jnbf,klcdghop,opnc,efmd->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.031250000 * np.einsum("imae,jnbf,klcdghop,efcd,opmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imae,jnbf,klcdghop,focd,epmn->ijklabgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.083333333 * np.einsum("imae,nbcf,jkldghop,fomn,epbd->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("imae,nbcf,jkldghop,opmn,efbd->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("imae,nbcf,jkldghop,fomd,epnb->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("imae,nbcf,jkldghop,opnb,efmd->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imae,nbcf,jkldghop,efnd,opmb->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.083333333 * np.einsum("imae,nbcf,jkldghop,fond,epmb->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imae,jkfb,lncdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("imae,jkfb,lncdghop,efnc,bpmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imae,jkfb,lncdghop,fpnc,ebmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imae,jnfb,klcdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imae,jnfb,klcdghop,fbmc,epnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.083333333 * np.einsum("imae,jnfb,klcdghop,fpmc,ebnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.083333333 * np.einsum("imae,jnfb,klcdghop,efnc,bpmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.083333333 * np.einsum("imae,jnfb,klcdghop,fpnc,ebmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("imae,jnfb,klcdghop,efcd,bpmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("imae,jnfb,klcdghop,fbcd,epmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.013888889 * np.einsum("imae,nbfc,jkldghop,fcmn,epbd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.027777778 * np.einsum("imae,nbfc,jkldghop,fpmn,ecbd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imae,nbfc,jkldghop,fcmd,epnb->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.013888889 * np.einsum("imae,nbfc,jkldghop,efnb,cpmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.013888889 * np.einsum("imae,nbfc,jkldghop,fpnb,ecmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.027777778 * np.einsum("imae,nbfc,jkldghop,efnd,cpmb->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.013888889 * np.einsum("imae,nbfc,jkldghop,fcnd,epmb->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("mnae,ibcf,jkldghop,fomn,epbd->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.083333333 * np.einsum("mnae,ibcf,jkldghop,fomd,epnb->ijklacgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.005208333 * np.einsum("mnae,bcdf,ijklghop,fomn,epbc->ijkladgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.005208333 * np.einsum("mnae,bcdf,ijklghop,efmb,opnc->ijkladgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("mnae,bcdf,ijklghop,fomb,epnc->ijkladgh",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("mnae,ijfb,klcdghop,fpmn,ebcd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.041666667 * np.einsum("mnae,ijfb,klcdghop,efmc,bpnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("mnae,ijfb,klcdghop,fpmc,ebnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.010416667 * np.einsum("mnae,ijfb,klcdghop,efcd,bpmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("mnae,ibfc,jkldghop,fcmn,epbd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.013888889 * np.einsum("mnae,ibfc,jkldghop,fpmn,ecbd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.027777778 * np.einsum("mnae,ibfc,jkldghop,efmb,cpnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.027777778 * np.einsum("mnae,ibfc,jkldghop,fpmb,ecnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.027777778 * np.einsum("mnae,ibfc,jkldghop,efmd,cpnb->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.013888889 * np.einsum("mnae,ibfc,jkldghop,fcmd,epnb->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.013888889 * np.einsum("mnae,ibfc,jkldghop,efbd,cpmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("mnae,bcfd,ijklghop,fdmn,epbc->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("mnae,bcfd,ijklghop,efmb,dpnc->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.003472222 * np.einsum("mnae,bcfd,ijklghop,fdmb,epnc->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.001736111 * np.einsum("mnae,bcfd,ijklghop,efbc,dpmn->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijef,kmab,lncdghop,bpnc,efmd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("ijef,mnab,klcdghop,bpmc,efnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.001302083 * np.einsum("ijef,klab,mncdghop,eamn,fbcd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("ijef,kmab,lncdghop,eamn,fbcd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("ijef,kmab,lncdghop,eanc,fbmd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("ijef,kmab,lncdghop,abnc,efmd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("ijef,mnab,klcdghop,eamn,fbcd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.010416667 * np.einsum("ijef,mnab,klcdghop,eamc,fbnd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.002604167 * np.einsum("ijef,mnab,klcdghop,abmc,efnd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.041666667 * np.einsum("imef,jnab,klcdghop,bpmc,efnd->ijklagho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.013888889 * np.einsum("imef,nabc,jkldghop,cpmn,efad->ijklbgho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.005208333 * np.einsum("imef,jnab,klcdghop,eamn,fbcd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.005208333 * np.einsum("imef,jnab,klcdghop,abmc,efnd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.020833333 * np.einsum("imef,jnab,klcdghop,eanc,fbmd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("imef,nabc,jkldghop,ebmn,fcad->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.001736111 * np.einsum("imef,nabc,jkldghop,bcmn,efad->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.003472222 * np.einsum("imef,nabc,jkldghop,ebna,fcmd->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += 0.006944444 * np.einsum("mnef,iabc,jkldghop,cpmn,efad->ijklbgho",t,t,t4,t_dag,v_m2,optimize="optimal")
+    roooovvvv += -0.000868056 * np.einsum("mnef,iabc,jkldghop,bcmn,efad->ijklghop",t,t,t4,t_dag,v_m2,optimize="optimal")
     return roooovvvv
