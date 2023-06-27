@@ -74,6 +74,7 @@ def extract_integer(string):
         return None
 
 
+
 class UltT2CC():
     """
     UltT2CC class contains all the necessary routines to setup and run the various CC implementations. Current implementation is tested for spin-integrated and spin-orbital T2 methods only.
@@ -109,7 +110,7 @@ class UltT2CC():
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
         self.t_base={}
-
+        self.xccd_resids="X" in self.cc_type # Boolean that when turned on, modifies the CCD T2 residual equations according to the order of XCCD
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
             self.tamps = {"t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab}

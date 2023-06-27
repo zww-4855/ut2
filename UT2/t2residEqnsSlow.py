@@ -51,8 +51,17 @@ def residMain(ccd_kernel):
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
 
 
-
-
+    # determine if we need to augment the CCD T2 equations with terms from XCCD(n)
+    if ccd_kernel.xccd_resids:
+        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
+        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
+        amp_list=[]
+        # gather the modifications to T2 residual eqns order-by-order
+        for order in ccd_kernel.pertOrder:
+            t_tmp=amp_obj.buildXCCDbase(order)
+            amp_list.append(t_tmp)
+            #resid_aaaa+=t_tmp
+    
     #if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
     resid_mod=[ccd_kernel.pert_wvfxn_corr]
     XCCD_run=5

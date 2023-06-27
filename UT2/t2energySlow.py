@@ -105,6 +105,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
             energy_list.append(energy)
  
         print('list of class-based energies order by order:',energy_list)
+        print('list of original codes energies, order by order:',qf_corr,order_7E)
         return totalEcorr #qf_corr*(1.0/32.0)
 
 
