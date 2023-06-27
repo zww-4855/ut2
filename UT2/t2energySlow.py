@@ -9,6 +9,9 @@ import UT2.modify_T2resid_T4Qf1Slow as t4resids
 import UT2.antisym_t4resids as antisym
 import UT2.xccd_resid as xccd_resid
 import re
+import UT2.modifyAmps as modifyAmps
+
+
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     """
     Drives the determination of spin-orbital, CCD energy. This includes unmodified energy, as well as calling subsequent modules to extract perturbative corrections.
@@ -92,6 +95,16 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
                                      
         totalEcorr=qf_corr+order_7E+order_8E+order_9E
 
+        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
+        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
+        energy_list=[]
+        # Extract the energy corrections order-by-order
+        for order in ccd_kernel.pertOrder: 
+            amp_obj.buildXCCDbase(order)
+            energy=contract_amp_obj.buildXCCD_T2energy(order)
+            energy_list.append(energy)
+ 
+        print('list of class-based energies order by order:',energy_list)
         return totalEcorr #qf_corr*(1.0/32.0)
 
 
