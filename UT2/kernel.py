@@ -53,6 +53,25 @@ def get_calc(storedInfo,calc_list):
             continue
 
 
+def extract_integer(string):
+    """
+    Parses the method name string (ie XCCD(5) ) and returns a list of sequential integers up to the maximum order.
+    :param string: Method being currently run
+    :return: Either a list of sequential integers between [5-n] for maximum n=9, or None if a CCD calculation is specified.
+    """
+    match = re.search(r'\d+', string)
+    print(int(match.group()) if match else None)
+    value= (int(match.group()) if match else None)
+    print(value)
+    pertOrder=[]
+    if value:
+        for i in range(5,value+1):
+            pertOrder.append(i)
+        return pertOrder
+    else:
+        return None
+
+
 class UltT2CC():
     """
     UltT2CC class contains all the necessary routines to setup and run the various CC implementations. Current implementation is tested for spin-integrated and spin-orbital T2 methods only.
@@ -90,7 +109,7 @@ class UltT2CC():
         self.t_base={}
         print(self.nvrta)
         self.contractInfo={"nocc":self.nocca,"nvir":self.nvrta,"tamps":self.tamps["t2aa"],"ints":self.ints["tei"],"oa":self.sliceInfo["occ_aa"],"va":self.sliceInfo["virt_aa"]}
-
+        self.pertOrder=extract_integer(self.cc_type)
 
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
