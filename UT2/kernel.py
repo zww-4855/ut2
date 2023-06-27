@@ -20,8 +20,10 @@ import sys
 import UT2.modify_T2resid_T4Qf1 as qf1
 import UT2.modify_T2resid_T4Qf2 as qf2
 import UT2.modify_T2energy_pertQf as pertQf
-from numpy import linalg
+import UT2.modifyAmps as modifyAmps
 
+from numpy import linalg
+import re
 
 
 def get_calc(storedInfo,calc_list):
@@ -107,9 +109,6 @@ class UltT2CC():
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
         self.t_base={}
-        print(self.nvrta)
-        self.contractInfo={"nocc":self.nocca,"nvir":self.nvrta,"tamps":self.tamps["t2aa"],"ints":self.ints["tei"],"oa":self.sliceInfo["occ_aa"],"va":self.sliceInfo["virt_aa"]}
-        self.pertOrder=extract_integer(self.cc_type)
 
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
@@ -146,8 +145,9 @@ class UltT2CC():
             self.tamps=tamps
             self.resid=resid
 
-        #elif "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
-        
+        self.contractInfo={"nocc":self.nocca,"nvir":self.nvrta,"tamps":self.tamps["t2aa"],"ints":self.ints["tei"],"oa":self.sliceInfo["occ_aa"],"va":self.sliceInfo["virt_aa"]}
+        self.pertOrder=extract_integer(self.cc_type)
+
 
     
     def set_tamps(self,tamps_spin,label=None):
@@ -198,6 +198,10 @@ class UltT2CC():
         """
         Handles final printing when CC iterations are converged. Also extract perturbative corrections based on converged T ampltitudes (ie CCD(Qf) ) if necessary
         
+        :param nucE: nuclear repulsion energy
+        :param current_energy: Current value for the (CCD-like) correlation energy ONLY
+        :param hf_energy: Energy associated with SCF
+
         """
         print("\n\n\n")
         print("************************************************************")
@@ -211,7 +215,7 @@ class UltT2CC():
         if self.cc_type != "CCD(Qf)":
             corrE=nucE+current_energy-hf_energy
             print('Correlation energy, without perturbative effects: \t {: 20.12f}'.format(corrE))
-            corrE=nucE+current_energy
+            #corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
         if self.cc_type == "CCD(Qf)" or self.cc_type == "CCD(Qf*)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)":
@@ -233,11 +237,12 @@ class UltT2CC():
             corrE=qf_corr
 
         if UT2_run:
-            corrE=t2energySlow.ccd_energyMain(self,get_perturbCorr=True)
-            print('ut2 corrE:',corrE)
-            tfinalEnergy=nucE+corrE
-            perturbE=corrE-current_energy
-            print("UT2-CCD perturbative energy correction: \t {: 20.12f}".format(perturbE))
+            # Total correlation energy is the base CCD energy plus the perturbative correction to the energy
+            ut2_energy=t2energySlow.ccd_energyMain(self,get_perturbCorr=True)
+            print('Perturbative energy correction associated with UT2 method: \t {: 20.12f}'.format(ut2_energy))
+            corrE+=ut2_energy
+            print('Total correlation energy (CCD E + UT2-CCD(n) E): \t {: 20.12f}'.format(corrE))
+            tfinalEnergy=current_energy+nucE+corrE
 
         self.tfinalEnergy=tfinalEnergy
         self.corrE=corrE
