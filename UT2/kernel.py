@@ -87,7 +87,10 @@ class UltT2CC():
         self.sliceInfo=storedInfo.get_occSliceInfo()
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
+        self.t_base={}
         print(self.nvrta)
+        self.contractInfo={"nocc":self.nocca,"nvir":self.nvrta,"tamps":self.tamps["t2aa"],"ints":self.ints["tei"],"oa":self.sliceInfo["occ_aa"],"va":self.sliceInfo["virt_aa"]}
+
 
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
@@ -127,7 +130,7 @@ class UltT2CC():
         #elif "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
         
 
-
+    
     def set_tamps(self,tamps_spin,label=None):
         """
         Updates the set of T amplitudes. Options for specific amplitudes (ie T2aa) or simply stores a dictionary of T amplitude information.
