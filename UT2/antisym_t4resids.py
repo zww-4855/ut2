@@ -44,7 +44,7 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     with open('roooovvvv_t4_third.pickle', 'wb') as handle:
         pickle.dump(Roooovvvv_t2_dump, handle) 
 
-    if ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type == "CCDQf*":# tack on the W-2 T2^3 contrib to T4
+    if ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type == "UT2-CCD(6)" or ccd_kernel.cc_type == "CCDQf*":# tack on the W-2 T2^3 contrib to T4
         Roooovvvv_t23 = -0.031250000 * np.einsum("imab,jncd,klef,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
         Roooovvvv_t23 += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
         Roooovvvv_t23 += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
