@@ -9,8 +9,7 @@ import UT2.modify_T2resid_T4Qf1Slow as t4resids
 import UT2.antisym_t4resids as antisym
 import UT2.xccd_resid as xccd_resid
 import re
-import UT2.modifyAmps as modifyAmps
-
+import UT2.kernel as kernel
 
 def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     """
@@ -95,9 +94,10 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
                                      
         totalEcorr=qf_corr+order_7E+order_8E+order_9E
 
-        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
-        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
+        amp_obj=kernel.BuildBaseAmps(ccd_kernel)
+        contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)
         energy_list=[]
+        print('ccd pertorder:',ccd_kernel.pertOrder)
         # Extract the energy corrections order-by-order
         for order in ccd_kernel.pertOrder: 
             amp_obj.buildXCCDbase(order)
@@ -138,16 +138,19 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
 
 
-        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
-        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
+        amp_obj=kernel.BuildBaseAmps(ccd_kernel)
+        contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)
         energy_list=[]
+        print('ccd pertorder:',ccd_kernel.pertOrder)
         # Extract the energy corrections order-by-order
+        factorization=False # Need to specify contracting with final T2^dag instead of Wn-2
         for order in ccd_kernel.pertOrder:
             amp_obj.buildXCCDbase(order)
-            energy=contract_amp_obj.buildXCCD_T2energy(order)
+            energy=contract_amp_obj.buildXCCD_T2energy(order,factorization)
             energy_list.append(energy)
 
         print('list of class-based energies order by order:',energy_list)
+
         print('list of original energies: ',order_5_6_E,order_7E)
         return XCCD_energy
     else:    

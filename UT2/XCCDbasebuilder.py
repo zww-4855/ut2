@@ -1,7 +1,9 @@
 import numpy as np
-import UT2.antisym_t4resids as antisym_t4_residual
+import UT2.antisym_t4resids as antisym
+import pickle
+from numpy import einsum
 
-def build_XCCDbase(t2_aa,order,contractInfo={})
+def build_XCCDbase(t2_aa,order,contractInfo={}):
     """
     Builds the appropriate T2 base, which depends on contractions with T2^\dag and products of HnT2
 
@@ -14,12 +16,12 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
     nocc=contractInfo["nocc"]
     nvir=contractInfo["nvir"]
     t=t2_aa.transpose(2,3,0,1)
-    t2_dag=t2_aa #contractInfo["tamps"]
+    t2_dag=t #contractInfo["tamps"]
 
     g=contractInfo["ints"]
     o=contractInfo["oa"]
     v=contractInfo["va"]
-
+    print('nocc,nvirt orbs', nocc,nvir)
     Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
     v_oo=g[o,o,o,o]
     v_vo=g[o,v,o,v]
@@ -32,12 +34,13 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
         Roooovvvv += -0.250000000 * np.einsum("imab,jkce,lemd->ijklabcd",t,t,v_vo,optimize="optimal")
         Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
 
-        t4=antisym_t4_residual(Roooovvvv,nocc,nvir)
+        t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         with open('roooovvvv_t4_third.pickle', 'wb') as handle:
             pickle.dump(t4, handle)
-
-        t4=t4.transpose(4,5,6,7,0,1,2,3)
-        resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
+        t4T=t4.transpose(4,5,6,7,0,1,2,3)
+        print(t4.shape,Roooovvvv.shape,t4T.shape,t4.transpose(4,5,6,7,0,1,2,3).shape)
+        print(t2_dag.shape)
+        resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4T)
 
     elif order == 6:
         # construct T2^\dag [Wn_2 T2^3/3!]c
@@ -45,7 +48,7 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
         Roooovvvv += 0.250000000 * np.einsum("imab,jkce,lndf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
         Roooovvvv += -0.031250000 * np.einsum("mnab,ijce,kldf,efmn->ijklabcd",t,t,t,v_m2,optimize="optimal")
 
-        t4=antisym_t4_residual(Roooovvvv,nocc,nvir)
+        t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
         resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
@@ -56,17 +59,17 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
             t4=pickle.load(handle)
 
         Roooovvvv = get_xcc7residual(nocc,nvir,t4,t2,t2_dag)
-        t4=antisym_t4_residual(Roooovvvv,nocc,nvir)
+        t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
         resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
     elif order == 8:
-
+        pass
 
 
 
     elif order == 9:
-
+        pass
 
     else:
         print("The specified order for XCCD is not implemented! Please chhoose from orders 5-9.")

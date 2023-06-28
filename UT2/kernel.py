@@ -20,10 +20,12 @@ import sys
 import UT2.modify_T2resid_T4Qf1 as qf1
 import UT2.modify_T2resid_T4Qf2 as qf2
 import UT2.modify_T2energy_pertQf as pertQf
-import UT2.modifyAmps as modifyAmps
 
 from numpy import linalg
 import re
+from numpy import einsum
+import numpy as np
+import UT2.XCCDbasebuilder as XCCDbasebuilder
 
 
 def get_calc(storedInfo,calc_list):
@@ -61,18 +63,20 @@ def extract_integer(string):
     :param string: Method being currently run
     :return: Either a list of sequential integers between [5-n] for maximum n=9, or None if a CCD calculation is specified.
     """
-    match = re.search(r'\d+', string)
-    print(int(match.group()) if match else None)
-    value= (int(match.group()) if match else None)
-    print(value)
+    tmp=string.split()
+    store=[]
+    print(tmp)
+    for val in string:
+        print(val)
+        try:
+            store.append(int(val))
+        except:
+            pass
+    print(store)
     pertOrder=[]
-    if value:
-        for i in range(5,value+1):
-            pertOrder.append(i)
-        return pertOrder
-    else:
-        return None
-
+    for i in range(5,store[-1:][0]+1):
+        pertOrder.append(i)
+    return pertOrder
 
 
 class UltT2CC():
@@ -148,7 +152,7 @@ class UltT2CC():
 
         self.contractInfo={"nocc":self.nocca,"nvir":self.nvrta,"tamps":self.tamps["t2aa"],"ints":self.ints["tei"],"oa":self.sliceInfo["occ_aa"],"va":self.sliceInfo["virt_aa"]}
         self.pertOrder=extract_integer(self.cc_type)
-
+        print(self.pertOrder,self.cc_type)
 
     
     def set_tamps(self,tamps_spin,label=None):
@@ -243,7 +247,7 @@ class UltT2CC():
             print('Perturbative energy correction associated with UT2 method: \t {: 20.12f}'.format(ut2_energy))
             corrE+=ut2_energy
             print('Total correlation energy (CCD E + UT2-CCD(n) E): \t {: 20.12f}'.format(corrE))
-            tfinalEnergy=current_energy+nucE+corrE
+            tfinalEnergy=current_energy+nucE+ut2_energy
 
         self.tfinalEnergy=tfinalEnergy
         self.corrE=corrE
@@ -347,3 +351,84 @@ class UltT2CC():
         self.finalize(self.nucE,current_energy,self.hf_energy)
  
         return self.tamps,self.tfinalEnergy, self.corrE
+
+
+
+class BuildBaseAmps():
+    """
+    Constructs the base amplitudes for a given method (ie XCCD(n), UCCD(n), or perturbatively corrected CC theory
+
+    :param UltT2CC.t_base: A dictionary containing the base amplitudes
+    :return: Sets the  t_base parameters in parent UltT2CC class
+    """
+    def __init__(self,UltT2CC):
+        self.t_base={}
+        self.UltT2CC=UltT2CC
+        self.contractInfo=UltT2CC.contractInfo
+        self.t_amps=None
+
+    def buildXCCDbase(self, order=5):
+        """
+    Constructs the base T2 amplitudes for XCCD(5-9) and sets them to the UltT2CC class parameter for later use
+
+    :param order: XCCD order
+        """
+        t2 = self.UltT2CC.tamps["t2aa"]
+        self.t_base = XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
+        #UltT2CC.t_base.update({order:t_base})
+        return self.t_base
+
+
+    def buildUCCDbase(self,order=5):
+        pass
+
+
+
+
+class ContractAdjointAmps():
+    def __init__(self,UltT2CC):
+        self.result={}
+        self.UltT2CC=UltT2CC
+        self.contractInfo=UltT2CC.contractInfo
+        self.sliceInfo=UltT2CC.sliceInfo
+        self.g=UltT2CC.contractInfo["ints"]
+
+    def buildXCCD_T2residEqns(self,order=5):
+        """
+    Returns the XCCD(order) modification to the T2 residual equations
+
+    :param order: order of XCCD
+
+    :return: Modification to the T2 residual eqns are the given order
+        """
+        t2_resid = UltT2CC.t_base[order]
+        return t2_resid
+
+    def buildXCCD_T2energy(self,order=5, factorization=True):
+        """
+    Returns XCCD-like corrections to the energy. Note, that this can be in the style of CCSDT(Qf) where we cap with T2^\dag and one W-2, or it can be in style of XCCD where we simply cap with all T2^\dag
+
+    :param order: order of XCCD
+    :factorization: Boolean variable that determines if we cap with a final W-2 (True) or a T2^\dag (False). Default is False.
+
+    :return: XCCD-like energy correction at some order
+        """
+        t2=self.UltT2CC.tamps["t2aa"]
+        #follow CCSDT(Qf) route to calculate energy 
+        if factorization == True:
+            g=self.g #UltT2CC.ints["tei"]
+            D2=self.UltT2CC.denom["D2aa"]
+            oa=self.sliceInfo["occ_aa"]
+            va=self.sliceInfo["virt_aa"]
+            t2_dag = g[va,va,oa,oa] * D2
+            t2_dag1 = t2_dag.transpose(2,3,0,1)
+
+        else:# Do XCCD-like correction
+            t2_dag=t2.transpose(2,3,0,1)
+
+        t2_order=XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
+        t2energy_mod = (1.0/4.0)*einsum("ijab,abij",t2_dag1,t2_order)
+
+        self.result.update({order:t2energy_mod})
+        return t2energy_mod
+
