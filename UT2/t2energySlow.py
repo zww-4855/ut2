@@ -136,6 +136,19 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
             order_9E=(1.0/96.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT22T4)
 
         XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
+
+
+        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
+        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
+        energy_list=[]
+        # Extract the energy corrections order-by-order
+        for order in ccd_kernel.pertOrder:
+            amp_obj.buildXCCDbase(order)
+            energy=contract_amp_obj.buildXCCD_T2energy(order)
+            energy_list.append(energy)
+
+        print('list of class-based energies order by order:',energy_list)
+        print('list of original energies: ',order_5_6_E,order_7E)
         return XCCD_energy
     else:    
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 

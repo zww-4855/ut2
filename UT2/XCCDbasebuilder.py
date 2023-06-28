@@ -33,6 +33,9 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
         Roooovvvv += -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
 
         t4=antisym_t4_residual(Roooovvvv,nocc,nvir)
+        with open('roooovvvv_t4_third.pickle', 'wb') as handle:
+            pickle.dump(t4, handle)
+
         t4=t4.transpose(4,5,6,7,0,1,2,3)
         resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
@@ -48,8 +51,14 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
 
     elif order == 7:
         # construct [T2^\dag T2^\dag [W0T2^3/3!]]c
+        t4=np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+        with open('roooovvvv_t4_third.pickle', 'rb') as handle:
+            t4=pickle.load(handle)
 
-
+        Roooovvvv = get_xcc7residual(nocc,nvir,t4,t2,t2_dag)
+        t4=antisym_t4_residual(Roooovvvv,nocc,nvir)
+        t4=t4.transpose(4,5,6,7,0,1,2,3)
+        resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
     elif order == 8:
 
@@ -64,4 +73,20 @@ def build_XCCDbase(t2_aa,order,contractInfo={})
         sys.exit()
 
     return resid_aaaa
+
+
+def get_xcc7residual(nocc,nvir,t4,t2,t_dag):
+    # contributions to the residual
+    roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    roooovvvv += -0.020833333 * np.einsum("imab,jklncdef,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += 0.002604167 * np.einsum("mnab,ijklcdef,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += -0.020833333 * np.einsum("ijae,klmnbcdf,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += 0.027777778 * np.einsum("imae,jklnbcdf,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += -0.003472222 * np.einsum("mnae,ijklbcdf,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += 0.002604167 * np.einsum("ijef,klmnabcd,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    roooovvvv += -0.003472222 * np.einsum("imef,jklnabcd,efmn->ijklabcd",t["oovv"],t["oooovvvv"],t_dag["vvoo"],optimize="optimal")
+    return roooovvvv
+
+
+
 
