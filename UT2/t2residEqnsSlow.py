@@ -5,6 +5,7 @@ import numpy as np
 
 
 import UT2.antisym_t4resids as antisym
+import UT2.kernel as kernel
 
 def residMain(ccd_kernel):
     """
@@ -53,14 +54,11 @@ def residMain(ccd_kernel):
 
     # determine if we need to augment the CCD T2 equations with terms from XCCD(n)
     if ccd_kernel.xccd_resids:
-        amp_obj=modifyAmps.BuildBaseAmps(ccd_kernel)
-        contract_amp_obj=modifyAmps.ContractAdjointAmps(ccd_kernel)
-        amp_list=[]
-        # gather the modifications to T2 residual eqns order-by-order
+        resid_aaaaBKUP=resid_aaaa
+        amp_obj=kernel.BuildBaseAmps(ccd_kernel)
         for order in ccd_kernel.pertOrder:
-            t_tmp=amp_obj.buildXCCDbase(order)
-            amp_list.append(t_tmp)
-            #resid_aaaa+=t_tmp
+            amp_obj.buildXCCDbase(order)
+            resid_aaaaBKUP+=amp_obj.t_base[order]
     
     #if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
     resid_mod=[ccd_kernel.pert_wvfxn_corr]
@@ -138,6 +136,14 @@ def residMain(ccd_kernel):
         qf2_aaaa = qf2.residQf2_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
 
         resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
+
+    norm=0.0
+    for a in range(nvirt):
+        for b in range(nvirt):
+            for i in range(nocc):
+                for j in range(nocc):
+                    norm+=abs(abs(resid_aaaa[a,b,i,j])-abs(resid_aaaaBKUP[a,b,i,j]))**2
+    print('Norm of the differences between XCCD orig and new', norm,np.sqrt(norm))
 
 
     resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa

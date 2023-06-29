@@ -100,7 +100,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         print('ccd pertorder:',ccd_kernel.pertOrder)
         # Extract the energy corrections order-by-order
         for order in ccd_kernel.pertOrder: 
-            amp_obj.buildXCCDbase(order)
+            #amp_obj.buildXCCDbase(order)
             energy=contract_amp_obj.buildXCCD_T2energy(order)
             energy_list.append(energy)
  
@@ -115,19 +115,19 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         baseCCDE=ccdEnergy(t2_aaaa,fock,tei,oa,va)
         energy_mod=extract_integer(ccd_kernel.cc_type)
         xcc_t2Dag=t2_aaaa.transpose(2,3,0,1)
-        if energy_mod <= 6:
+        if energy_mod >= 6:
             t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
 
             antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
             order_5_6_E=(1.0/32.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,antisym_t4_resid)
 
-        if energy_mod <= 7:
+        if energy_mod >= 7:
             t4_t2DagWT23=xccd_resid.xccd_7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
             t4_t2DagWT23=t4_t2DagWT23.transpose(4,5,6,7,0,1,2,3)
             order_7E=(1.0/128.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT23)
 
-        if energy_mod <= 8:
-            order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,t22_dag,oa,va,nocc,nvirt)
+        if energy_mod >= 8:
+            order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,xcc_t2Dag,oa,va,nocc,nvirt)
 
 
         if energy_mod == 9:

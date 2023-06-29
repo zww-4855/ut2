@@ -114,6 +114,7 @@ class UltT2CC():
         self.ints=storedInfo.get_integralInfo()
         self.l2={}
         self.t_base={}
+        self.XCCDflag="XCCD" in self.cc_type
         self.xccd_resids="X" in self.cc_type # Boolean that when turned on, modifies the CCD T2 residual equations according to the order of XCCD
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
@@ -279,7 +280,6 @@ class UltT2CC():
 
         for idx in range(self.max_iter):
             self.set_l2amps()
-            #self.l2={"l2aa":self.tamps["t2aa"].transpose(2,3,0,1),"l2bb":self.tamps["t2bb"].transpose(2,3,0,1),"l2ab":self.tamps["t2ab"].transpose(2,3,0,1)}
 
             # Updates all of aaaa,abab,bbbb spin residuals
             if self.cc_label == "ccdType":
@@ -327,7 +327,6 @@ class UltT2CC():
             elif self.cc_label == "fullCCType":
                 current_energy = fullCCenergy.fullCC_energyMain(self)
 
-#            current_energy = t2energy.ccd_energyMain(self)
             delta_e = np.abs(old_energy - current_energy)
 
             print(
@@ -358,7 +357,7 @@ class BuildBaseAmps():
     """
     Constructs the base amplitudes for a given method (ie XCCD(n), UCCD(n), or perturbatively corrected CC theory
 
-    :param UltT2CC.t_base: A dictionary containing the base amplitudes
+    :param UltT2CC: The CC object containing all pertinent data structures such as T amplitudes, energy denominators, etc 
     :return: Sets the  t_base parameters in parent UltT2CC class
     """
     def __init__(self,UltT2CC):
@@ -374,9 +373,8 @@ class BuildBaseAmps():
     :param order: XCCD order
         """
         t2 = self.UltT2CC.tamps["t2aa"]
-        self.t_base = XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
-        #UltT2CC.t_base.update({order:t_base})
-        return self.t_base
+        resid = XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
+        self.t_base.update({order:resid})
 
 
     def buildUCCDbase(self,order=5):
@@ -386,6 +384,12 @@ class BuildBaseAmps():
 
 
 class ContractAdjointAmps():
+    """
+    Contracts the base amplitudes of a given method (ie XCCD(n), UCCD(n) with either T^daggers or 2e- integrals. One choice of capping the base amplitudes is made after it has been determined whether to rigorously invoke the factorization theorem
+
+    :param UltT2CC: The CC object containing all pertinent data structures such as T amplitudes, energy denominators, etc
+    :return: Returns a calculated energy, or a dictionary of T amplitudes, depending on whether we are trying to modify the residual eqns or simply calculate an energy.  
+    """
     def __init__(self,UltT2CC):
         self.result={}
         self.UltT2CC=UltT2CC
@@ -393,16 +397,6 @@ class ContractAdjointAmps():
         self.sliceInfo=UltT2CC.sliceInfo
         self.g=UltT2CC.contractInfo["ints"]
 
-    def buildXCCD_T2residEqns(self,order=5):
-        """
-    Returns the XCCD(order) modification to the T2 residual equations
-
-    :param order: order of XCCD
-
-    :return: Modification to the T2 residual eqns are the given order
-        """
-        t2_resid = UltT2CC.t_base[order]
-        return t2_resid
 
     def buildXCCD_T2energy(self,order=5, factorization=True):
         """
@@ -424,7 +418,7 @@ class ContractAdjointAmps():
             t2_dag1 = t2_dag.transpose(2,3,0,1)
 
         else:# Do XCCD-like correction
-            t2_dag=t2.transpose(2,3,0,1)
+            t2_dag1=t2.transpose(2,3,0,1)
 
         t2_order=XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
         t2energy_mod = (1.0/4.0)*einsum("ijab,abij",t2_dag1,t2_order)
