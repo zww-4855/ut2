@@ -144,15 +144,18 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         print('ccd pertorder:',ccd_kernel.pertOrder)
         # Extract the energy corrections order-by-order
         factorization=False # Need to specify contracting with final T2^dag instead of Wn-2
+        TotalE=0.0
         for order in ccd_kernel.pertOrder:
             amp_obj.buildXCCDbase(order)
             energy=contract_amp_obj.buildXCCD_T2energy(order,factorization)
             energy_list.append(energy)
+            TotalE+=energy
 
         print('list of class-based energies order by order:',energy_list)
-
+        print('\n\n here')
+        print('compare sum:',sum(energy_list),TotalE)
         print('list of original energies: ',order_5_6_E,order_7E)
-        return XCCD_energy
+        return sum(energy_list) #XCCD_energy
     else:    
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
 

@@ -28,7 +28,7 @@ def residMain(ccd_kernel):
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 
- 
+    resid_aaaaBKUP = np.zeros((nvirt,nvirt,nocc,nocc))
 
 #    g_aaaa=tei["g_aaaa"]
 
@@ -137,6 +137,7 @@ def residMain(ccd_kernel):
 
         resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
 
+    
     norm=0.0
     for a in range(nvirt):
         for b in range(nvirt):

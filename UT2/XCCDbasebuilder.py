@@ -58,14 +58,18 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
         with open('roooovvvv_t4_third.pickle', 'rb') as handle:
             t4=pickle.load(handle)
 
-        Roooovvvv = get_xcc7residual(nocc,nvir,t4,t2,t2_dag)
+        Roooovvvv = get_xcc7residual(nocc,nvir,t4,t,t2_dag.transpose(2,3,0,1))
         t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
-        resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
+        resid_aaaa = (1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
     elif order == 8:
-        pass
+        t4=get_xcc8residual(nocc,nvir,t,t2_dag.transpose(2,3,0,1),v_m2)
+        t4=antisym.antisym_t4_residual(t4,nocc,nvir)
+        t4=t4.transpose(4,5,6,7,0,1,2,3)
 
+        resid_aaaa=(1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)    
+        
 
 
     elif order == 9:
@@ -73,10 +77,10 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
         with open('roooovvvv_t4_third.pickle', 'rb') as handle:
             t4=pickle.load(handle)
 
-        Roooovvvv = get_xcc9residual(nocc,nvir,t4,t2,t2_dag)
+        Roooovvvv = get_xcc9residual(nocc,nvir,t4,t2,t2_dag.transpose(2,3,0,1))
         t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
-        resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
+        resid_aaaa = (1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
 
     else:
@@ -109,6 +113,43 @@ def get_xcc7residual(nocc,nvir,t4,t2,t_dag):
     return roooovvvv
 
 
+
+def get_xcc8residual(nocc,nvir,t,t_dag,g):
+    """
+    Constructs the XCCD(8) diagram, in a form looking like a net T4
+
+    :param nocc: Number of occupied orbitals
+    :param nvir: Number of virtual orbitals
+    :param t4: Third order net-T4 constructed at the XCCD(5) level
+    :param t2: T2 amplitude
+    :param t_dag: Adjoint of the T2 amplitude
+
+    :return: XCCD(8) net-T4 like amplitude for contraction against T2^t
+    """
+
+    roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
+    roooovvvv += 0.031250000 * np.einsum("imab,jncd,klef,ghop,eogh,fpmn->ijklabcd",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.062500000 * np.einsum("imab,jncd,kefg,lhop,foeh,gpmn->ijklabcd",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.125000000 * np.einsum("imab,ncde,jkfg,lhop,fonh,gpmc->ijklabde",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imab,jkce,lndf,ghop,opng,efmh->ijklabcd",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imab,jkce,lndf,ghop,fogh,epmn->ijklabcd",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.062500000 * np.einsum("imab,jkce,ndfg,lhop,opnd,egmh->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.250000000 * np.einsum("imab,jkce,ndfg,lhop,gonh,epmd->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.125000000 * np.einsum("imab,jnce,kdfg,lhop,opnd,egmh->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.500000000 * np.einsum("imab,jnce,kdfg,lhop,gonh,epmd->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.250000000 * np.einsum("imab,jnce,dfgh,klop,hond,epmf->ijklabcg",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("imab,ncde,jfgh,klop,honc,epmf->ijklabdg",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.015625000 * np.einsum("mnab,cdef,ijgh,klop,gomc,hpnd->ijklabef",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.031250000 * np.einsum("mnab,ijce,kldf,ghop,opmg,efnh->ijklabcd",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.125000000 * np.einsum("mnab,ijce,kdfg,lhop,opmd,egnh->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.250000000 * np.einsum("mnab,ijce,kdfg,lhop,gomh,epnd->ijklabcf",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.125000000 * np.einsum("mnab,ijce,dfgh,klop,homd,epnf->ijklabcg",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.250000000 * np.einsum("mnab,icde,jfgh,klop,homc,epnf->ijklabdg",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.062500000 * np.einsum("ijae,klbf,mncd,ghop,dpmg,efnh->ijklabco",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.500000000 * np.einsum("ijae,kmbf,lncd,ghop,dpmg,efnh->ijklabco",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += -0.125000000 * np.einsum("ijae,mnbf,kcdg,lhop,gpmn,efch->ijklabdo",t,t,t,t,t_dag,g,optimize="optimal")
+    roooovvvv += 0.250000000 * np.einsum("imae,jnbf,kcdg,lhop,gpmn,efch->ijklabdo",t,t,t,t,t_dag,g,optimize="optimal")
+    return roooovvvv
 
 def get_xcc9residual(nocc,nvir,t4,t2,t_dag):
     """

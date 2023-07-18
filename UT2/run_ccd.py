@@ -162,7 +162,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
     elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
-        cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
+        cc_runtype.update({"diis_size":5, "diis_start_cycle":5})
 
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()

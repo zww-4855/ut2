@@ -73,6 +73,8 @@ def extract_integer(string):
         except:
             pass
     print(store)
+    if not store:
+        return None
     pertOrder=[]
     for i in range(5,store[-1:][0]+1):
         pertOrder.append(i)

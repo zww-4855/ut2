@@ -65,9 +65,189 @@ def unsym_residQf1(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
 #    finalTest=np.einsum('ijab,abij',t2_FO_dagger,Roovv_anti)
 #    print('tested Qf energy:',finalTest,finalTest/8.0)
     Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvir)
+
+    calculate_t4intermediateE(t,v_vv,g[o,o,v,v],g,nocc,nvir)
+    fifth_orderINTERMEDmain(t,v_vv,v_m2,nocc,nvir)
+    write_fifthO_loop(t,g,nocc,nvir)
     return Roooovvvv
 
 
+def write_fifthO_loop(t2,g,nocc,nvirt):
+    AA=np.zeros((nocc,nocc,nvirt,nvirt,nvirt,nvirt))
+    for i in range(nocc):
+        for j in range(nocc):
+            for f in range(nvirt):
+                for a in range(nvirt): 
+                    for b in range(nvirt):
+                        for c in range(nvirt):
+                            AA[i,j,f,a,b,c]=0.0
+                            for e in range(nvirt):
+                                AA[i,j,f,a,b,c]+=(t2[i,j,a,e]*g[e,f,b,c]-t2[i,j,b,e]*g[e,f,a,c]-t2[i,j,c,e]*g[e,f,b,a])
+
+
+    SS=np.zeros((nvirt,nvirt))
+    
+    for f in range(nvirt):
+        for c in range(nvirt):
+            for i in range(nocc):
+                for j in range(nocc):
+                    for a in range(nvirt):
+                        for b in range(nvirt):
+                            SS[f,c]+=0.25*(AA[i,j,a,b,c,f]*g[i,j,a,b])
+
+
+    BB=np.zeros((nocc,nocc,nvirt,nvirt))
+    for k in range(nocc):
+        for l in range(nocc):
+            for c in range(nvirt):
+                for d in range(nvirt):
+                    for f in range(nvirt):
+                        BB+=(SS[f,c]*t2[k,l,f,d]-SS[f,d]*t2[k,l,f,c])
+#                    BB[k,l,c,d]-=BB[k,l,d,c]
+
+#    BB=BB-np.einsum('klcd->kldc',BB)
+
+    energy=0.0
+    for k in range(nocc):
+        for l in range(nocc):
+            for c in range(nvirt):
+                for d in range(nvirt):
+                    energy+=(1.0/4.0)*(BB[k,l,c,d]*g[c,d,k,l])
+
+
+    print('energy is: ',energy)
+  
+
+    
+                 
+
+
+def antisymmetrize_residual_2_2(Roovv, nocc, nvir):
+    # antisymmetrize the residual
+    Roovv_anti = np.zeros((nocc, nocc, nvir, nvir))
+    Roovv_anti += np.einsum("ijab->ijab", Roovv)
+    Roovv_anti -= np.einsum("ijab->jiab", Roovv)
+    Roovv_anti -= np.einsum("ijab->ijba", Roovv)
+    Roovv_anti += np.einsum("ijab->jiba", Roovv)
+    return Roovv_anti
+
+def antisym_A(A,nocc,nvirt):
+    A_vvv_voo =  1 * np.einsum("ijabcf->ijabcf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->ijacbf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->ijbacf", A)
+    A_vvv_voo +=  1 * np.einsum("ijabcf->ijbcaf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->ijcbaf", A)
+    A_vvv_voo +=  1 * np.einsum("ijabcf->ijcabf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->jiabcf", A)
+    A_vvv_voo +=  1 * np.einsum("ijabcf->jiacbf", A)
+    A_vvv_voo +=  1 * np.einsum("ijabcf->jibacf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->jibcaf", A)
+    A_vvv_voo +=  1 * np.einsum("ijabcf->jicbaf", A)
+    A_vvv_voo +=  -1 * np.einsum("ijabcf->jicabf", A)
+    return A_vvv_voo
+
+def antisym_T3(Roooovvvv):
+    Roooovvvv_anti =  1 * np.einsum("ijabcd->ijabcd", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijabdc", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijacbd", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijacdb", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijadcb", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijadbc", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijbacd", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijbadc", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijbcad", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijbcda", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijbdca", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijbdac", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijcbad", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijcbda", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijcabd", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijcadb", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijcdab", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijcdba", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijdbca", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijdbac", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijdcba", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijdcab", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->ijdacb", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->ijdabc", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jiabcd", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jiabdc", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jiacbd", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jiacdb", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jiadcb", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jiadbc", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jibacd", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jibadc", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jibcad", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jibcda", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jibdca", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jibdac", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jicbad", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jicbda", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jicabd", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jicadb", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jicdab", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jicdba", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jidbca", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jidbac", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jidcba", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jidcab", Roooovvvv)
+    Roooovvvv_anti +=  -1 * np.einsum("ijabcd->jidacb", Roooovvvv)
+    Roooovvvv_anti +=  1 * np.einsum("ijabcd->jidabc", Roooovvvv)
+    return Roooovvvv_anti
+
+def fifth_orderINTERMEDmain(t2,v_vv,v_vo,nocc,nvirt):
+    A_abc_ijf=-0.250000000 * np.einsum("ijae,debc->ijdabc",t2,v_vv,optimize="optimal")
+    antiAA=A_abc_ijf #antisym_A(A_abc_ijf,nocc,nvirt)
+
+    S_c_f = -0.250000000 * np.einsum("ijbacd,cdij->ba",antiAA,v_vo,optimize="optimal")
+    
+    B_cd_kl= -0.500000000 * np.einsum("ca,ijbc->ijab",S_c_f,t2,optimize="optimal")
+
+    netT2=antisymmetrize_residual_2_2(B_cd_kl,nocc,nvirt)
+
+    energy=-0.250000000 * np.einsum("ijab,abij->",netT2,v_vo,optimize="optimal")
+ 
+    print("constructed INTERMEDIATE THRU WICKED: ",energy)
+
+def calculate_t4intermediateE(t,v_vv,v_m2,g,nocc,nvirt):
+    Roooovvvv = -0.062500000 * np.einsum("ijae,klbf,efcd->ijklabcd",t,t,v_vv,optimize="optimal")
+
+
+    Roooovvvv=antisym_t4_residual(Roooovvvv,nocc,nvirt)
+
+    energy=0.0
+    for i in range(nocc):
+        for j in range(nocc):
+            for k in range(nocc):  
+                for l in range(nocc):
+                    for d in range(nvirt):
+                        for c in range(nvirt):
+                            for b in range(nvirt):
+                                for a in range(nvirt):
+                                    energy+=Roooovvvv[i,j,k,l,a,b,c,d]*g[i,j,a,b]*g[k,l,c,d]
+
+    print('newest energyT4 loop:', energy,energy/32.0)
+
+
+    t4=Roooovvvv.transpose(4,5,6,7,0,1,2,3)
+    energy=np.einsum('klcd,ijab,abcdijkl->',v_m2,v_m2,t4[:,:,:,:,:,:,:,:])
+    print('t4INTERMEDIATE full E:',energy)
+    print('t4INTERMEDIATE rev E:',(1/32.0)*energy)
+
+    e=0.0
+    for a in range(nvirt):
+        for b in range(nvirt):
+            for c in range(nvirt):
+                for d in range(nvirt):
+                    for i in range(nocc):
+                        for j in range(nocc):
+                            for k in range(nocc):
+                                for l in range(nocc):
+                                    e+=t4[a,b,c,d,i,j,k,l]*g[i,j,a,b]*g[k,l,c,d]
+
+    print('e is: ',e,e/32.0)
 def xccd_6(ccd_kernel,g,t2_aa,o,v,nocc,nvir,g2=None):
     Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
     t=t2_aa.transpose(2,3,0,1)
