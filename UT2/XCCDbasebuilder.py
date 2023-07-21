@@ -21,7 +21,6 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
     g=contractInfo["ints"]
     o=contractInfo["oa"]
     v=contractInfo["va"]
-    print('nocc,nvirt orbs', nocc,nvir)
     Roooovvvv = np.zeros((nocc,nocc,nocc,nocc,nvir,nvir,nvir,nvir))
     v_oo=g[o,o,o,o]
     v_vo=g[o,v,o,v]
@@ -38,8 +37,6 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
         with open('roooovvvv_t4_third.pickle', 'wb') as handle:
             pickle.dump(t4, handle)
         t4T=t4.transpose(4,5,6,7,0,1,2,3)
-        print(t4.shape,Roooovvvv.shape,t4T.shape,t4.transpose(4,5,6,7,0,1,2,3).shape)
-        print(t2_dag.shape)
         resid_aaaa = (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4T)
 
     elif order == 6:
@@ -61,14 +58,14 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
         Roooovvvv = get_xcc7residual(nocc,nvir,t4,t,t2_dag.transpose(2,3,0,1))
         t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
-        resid_aaaa = (1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
+        resid_aaaa = (1.0/24.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
     elif order == 8:
         t4=get_xcc8residual(nocc,nvir,t,t2_dag.transpose(2,3,0,1),v_m2)
         t4=antisym.antisym_t4_residual(t4,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
 
-        resid_aaaa=(1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)    
+        resid_aaaa=(1.0/24.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)    
         
 
 
@@ -77,10 +74,10 @@ def build_XCCDbase(t2_aa,order,contractInfo={}):
         with open('roooovvvv_t4_third.pickle', 'rb') as handle:
             t4=pickle.load(handle)
 
-        Roooovvvv = get_xcc9residual(nocc,nvir,t4,t2,t2_dag.transpose(2,3,0,1))
+        Roooovvvv = get_xcc9residual(nocc,nvir,t4,t,t2_dag.transpose(2,3,0,1))
         t4=antisym.antisym_t4_residual(Roooovvvv,nocc,nvir)
         t4=t4.transpose(4,5,6,7,0,1,2,3)
-        resid_aaaa = (1.0/96.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
+        resid_aaaa = (1.0/24.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4)
 
 
     else:
