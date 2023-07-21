@@ -103,7 +103,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
 
 
-        amp_obj=kernel.BuildBaseAmps(ccd_kernel)
+        #amp_obj=kernel.BuildBaseAmps(ccd_kernel.contractInfo)
         contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)
         energy_list=[]
         print('ccd pertorder:',ccd_kernel.pertOrder)
@@ -111,7 +111,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         factorization=False # Need to specify contracting with final T2^dag instead of Wn-2
         TotalE=0.0
         for order in ccd_kernel.pertOrder:
-            amp_obj.buildXCCDbase(order)
+            #amp_obj.buildXCCDbase(order)
             energy=contract_amp_obj.buildXCCD_T2energy(order,factorization)
             energy_list.append(energy)
             TotalE+=energy
@@ -120,11 +120,33 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
         print('\n\n here')
         print('compare sum:',sum(energy_list),TotalE)
         print('list of original energies: ',order_5_6_E,order_7E)
-        return sum(energy_list) #XCCD_energy
+
+        testXCCenergy,test_energy_list=add_XCCenergy(factorization,ccd_kernel)
+        print('new function; XCC tot. energy:', testXCCenergy)
+        print('new function; XCC energy by orders:',test_energy_list)
+        return baseCCDE+sum(energy_list) #XCCD_energy
     else:    
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
 
 
+def add_XCCenergy(factorization,ccd_kernel):
+    '''
+    Determines the XCCD-like energy correction. If (Qf)-like correction is requested by factorization=True, then the final cap to build energy uses first-order T2; else, infinite-order (truly XCCD-like) T2^\dag is used to cap to build energy. 
+
+    :param factorization: Boolean that - when True - means that the energy returned will be contracted with a final, first-order T2^\dag. If False, then the energy contraction will use an infinite-order T2^\dag to contract. 
+
+    :param ccd_kernel: an instance of the UltT2CC class
+    :return: Returns the total calculated XCCD-like energy, and a list containing the energy associated with orders thru which the calculation has been specified. So, if XCCD(6) calcalation has been requested, then 'energy_list' returns the energy associated with the 5th and 6th order energy corrections. 
+ 
+    '''
+    contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)    
+    XCCenergy=0.0
+    energy_list=[]
+    for order in ccd_kernel.pertOrder:
+        energy=contract_amp_obj.buildXCCD_T2energy(order,factorization)
+        energy_list.append(energy)
+        XCCenergy+=energy
+    return XCCenergy,energy_list
 
 def extract_UT2(string):
     " Returns the -- UT2 -- from the method strings name, as in UT2-CCD(5), if it is present; otherwise returns None"
