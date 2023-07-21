@@ -362,19 +362,19 @@ class BuildBaseAmps():
     :param UltT2CC: The CC object containing all pertinent data structures such as T amplitudes, energy denominators, etc 
     :return: Sets the  t_base parameters in parent UltT2CC class
     """
-    def __init__(self,UltT2CC):
+    def __init__(self,contractInfo):
         self.t_base={}
-        self.UltT2CC=UltT2CC
-        self.contractInfo=UltT2CC.contractInfo
-        self.t_amps=None
+        #self.UltT2CC=UltT2CC
+        self.contractInfo=contractInfo #UltT2CC.contractInfo
+        #self.t_amps=None
 
-    def buildXCCDbase(self, order=5):
+    def buildXCCDbase(self, t2, order=5):
         """
     Constructs the base T2 amplitudes for XCCD(5-9) and sets them to the UltT2CC class parameter for later use
 
     :param order: XCCD order
         """
-        t2 = self.UltT2CC.tamps["t2aa"]
+        #t2 = self.UltT2CC.tamps["t2aa"]
         resid = XCCDbasebuilder.build_XCCDbase(t2,order,self.contractInfo)
         self.t_base.update({order:resid})
 
