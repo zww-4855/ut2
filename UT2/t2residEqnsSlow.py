@@ -29,17 +29,11 @@ def residMain(ccd_kernel):
     tei=ccd_kernel.ints["tei"]
 
     resid_aaaaBKUP = np.zeros((nvirt,nvirt,nocc,nocc))
-
-#    g_aaaa=tei["g_aaaa"]
-
     eabij_aa=ccd_kernel.denom["D2aa"]
 
- #   g={"aaaa":g_aaaa,"bbbb":g_bbbb,"abab":g_abab}
- #   t2={"aaaa":t2_aaaa,"bbbb":t2_bbbb,"abab":t2_abab}
- #   l2dic=ccd_kernel.get_l2amps()
- #   l2={"aaaa":l2dic["l2aa"],"bbbb":l2dic["l2bb"],"abab":l2dic["l2ab"]}
+
+    # construct the baseline pCCD or CCD residual equations
     if ccd_kernel.cc_type=="pCCD":
-        #resid_aaaa=pccd_t2resid(t2_aaaa, fock, tei, oa, va)
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
         if np.linalg.norm(ccd_kernel.tamps['t2aa']) > 10E-8:
             tmp=np.zeros((nvirt,nvirt,nocc,nocc ))
@@ -50,94 +44,45 @@ def residMain(ccd_kernel):
             resid_aaaa=tmp
     else: 
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
-
-
+         
     # determine if we need to augment the CCD T2 equations with terms from XCCD(n)
     if ccd_kernel.xccd_resids:
         resid_aaaaBKUP=resid_aaaa
-        amp_obj=kernel.BuildBaseAmps(ccd_kernel)
+        amp_obj=kernel.BuildBaseAmps(ccd_kernel.contractInfo)
         for order in ccd_kernel.pertOrder:
-            amp_obj.buildXCCDbase(order)
-            resid_aaaaBKUP+=amp_obj.t_base[order]
-    
-    #if ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
-    resid_mod=[ccd_kernel.pert_wvfxn_corr]
-    XCCD_run=5
-    try:
-        XCCD_run=int(ccd_kernel.pert_wvfxn_corr)
-    except:
-        XCCD_run=0
-    base_calc=ccd_kernel.cc_type
-    print('resid modification is: ', resid_mod,"Qf" in [resid_mod])
-    if "Qf" in resid_mod or "Qf*" in resid_mod or XCCD_run>=5 or base_calc == "CCDQf" or base_calc == "CCDQf*": 
-        import UT2.pdagq_t4resid as pdagq
-        print('modifying T2 ansate w/ T4 ish')
-        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+            amp_obj.buildXCCDbase(t2_aaaa,order)
+            resid_aaaa+=amp_obj.t_base[order]
+#            print('now changes')
+#            checksum(nvirt,nocc,resid_aaaaBKUP)
+#            checksum(nvirt,nocc,resid_aaaa)
+#            check_norms(nvirt,nocc,resid_aaaa,resid_aaaaBKUP)
 
-        antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
-        t2_dag=t2_aaaa*ccd_kernel.denom["D2aa"]
-        t2_dag=t2_aaaa.transpose(2,3,0,1)
-        xcc_t2Dag=t2_aaaa.transpose(2,3,0,1)
-        if XCCD_run>=5:
-            import UT2.xccd_resid as xccd_resid
-            modify_orders=[i for i in range(5,XCCD_run+1)]
-            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,antisym_t4_resid)
-            if 6 in modify_orders:
-                t4_t23=antisym.xccd_6(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
-                t4_t23=t4_t23.transpose(4,5,6,7,0,1,2,3)
-                resid_aaaa+=(1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,t4_t23
-)
-            if 7 in modify_orders:
-                t4_t2DagWT23=xccd_resid.xccd_7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
-                t4_t2DagWT23=t4_t2DagWT23.transpose(4,5,6,7,0,1,2,3)
-                resid_aaaa+=(1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,t4_t2DagWT23)
-               
-            if 8 in modify_orders:
-                resid_aaaa += xccd_resid.xccd8_resid(ccd_kernel,tei,None,t2_aaaa,xcc_t2Dag,oa,va,nocc,nvirt) 
 
-            if 9 in modify_orders: 
-                t4_t2DagWT22T4=xccd_resid.xccd9_resid(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
-                t4_t2DagWT22T4=t4_t2DagWT22T4.transpose(4,5,6,7,0,1,2,3)
-                resid_aaaa += (1.0/24.0)*einsum('klcd,abcdijkl',xcc_t2Dag,t4_t2DagWT22T4)
- 
-        else:
-            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
-        #trash,t4_resid=pdagq.t4_test_residual(t2_aaaa,tei,oa,va)
 
-#        tmp_t2=np.zeros((nvirt,nvirt,nocc,nocc))
-#        print(type(tmp_t2),type(t2_dag),type(t4_resid))
-#        for a in range(nvirt):
-#            for b in range(nvirt):
-#                for i in range(nocc): 
-#                    for j in range(nocc):
-#                        for k in range(nocc):
-#                            for l in range(nocc):
-#                                for c in range(nvirt):
-#                                    for d in range(nvirt):
-#                                        tmp_t2[a,b,i,j]+= t2_dag[k,l,c,d]*t4_resid[a,b,c,d,i,j,k,l]
-#
-#        tmp_t2=tmp_t2*(0.5)
-#        resid_aaaa+=tmp_t2
-        #resid_aaaa += (1.0/2.0)*einsum('klcd,abcdijkl->abij',t2_dag,t4_resid)
+# insert debug code at bottom of file here, if added checks are necessary
 
-    if ccd_kernel.cc_type == "CCDQf-1":
-        l2dic=ccd_kernel.get_l2amps()
-        l2=l2dic["l2aa"]
 
-        qf1_aaaa = qf1.residQf1_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
-        resid_aaaa += 0.5 * qf1_aaaa
+    resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa
+    final_resid={"resT2aa":resid_aaaa}
+    ccd_kernel.set_resid(final_resid)
+    t2amp={"t2aa":resid_aaaa*eabij_aa,"t2bb":resid_aaaa*0.0,"t2ab":resid_aaaa*0.0}#
+    ccd_kernel.set_tamps(t2amp)
+    return ccd_kernel
 
-    elif ccd_kernel.cc_type == "CCDQf-2":
-        l2dic=ccd_kernel.get_l2amps()
-        l2=l2dic["l2aa"]
 
-        qf1_aaaa = qf1.residQf1_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
+def checksum(nvirt,nocc,val):
+    total=0.0
+    maxval=0.0
+    for a in range(nvirt):
+        for b in range(nvirt):
+            for i in range(nocc):
+                for j in range(nocc):
+                    total+=(val[a,b,i,j])**2
+                    if abs(val[a,b,i,j])>maxval:
+                        maxval=abs(val[a,b,i,j])
+    print(total,maxval)
 
-        qf2_aaaa = qf2.residQf2_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
-
-        resid_aaaa += 0.5 * qf1_aaaa + (1.0 / 6.0) * qf2_aaaa
-
-    
+def check_norms(nvirt,nocc,resid_aaaa,resid_aaaaBKUP):
     norm=0.0
     for a in range(nvirt):
         for b in range(nvirt):
@@ -145,18 +90,6 @@ def residMain(ccd_kernel):
                 for j in range(nocc):
                     norm+=abs(abs(resid_aaaa[a,b,i,j])-abs(resid_aaaaBKUP[a,b,i,j]))**2
     print('Norm of the differences between XCCD orig and new', norm,np.sqrt(norm))
-
-
-    resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa
-
-    final_resid={"resT2aa":resid_aaaa}
-    ccd_kernel.set_resid(final_resid)
-
-    t2amp={"t2aa":resid_aaaa*eabij_aa,"t2bb":resid_aaaa*0.0,"t2ab":resid_aaaa*0.0}#
-    #t2amp={"t2aa":resid_aaaa*eabij_aa}
-    ccd_kernel.set_tamps(t2amp)
-
-    return ccd_kernel
 
 def pccd_t2resid(t2, f, g, o, v):
     doubles_res=einsum('aaii',g[v,v,o,o])
@@ -216,3 +149,49 @@ def ccd_t2residual(t2,f,g,o,v):
     doubles_res += -0.500000000000000 * einsum('lkcd,caij,dblk->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 2), (0, 1)])
     
     return doubles_res
+
+
+
+
+#### IN CASE DEBUGGING OF RESIDUAL EQNS IS NEEDED, THESE ALGOS SHOULD BE CORRECT
+
+#
+#    resid_mod=[ccd_kernel.pert_wvfxn_corr]
+#    XCCD_run=5
+#    try:
+#        XCCD_run=int(ccd_kernel.pert_wvfxn_corr)
+#    except:
+#        XCCD_run=0
+#    base_calc=ccd_kernel.cc_type
+#    print('resid modification is: ', resid_mod,"Qf" in [resid_mod],'XCCD_run',XCCD_run)
+#    if "Qf" in resid_mod or "Qf*" in resid_mod or XCCD_run>=5 or base_calc == "CCDQf" or base_calc == "CCDQf*":
+#        import UT2.pdagq_t4resid as pdagq
+#        print('modifying T2 ansate w/ T4 ish')
+#        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+#
+#        antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
+#        t2_dag=t2_aaaa*ccd_kernel.denom["D2aa"]
+#        t2_dag=t2_aaaa.transpose(2,3,0,1)
+#        xcc_t2Dag=t2_aaaa.transpose(2,3,0,1)
+#        if XCCD_run>=5:
+#            import UT2.xccd_resid as xccd_resid
+#            print('inside XCCD run')
+#            modify_orders=[i for i in range(5,XCCD_run+1)]
+#            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,antisym_t4_resid)
+#            if 6 in modify_orders:
+#                t4_t23=antisym.xccd_6(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+#                t4_t23=t4_t23.transpose(4,5,6,7,0,1,2,3)
+#                resid_aaaa+=(1.0/8.0)*einsum('klcd,abcdijkl->abij',xcc_t2Dag,t4_t23
+#)
+#
+#        else:
+#            print('inside modify T2')
+#            resid_aaaa += (1.0/8.0)*einsum('klcd,abcdijkl->abij',t2_dag,antisym_t4_resid)
+#
+#    print('ccd_kernel.cc_type',ccd_kernel.cc_type)
+#    if ccd_kernel.cc_type == "CCDQf-1":
+#        l2dic=ccd_kernel.get_l2amps()
+#        l2=l2dic["l2aa"]
+#
+#        qf1_aaaa = qf1.residQf1_aaaa(tei, l2, t2_aaaa, occaa, virtaa)
+#        resid_aaaa += 0.5 * qf1_aaaa
