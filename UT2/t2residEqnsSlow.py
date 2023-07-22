@@ -52,7 +52,6 @@ def residMain(ccd_kernel):
         for order in ccd_kernel.pertOrder:
             amp_obj.buildXCCDbase(t2_aaaa,order)
             resid_aaaa+=amp_obj.t_base[order]
-#            print('now changes')
 #            checksum(nvirt,nocc,resid_aaaaBKUP)
 #            checksum(nvirt,nocc,resid_aaaa)
 #            check_norms(nvirt,nocc,resid_aaaa,resid_aaaaBKUP)

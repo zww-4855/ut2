@@ -35,97 +35,33 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     XCCD_methods=["XCCD(5)","XCCD(6)","XCCD(7)","XCCD(8)","XCCD(9)"]
     XCCD_Flag=any(element in ccd_kernel.cc_type for element in XCCD_methods)
 
-    if get_perturbCorr==True:
-        t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
-        t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
+    if get_perturbCorr==True: 
+    # only returns perturbative energy corrections
         print('inside pert corr')
-        t2_FO_dag=tei[va,va,oa,oa]*ccd_kernel.denom["D2aa"]
-        t2_FO_dagger=t2_FO_dag.transpose(2,3,0,1)
-
-
         contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)
-        energy_list=[]
-        print('ccd pertorder:',ccd_kernel.pertOrder)
-        # Extract the energy corrections order-by-order
-        TotalE=0.0
-        for order in ccd_kernel.pertOrder:
-            energy=contract_amp_obj.buildXCCD_T2energy(order)
-            energy_list.append(energy)
-            TotalE+=energy
-        print('list of class-based energies order by order:',energy_list)
-        print('compare sum:',sum(energy_list),TotalE)
-        return sum(energy_list) #qf_corr*(1.0/32.0)
+        factorization=True
+        Pert_energy,energy_list=add_XCCenergy(factorization,ccd_kernel)
+        print('new function; XCC energy by orders:',energy_list)
+        print('perturbative energy correction: ', Pert_energy,sum(energy_list))
+        return sum(energy_list) 
 
-## OLD WAY TO CALCULTE 5/6 ORDER PERTURBATIVE CORRECTIONS; USE ONLY IF A CHECK IS NEEDED
-#
-#        t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
-#        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
-#        t22_dag=t2_aaaa.transpose(2,3,0,1)
-#        qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
-
- #       qf_corr=(1.0/32.0)*qf_corr
- #       print('Order 5-6 energy correction:', qf_corr, qf_corr*32.0)
-
-
-#### NEW WAY TO CALCULATE ONLY 5TH ORDER CORRECTIONS; USE ONLY IF CHECK IS NEEDED
-#        import UT2.test_qf as test_qf
-#        test_t2_qf=test_qf.evaluate_residual_2_2(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
-#        test_t2_qf=test_t2_qf.transpose(2,3,0,1)
-#        test_qf_corr= einsum('ijab,abij',t2_FO_dagger,test_t2_qf[:,:,:,:])
-#        print('tested Qf corr by contract T4 to T2:', test_qf_corr/8.0, 4.0*test_qf_corr)
+        # Add debug logic present at the bottom of this file here
+        # to check the validity of perturbative energy corrections
 
     elif XCCD_Flag:
-        XCCD_energy=baseCCDE=order_5_6_E=order_7E=order_8E=order_9E=0.0
-
+    # returns pert. energy + baseline CCD energy
         baseCCDE=ccdEnergy(t2_aaaa,fock,tei,oa,va)
-        energy_mod=extract_integer(ccd_kernel.cc_type)
-        xcc_t2Dag=t2_aaaa.transpose(2,3,0,1)
-        if energy_mod >= 6:
-            t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
+        print('Inside t2energySlow XCCD_Flag if-statement. ccd pertorder:',ccd_kernel.pertOrder)
 
-            antisym_t4_resid=t4_resid.transpose(4,5,6,7,0,1,2,3)
-            order_5_6_E=(1.0/32.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,antisym_t4_resid)
-
-        if energy_mod >= 7:
-            t4_t2DagWT23=xccd_resid.xccd_7(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
-            t4_t2DagWT23=t4_t2DagWT23.transpose(4,5,6,7,0,1,2,3)
-            order_7E=(1.0/128.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT23)
-
-        if energy_mod >= 8:
-            order_8E=antisym.xccd_8(ccd_kernel,tei,None,t2_aaaa,xcc_t2Dag,oa,va,nocc,nvirt)
-
-
-        if energy_mod == 9:
-            t4_t2DagWT22T4=xccd_resid.xccd9_resid(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt)
-            t4_t2DagWT22T4=t4_t2DagWT22T4.transpose(4,5,6,7,0,1,2,3)
-            order_9E=(1.0/96.0)*einsum('klcd,ijab,abcdijkl',xcc_t2Dag,xcc_t2Dag,t4_t2DagWT22T4)
-
-        XCCD_energy=baseCCDE+order_5_6_E+order_7E+order_8E+order_9E
-
-
-        #amp_obj=kernel.BuildBaseAmps(ccd_kernel.contractInfo)
-        contract_amp_obj=kernel.ContractAdjointAmps(ccd_kernel)
-        energy_list=[]
-        print('ccd pertorder:',ccd_kernel.pertOrder)
         # Extract the energy corrections order-by-order
         factorization=False # Need to specify contracting with final T2^dag instead of Wn-2
-        TotalE=0.0
-        for order in ccd_kernel.pertOrder:
-            #amp_obj.buildXCCDbase(order)
-            energy=contract_amp_obj.buildXCCD_T2energy(order,factorization)
-            energy_list.append(energy)
-            TotalE+=energy
-
-        print('list of class-based energies order by order:',energy_list)
-        print('\n\n here')
-        print('compare sum:',sum(energy_list),TotalE)
-        print('list of original energies: ',order_5_6_E,order_7E)
-
-        testXCCenergy,test_energy_list=add_XCCenergy(factorization,ccd_kernel)
-        print('new function; XCC tot. energy:', testXCCenergy)
-        print('new function; XCC energy by orders:',test_energy_list)
-        return baseCCDE+sum(energy_list) #XCCD_energy
-    else:    
+        testXCCenergy,energy_list=add_XCCenergy(factorization,ccd_kernel)
+        print('new function; XCC energy by orders:',energy_list)
+        print('CCD e:',baseCCDE,testXCCenergy)
+        return baseCCDE+sum(energy_list)
+ 
+    else:
+    # returns standard CCD energy
         return ccdEnergy(t2_aaaa,fock,tei,oa,va) 
 
 
@@ -184,4 +120,24 @@ def ccdEnergy(t2,f,g,o,v):
     energy +=  0.250000000000000 * einsum('jiab,abji', g[o, o, v, v], t2)
 
     return energy
+
+
+## OLD WAY TO CALCULTE 5/6 ORDER PERTURBATIVE CORRECTIONS; USE ONLY IF A CHECK IS NEEDED
+#
+#        t4_resid=np.zeros((nocc,nocc,nocc,nocc,nvirt,nvirt,nvirt,nvirt))
+#        t4_resid=antisym.unsym_residQf1(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag) #t4resids.unsym_residQf1(tei,t2_aaaa,oa,va,nocc,nvirt)
+#        t22_dag=t2_aaaa.transpose(2,3,0,1)
+#        qf_corr = einsum('klcd,ijab,abcdijkl', t2_FO_dagger, t2_aaaa.transpose(2,3,0,1), antisym_t4_resid[:, :, :, :, :, :, :, :], optimize=['einsum_path', (0, 2), (0, 1)])
+
+ #       qf_corr=(1.0/32.0)*qf_corr
+ #       print('Order 5-6 energy correction:', qf_corr, qf_corr*32.0)
+
+
+#### NEW WAY TO CALCULATE ONLY 5TH ORDER CORRECTIONS; USE ONLY IF CHECK IS NEEDED
+#        import UT2.test_qf as test_qf
+#        test_t2_qf=test_qf.evaluate_residual_2_2(ccd_kernel,tei,t2_aaaa,oa,va,nocc,nvirt,t2_FO_dag)
+#        test_t2_qf=test_t2_qf.transpose(2,3,0,1)
+#        test_qf_corr= einsum('ijab,abij',t2_FO_dagger,test_t2_qf[:,:,:,:])
+#        print('tested Qf corr by contract T4 to T2:', test_qf_corr/8.0, 4.0*test_qf_corr)
+
 
