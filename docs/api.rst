@@ -30,9 +30,20 @@ API Documentation
    UT2.kernel.UltT2CC.set_resid
    UT2.kernel.UltT2CC.kernel
    UT2.kernel.UltT2CC.finalize
+   UT2.kernel.BuildBaseAmps
+   UT2.kernel.BuildBaseAmps.__init__
+   UT2.kernel.BuildBaseAmps.buildXCCDbase
+   UT2.kernel.BuildBaseAmps.buildUCCDbase
+   UT2.kernel.ContractAdjointAmps
+   UT2.kernel.ContractAdjointAmps.__init__
+   UT2.kernel.ContractAdjointAmps.buildXCCD_T2energy
    UT2.t2energySlow
    UT2.t2energySlow.ccd_energyMain
    UT2.t2energySlow.ccdEnergy
+   UT2.t2energySlow.add_XCCenergy
+   UT2.t2residEqnsSlow
+   UT2.t2residEqnsSlow.residMain
+   UT2.t2residEqnsSlow.ccd_t2residual
    UT2.fullCCenergy
    UT2.fullCCenergy.fullCC_energyMain
    UT2.fullCCresidEqns
