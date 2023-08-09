@@ -162,7 +162,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
     elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
         storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
-        cc_runtype.update({"diis_size":5, "diis_start_cycle":5})
+        cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
 
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
@@ -594,6 +594,19 @@ def convertSCFinfo(mf, mol, orb,cc_runtype,storedInfo):
     storedInfo.set_integralInfo(integralInfo)
     return storedInfo #occupationInfo, integralInfo, eps, denomInfo, occupationSliceInfo
 
+
+def spin_block_tei(I):
+    """
+    Function that spin blocks two-electron integrals
+    Using np.kron, we project I into the space of the 2x2 identity, tranpose the result
+    and project into the space of the 2x2 identity again. This doubles the size of each axis.
+    The result is our two electron integral tensor in the spin orbital form.
+    """
+    identity = np.eye(2)
+    I = np.kron(identity, I)
+    return np.kron(identity, I.T)
+
+
 def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     """
     Transforms relevant integrals into MO framework. Used specifically in the spin-orbital based code.
@@ -606,54 +619,142 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     
     :return: Returns an updated storedInfo object, where the integrals and denominator information has been updated. 
     """
+    orb=np.asarray(orb)
+    print('orb:', np.shape(orb), orb.ndim)
+    if orb.ndim <= 2:
+        occ = mf.mo_occ
+        print('occ:',occ)
+        nele = int(sum(occ))
+        nocc = nele // 2
+        norbs = mf.get_fock().shape[0] #oei.shape[0]
+        global nsvirt, nsocc
+        
+        nsvirt = 2 * (norbs - nocc)
+        nsocc = 2 * nocc
+        
+        occupationInfo={"nocc_aa":nsocc,"nvirt_aa":nsvirt}
+        storedInfo.set_occInfo(occupationInfo)
+        
+        n = np.newaxis
+        o = slice(None, nsocc)
+        v = slice(nsocc, None)
+        occupationSliceInfo={"occ_aa":o,"virt_aa":v}
+        storedInfo.set_occSliceInfo(occupationSliceInfo)
+        
+        moE_aa = mf.mo_energy
+        eps_aa=np.kron(moE_aa,np.ones(2))
+        eps={"eps_aa":eps_aa}
+        denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps)
+        storedInfo.set_denoms(denomInfo)
+        
+        
+        hcore=mf.get_hcore()
+        hcoreMO=(orb.T@hcore)@orb
+        
+        twoEints=ao2mo.kernel(mol,mf.mo_coeff)
+        two_electron_integrals = ao2mo.restore(
+                1, # no permutation symmetry
+                twoEints, orb.shape[0])
+            # See PQRS convention in OpenFermion.hamiltonians._molecular_data
+            # h[p,q,r,s] = (ps|qr)
+        two_electron_integrals = np.asarray(
+                two_electron_integrals.transpose(0, 2, 3, 1), order='C')
+        
+        soei, stei = spinorb_from_spatial(hcoreMO,two_electron_integrals) #oei, tei)
+        astei = np.einsum('ijkl', stei) - np.einsum('ijlk', stei)
+        gtei = astei.transpose(0, 1, 3, 2)
+        
+        fock = soei + np.einsum('piiq->pq', astei[:, o, o, :])
+        
+        integralInfo={"oei":fock,"tei":gtei}
+        storedInfo.set_cc_runtype(cc_runtype)
+        storedInfo.set_integralInfo(integralInfo)
+    elif orb.ndim > 2:  # MEANS IM RUNNING UHF CALC
+        print('iNSIDE UHF')
+        norbs=mf.get_fock().shape[0] + mf.get_fock().shape[1]
+        na,nb=mf.nelec
+        nele=na+nb
+        nsvirt = 2 * (mf.get_fock()[0].shape[0] - na)#(norbs - nocc)
+        occupationInfo={"nocc_aa":nele,"nvirt_aa":nsvirt}
+        storedInfo.set_occInfo(occupationInfo)
 
-    occ = mf.mo_occ
-    print('occ:',occ)
-    nele = int(sum(occ))
-    nocc = nele // 2
-    norbs = mf.get_fock().shape[0] #oei.shape[0]
-    global nsvirt, nsocc
+        n = np.newaxis
+        o = slice(None, nele)
+        v = slice(nele, None)
+        occupationSliceInfo={"occ_aa":o,"virt_aa":v}
+        storedInfo.set_occSliceInfo(occupationSliceInfo)
+
+
+        eri = mol.intor('int2e', aosym='s1') 
     
-    nsvirt = 2 * (norbs - nocc)
-    nsocc = 2 * nocc
+        Ca = np.asarray(mf.mo_coeff[0])
+        Cb = np.asarray(mf.mo_coeff[1])
+        C = np.block([
+                 [      Ca           ,   np.zeros_like(Cb) ],
+                 [np.zeros_like(Ca)  ,          Cb         ]
+                ])
     
-    occupationInfo={"nocc_aa":nsocc,"nvirt_aa":nsvirt}
-    storedInfo.set_occInfo(occupationInfo)
+        I = np.asarray(eri)
+        I_spinblock = spin_block_tei(I)
+
+
+        # Converts chemist's notation to physicist's notation, and antisymmetrize
+        # (pq | rs) ---> <pr | qs>
+        # Physicist's notation
+        tmp = I_spinblock.transpose(0, 2, 1, 3)
+        # Antisymmetrize:
+        # <pr||qs> = <pr | qs> - <pr | sq>
+        gao = tmp - tmp.transpose(0, 1, 3, 2)
     
-    n = np.newaxis
-    o = slice(None, nsocc)
-    v = slice(nsocc, None)
-    occupationSliceInfo={"occ_aa":o,"virt_aa":v}
-    storedInfo.set_occSliceInfo(occupationSliceInfo)
+        eps_a = np.asarray(mf.mo_energy[0])
+        eps_b = np.asarray(mf.mo_energy[1])
+        eps = np.append(eps_a, eps_b)
+
+
+        # Sort the columns of C according to the order of increasing orbital energies
+        C = C[:, eps.argsort()]
     
-    moE_aa = mf.mo_energy
-    eps_aa=np.kron(moE_aa,np.ones(2))
-    eps={"eps_aa":eps_aa}
-    denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps)
-    storedInfo.set_denoms(denomInfo)
+    # Sort orbital energies in increasing order
+        eps = np.sort(eps)
+
+
+#        nalpha = mf.nelec[0]
+#        nbeta = mf.nelec[1]
+#        nocc = nalpha + nbeta
     
     
-    hcore=mf.get_hcore()
-    hcoreMO=(orb.T@hcore)@orb
+#        n = np.newaxis
+#        o = slice(None, nocc)
+#        v = slice(nocc, None)
+
+    # Transform gao, which is the spin-blocked 4d array of physicist's notation,
+    # antisymmetric two-electron integrals, into the MO basis using MO coefficients
+        gmo = np.einsum('pQRS, pP -> PQRS',
+              np.einsum('pqRS, qQ -> pQRS',
+              np.einsum('pqrS, rR -> pqRS',
+              np.einsum('pqrs, sS -> pqrS', gao, C, optimize=True), C, optimize=True), C, optimize=True), C, optimize=True)
+
+        e_abij = 1 / (-eps[v, n, n, n] - eps[n, v, n, n] + eps[n, n, o, n] + eps[n, n, n, o])
+
+        t2=e_abij*gmo[v,v,o,o]
     
-    twoEints=ao2mo.kernel(mol,mf.mo_coeff)
-    two_electron_integrals = ao2mo.restore(
-            1, # no permutation symmetry
-            twoEints, orb.shape[0])
-        # See PQRS convention in OpenFermion.hamiltonians._molecular_data
-        # h[p,q,r,s] = (ps|qr)
-    two_electron_integrals = np.asarray(
-            two_electron_integrals.transpose(0, 2, 3, 1), order='C')
+        mp2E=0.250000000000000 * np.einsum('jiab,abji',gmo[o, o, v, v], t2)
     
-    soei, stei = spinorb_from_spatial(hcoreMO,two_electron_integrals) #oei, tei)
-    astei = np.einsum('ijkl', stei) - np.einsum('ijlk', stei)
-    gtei = astei.transpose(0, 1, 3, 2)
+        print('mp2E:', mp2E)
+
+        eps2={"eps_aa":eps}
+        denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps2)
+        storedInfo.set_denoms(denomInfo)
+
+        #print(np.shape(eps),eps,np.diag(eps),np.diag(np.diag(eps)))
+        fock=np.diag(eps)
+        integralInfo={"oei":fock,"tei":gmo}
+        storedInfo.set_cc_runtype(cc_runtype)
+        storedInfo.set_integralInfo(integralInfo) 
     
-    fock = soei + np.einsum('piiq->pq', astei[:, o, o, :])
-    
-    integralInfo={"oei":fock,"tei":gtei}
-    storedInfo.set_cc_runtype(cc_runtype)
-    storedInfo.set_integralInfo(integralInfo)
+
+
+
     return storedInfo
 
 def get_denoms(cc_runtype,occupationSliceInfo,eps):
@@ -935,6 +1036,51 @@ def spinorb_from_spatial(one_body_integrals, two_body_integrals):
                                           1] = (two_body_integrals[p, q, r, s])
 
     return one_body_coefficients, two_body_coefficients
+
+def spinorb_from_UHFspatial(oei_alpha,oei_beta,tei_alpha,tei_beta,tei_mixed):
+    import numpy
+    n_qubits = 2 * oei_alpha.shape[0]
+
+    # Initialize Hamiltonian coefficients.
+    one_body_coefficients = numpy.zeros((n_qubits, n_qubits))
+    two_body_coefficients = numpy.zeros(
+        (n_qubits, n_qubits, n_qubits, n_qubits))
+    # Loop through integrals.
+    for p in range(n_qubits // 2):
+        for q in range(n_qubits // 2):
+
+            # Populate 1-body coefficients. Require p and q have same spin.
+            one_body_coefficients[2 * p, 2 * q] = oei_alpha[p, q]
+            one_body_coefficients[2 * p + 1, 2 * q +
+                                  1] = oei_beta[p, q]
+            # Continue looping to prepare 2-body coefficients.
+            for r in range(n_qubits // 2):
+                for s in range(n_qubits // 2):
+
+                    # Mixed spin
+                    two_body_coefficients[2 * p, 2 * q + 1, 2 * r + 1, 2 *
+                                          s] = (tei_mixed[p, q, r, s])
+                    two_body_coefficients[2 * p + 1, 2 * q, 2 * r, 2 * s +
+                                          1] = (tei_mixed[p, q, r, s])
+
+
+                 #   two_body_coefficients[2*p,2*q+1,2*r,2*s+1]=(-tei_mixed[p,q,s,r])
+                 #   two_body_coefficients[2*p+1,2*q,2*r+1,2*s]=(-tei_mixed[p,q,s,r])
+                    #print('verify antisym')
+                    #print(tei_mixed[p,q,r,s],tei_mixed[p,q,s,r])
+                    # Same spin
+
+                    two_body_coefficients[2 * p, 2 * q, 2 * r, 2 *
+                                          s] = (tei_alpha[p, q, r, s])#-tei_alpha[p,q,s,r])
+                    two_body_coefficients[2 * p + 1, 2 * q + 1, 2 * r +
+                                          1, 2 * s +
+                                          1] = (tei_beta[p, q, r, s])#-tei_beta[p,q,s,r])
+
+                    #print('verify same spin')
+                    #print(tei_alpha[p, q, r, s]-tei_alpha[p, q, s,r])
+    #sys.exit()
+    return one_body_coefficients, two_body_coefficients
+
 
 #def test_rhf_energy(mol, mf, orb):
 #    eri = ao2mo.full(mol, orb, verbose=0)
