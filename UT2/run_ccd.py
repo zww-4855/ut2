@@ -138,6 +138,25 @@ def ccd_main(mf, mol, orb, cc_runtype):
     if "pert_E_corr" not in cc_runtype:
         cc_runtype.update({"pert_E_corr":"0"})
 
+    if "pertCorr" in cc_runtype: # keyword used to jumpstart the perturbative correction-only logic
+
+        storedInfo=convertSCFinfo_slow(mf,mol,orb,cc_runtype,storedInfo)
+        # overwrite/add denominator information for T1/T3 amplitudes to storedInfo    
+        n = np.newaxis
+        o=storedInfo.occupationSliceInfo["occ_aa"]
+        v=storedInfo.occupationSliceInfo["virt_aa"]
+        eps=np.kron(mf.mo_energy,np.ones(2))
+        
+        D1_aa=1.0/(-eps[v,n]+eps[n,o])
+        D3_aa=1.0/(-eps[v,n,n,n,n,n]-eps[n,v,n,n,n,n]-eps[n,n,v,n,n,n]+
+                   eps[n,n,n,o,n,n]+eps[n,n,n,n,o,n]+eps[n,n,n,n,n,o])
+ 
+        storedInfo.denomInfo.update({'D1aa':D1_aa,'D3aa':D3_aa})
+        # call AmpHandler class to harvest amps, extract perturbative correction
+        ampObj = AmpHandler(cc_runtype["pertCorr"]["T1infile"],cc_runtype["pertCorr"]["T2infile"])
+
+
+
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
 
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
