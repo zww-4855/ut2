@@ -1,11 +1,13 @@
 import pickle
 
 class AmpHandler():
-    def __init__(self,T2infile,T1infile=None,T3infile=None):
+    def __init__(self,storedInfo,T2infile,T1infile=None,T3infile=None):
         self.t1=None
         self.t2=None
         self.t3=None
         self.getAmps()
+        self.g=storedInfo.integralInfo["tei"]
+        self.denoms=storedInfo.denoms
 
 
 
