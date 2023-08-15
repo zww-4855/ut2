@@ -1,17 +1,24 @@
 import pickle
 
 class AmpHandler():
-    def __init__(T1infile,T2infile,T3infile=None):
-        with open(T1infile,'rb') as t1handle:
-            t1=pickle.load(t1handle)
+    def __init__(self,T2infile,T1infile=None,T3infile=None):
+        self.t1=None
+        self.t2=None
+        self.t3=None
+        self.getAmps()
+
+
+
+    def getAmps(self):
         with open(T2infile,'rb') as t2handle:
-            t2=pickle.load(t2handle)
+            self.t2=pickle.load(t2handle)
+
+        if T1infile:
+            with open(T1infile,'rb') as t1handle:
+                self.t1=pickle.load(t1handle)
 
         if T3infile:
             with open(t3infile,'rb') as t3handle:
-                t3=pickle.load(t3handle)
-        else:
-            t3=None
+                self.t3=pickle.load(t3handle)
 
-        self.t1=t1
         
