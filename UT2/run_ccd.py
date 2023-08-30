@@ -12,6 +12,7 @@ import UT2.modify_T2energy_pertQf as pertQf
 from numpy import linalg
 
 import UT2.kernel as kernel
+import pickle
 
 class StoredInfo():
     """ StoredInfo() is a class that holds all data necessary for a CC calculation. Similar in design to C-struct
@@ -155,6 +156,16 @@ def ccd_main(mf, mol, orb, cc_runtype):
         # call AmpHandler class to harvest amps, extract perturbative correction
         ampObj = AmpHandler(cc_runtype["pertCorr"]["T1infile"],cc_runtype["pertCorr"]["T2infile"])
 
+        iterateOver=cc_runtype["pertCorr"]
+        factorization=False
+        for correction in iterateOver:# iterates over "T" or "Qf" keys
+            corrOrder=iterateOver[correction]
+            for order in corrOrder: # iterates over list of values specifying pert order
+               #Build the T3/T4 base, then contract it to form the perturbative correction
+               if corrOrder == "T":
+                   energy=ampObj.build_T3energy(order,factorization)
+               elif corrOrder == "Qf":
+                   energy=ampObj.build_T4energy(order,factorization)
 
 
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
@@ -180,8 +191,11 @@ def ccd_main(mf, mol, orb, cc_runtype):
         t2, currentE, corrE = CCDobj.kernel()
 
     elif "ccdTypeSlow" in cc_runtype: # can run all T2 spin-orb methods
-        storedInfo=convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
-        cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
+        storedInfo=convertSCFinfo_tmpslow(mf, mol, orb,cc_runtype,storedInfo) #convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo)
+        ds=cc_runtype["diis_size"]
+        dstart=cc_runtype["diis_start_cycle"]
+        #cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
+        cc_runtype.update({"diis_size":ds, "diis_start_cycle":dstart})
 
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
@@ -626,6 +640,102 @@ def spin_block_tei(I):
     return np.kron(identity, I.T)
 
 
+def convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo):
+    if 'RHF' in str(type(mf)): # running RHF calculation
+        occ = mf.mo_occ
+        nele = int(sum(occ))
+        nocc = nele // 2
+        norbs = mf.get_fock().shape[0] #oei.shape[0]
+        nsvirt = 2 * (norbs - nocc)
+        nsocc = 2 * nocc
+        occupationInfo={"nocc_aa":nsocc,"nvirt_aa":nsvirt}
+        storedInfo.set_occInfo(occupationInfo)
+
+        Ca = Cb = np.asarray(mf.mo_coeff)
+        eps_a = eps_b = np.asarray(mf.mo_energy)
+
+    elif 'UHF' in str(type(mf)): # running UHF calculation
+        norbs=mf.get_fock().shape[0] + mf.get_fock().shape[1]
+        na,nb=mf.nelec
+        nele=na+nb
+        nsvirt = 2 * (mf.get_fock()[0].shape[0] - na)#(norbs - nocc)
+        occupationInfo={"nocc_aa":nele,"nvirt_aa":nsvirt}
+        storedInfo.set_occInfo(occupationInfo)
+        Ca = np.asarray(mf.mo_coeff[0])
+        Cb = np.asarray(mf.mo_coeff[1])
+        eps_a = np.asarray(mf.mo_energy[0])
+        eps_b = np.asarray(mf.mo_energy[1])
+
+
+
+    # default is to try and use PySCF object to harvest AO 2eints
+    eri = mol.intor('int2e',aosym='s1')
+    if np.shape(eri)==(0,0,0,0):# otherwise,
+        eri=np.zeros((norbs,norbs,norbs,norbs))
+        print(np.shape(eri))
+        with open('ao_tei.pickle', 'rb') as handle:
+            eri=pickle.load(handle)
+
+
+    C = np.block([
+             [      Ca           ,   np.zeros_like(Cb) ],
+             [np.zeros_like(Ca)  ,          Cb         ]
+            ])
+
+    n = np.newaxis
+    o = slice(None, nele)
+    v = slice(nele, None)
+    occupationSliceInfo={"occ_aa":o,"virt_aa":v}
+    storedInfo.set_occSliceInfo(occupationSliceInfo)
+
+
+
+    I = np.asarray(eri)
+    I_spinblock = spin_block_tei(I)
+    # Converts chemist's notation to physicist's notation, and antisymmetrize
+    # (pq | rs) ---> <pr | qs>
+    # Physicist's notation
+    tmp = I_spinblock.transpose(0, 2, 1, 3)
+    # Antisymmetrize:
+    # <pr||qs> = <pr | qs> - <pr | sq>
+    gao = tmp - tmp.transpose(0, 1, 3, 2)
+    eps = np.append(eps_a, eps_b)
+
+
+    # Sort the columns of C according to the order of increasing orbital energies
+    C = C[:, eps.argsort()]
+
+# Sort orbital energies in increasing order
+    eps = np.sort(eps)
+
+    print(np.shape(gao),np.shape(C))
+    # Transform gao, which is the spin-blocked 4d array of physicist's notation,
+    # antisymmetric two-electron integrals, into the MO basis using MO coefficients
+    gmo = np.einsum('pQRS, pP -> PQRS',
+          np.einsum('pqRS, qQ -> pQRS',
+          np.einsum('pqrS, rR -> pqRS',
+          np.einsum('pqrs, sS -> pqrS', gao, C, optimize=True), C, optimize=True), C, optimize=True), C, optimize=True)
+
+    e_abij = 1 / (-eps[v, n, n, n] - eps[n, v, n, n] + eps[n, n, o, n] + eps[n, n, n, o])
+
+    t2=e_abij*gmo[v,v,o,o]
+
+    mp2E=0.250000000000000 * np.einsum('jiab,abji',gmo[o, o, v, v], t2)
+
+    print('mp2E:', mp2E)
+
+    eps2={"eps_aa":eps}
+    denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps2)
+    storedInfo.set_denoms(denomInfo)
+
+    #print(np.shape(eps),eps,np.diag(eps),np.diag(np.diag(eps)))
+    fock=np.diag(eps)
+    integralInfo={"oei":fock,"tei":gmo}
+    storedInfo.set_cc_runtype(cc_runtype)
+    storedInfo.set_integralInfo(integralInfo)
+
+    return storedInfo
+
 def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     """
     Transforms relevant integrals into MO framework. Used specifically in the spin-orbital based code.
@@ -670,10 +780,23 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
         hcore=mf.get_hcore()
         hcoreMO=(orb.T@hcore)@orb
         
-        twoEints=ao2mo.kernel(mol,mf.mo_coeff)
-        two_electron_integrals = ao2mo.restore(
+        try:
+            twoEints=ao2mo.kernel(mol,mf.mo_coeff)
+            two_electron_integrals = ao2mo.restore(
                 1, # no permutation symmetry
                 twoEints, orb.shape[0])
+
+        except:
+            #t4=np.zeros((nvir,nvir,nocc,nocc))
+            with open('ao_tei.pickle', 'rb') as handle:
+                twoEints=pickle.load(handle)
+
+        print('final tei load')
+        print(two_electron_integrals)
+        #sys.exit()
+#        two_electron_integrals = ao2mo.restore(
+#                1, # no permutation symmetry
+#                twoEints, orb.shape[0])
             # See PQRS convention in OpenFermion.hamiltonians._molecular_data
             # h[p,q,r,s] = (ps|qr)
         two_electron_integrals = np.asarray(
@@ -684,7 +807,8 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
         gtei = astei.transpose(0, 1, 3, 2)
         
         fock = soei + np.einsum('piiq->pq', astei[:, o, o, :])
-        
+
+
         integralInfo={"oei":fock,"tei":gtei}
         storedInfo.set_cc_runtype(cc_runtype)
         storedInfo.set_integralInfo(integralInfo)
