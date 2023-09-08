@@ -13,6 +13,8 @@ from numpy import linalg
 
 import UT2.kernel as kernel
 import pickle
+import UT2.amphandler as ampHandles
+
 
 class StoredInfo():
     """ StoredInfo() is a class that holds all data necessary for a CC calculation. Similar in design to C-struct
@@ -141,31 +143,51 @@ def ccd_main(mf, mol, orb, cc_runtype):
 
     if "pertCorr" in cc_runtype: # keyword used to jumpstart the perturbative correction-only logic
 
-        storedInfo=convertSCFinfo_slow(mf,mol,orb,cc_runtype,storedInfo)
+        storedInfo=convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo)
         # overwrite/add denominator information for T1/T3 amplitudes to storedInfo    
         n = np.newaxis
-        o=storedInfo.occupationSliceInfo["occ_aa"]
-        v=storedInfo.occupationSliceInfo["virt_aa"]
+        o=storedInfo.occSliceInfo["occ_aa"]
+        v=storedInfo.occSliceInfo["virt_aa"]
+        nocc=storedInfo.occInfo["nocc_aa"]
+        nvirt=storedInfo.occInfo["nvirt_aa"]
         eps=np.kron(mf.mo_energy,np.ones(2))
-        
+        eps = np.sort(eps)
+        print('eps:',eps)
+        print('o',o,'v',v)
         D1_aa=1.0/(-eps[v,n]+eps[n,o])
+        D2_aa=1.0/(-eps[v,n,n,n]-eps[n,v,n,n]+eps[n,n,o,n]+eps[n,n,n,o])
         D3_aa=1.0/(-eps[v,n,n,n,n,n]-eps[n,v,n,n,n,n]-eps[n,n,v,n,n,n]+
                    eps[n,n,n,o,n,n]+eps[n,n,n,n,o,n]+eps[n,n,n,n,n,o])
  
-        storedInfo.denomInfo.update({'D1aa':D1_aa,'D3aa':D3_aa})
+        #for a in range(nvirt):
+        #    for b in range(nvirt):
+        #        for i in range(nocc):
+        #            for j in range(nocc):
+        #                print(D3_aa[a,b,i,j])
+        #sys.exit()
+        storedInfo.denomInfo.update({'D1aa':D1_aa,'D2aa':D2_aa,'D3aa':D3_aa})
         # call AmpHandler class to harvest amps, extract perturbative correction
-        ampObj = AmpHandler(cc_runtype["pertCorr"]["T1infile"],cc_runtype["pertCorr"]["T2infile"])
+        ampObj = ampHandles.AmpHandler(o,v,storedInfo,cc_runtype["pertCorr"]["T2infile"],cc_runtype["pertCorr"]["T1infile"])
 
-        iterateOver=cc_runtype["pertCorr"]
-        factorization=False
-        for correction in iterateOver:# iterates over "T" or "Qf" keys
-            corrOrder=iterateOver[correction]
-            for order in corrOrder: # iterates over list of values specifying pert order
-               #Build the T3/T4 base, then contract it to form the perturbative correction
-               if corrOrder == "T":
-                   energy=ampObj.build_T3energy(order,factorization)
-               elif corrOrder == "Qf":
-                   energy=ampObj.build_T4energy(order,factorization)
+
+        if cc_runtype["pertCorrOrders"] == "pdagq_parT":
+            ampObj.run_pdagq()
+        elif cc_runtype["pertCorrOrders"] == "wicked_parT":
+            ampObj.run_wickedTest()
+        else: # run UCC(5)-based energy corrections for triples
+            pass
+        sys.exit()
+
+#        iterateOver=cc_runtype["pertCorr"]
+#        factorization=False
+#        for correction in iterateOver:# iterates over "T" or "Qf" keys
+#            corrOrder=iterateOver[correction]
+#            for order in corrOrder: # iterates over list of values specifying pert order
+#               #Build the T3/T4 base, then contract it to form the perturbative correction
+#               if corrOrder == "T":
+#                   energy=ampObj.build_T3energy(order,factorization)
+#               elif corrOrder == "Qf":
+#                   energy=ampObj.build_T4energy(order,factorization)
 
 
     if "ccdType" in cc_runtype: # can run all T2 spin-integrt methods
@@ -725,8 +747,9 @@ def convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo):
     print('mp2E:', mp2E)
 
     eps2={"eps_aa":eps}
-    denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps2)
-    storedInfo.set_denoms(denomInfo)
+    if 'pertCorr' not in cc_runtype:
+        denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps2)
+        storedInfo.set_denoms(denomInfo)
 
     #print(np.shape(eps),eps,np.diag(eps),np.diag(np.diag(eps)))
     fock=np.diag(eps)
