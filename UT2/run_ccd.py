@@ -14,7 +14,7 @@ from numpy import linalg
 import UT2.kernel as kernel
 import pickle
 import UT2.amphandler as ampHandles
-
+import UT2.xacc as xacc
 
 class StoredInfo():
     """ StoredInfo() is a class that holds all data necessary for a CC calculation. Similar in design to C-struct
@@ -142,32 +142,37 @@ def ccd_main(mf, mol, orb, cc_runtype):
         cc_runtype.update({"pert_E_corr":"0"})
 
     if "pertCorr" in cc_runtype: # keyword used to jumpstart the perturbative correction-only logic
+        # rely solely on xacc-piped information like oei,tei,tamps,denoms,etc
+        if cc_runtype["pertOrderSoftware"]=='xacc':
+            infiles=cc_runtype["xaccfiles"]
+            xaccObj=xacc.run_xacc(infiles["fock"],infiles["tamps"],infiles["ints"])
 
-        storedInfo=convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo)
-        # overwrite/add denominator information for T1/T3 amplitudes to storedInfo    
-        n = np.newaxis
-        o=storedInfo.occSliceInfo["occ_aa"]
-        v=storedInfo.occSliceInfo["virt_aa"]
-        nocc=storedInfo.occInfo["nocc_aa"]
-        nvirt=storedInfo.occInfo["nvirt_aa"]
-        eps=np.kron(mf.mo_energy,np.ones(2))
-        eps = np.sort(eps)
-        print('eps:',eps)
-        print('o',o,'v',v)
-        D1_aa=1.0/(-eps[v,n]+eps[n,o])
-        D2_aa=1.0/(-eps[v,n,n,n]-eps[n,v,n,n]+eps[n,n,o,n]+eps[n,n,n,o])
-        D3_aa=1.0/(-eps[v,n,n,n,n,n]-eps[n,v,n,n,n,n]-eps[n,n,v,n,n,n]+
-                   eps[n,n,n,o,n,n]+eps[n,n,n,n,o,n]+eps[n,n,n,n,n,o])
- 
-        #for a in range(nvirt):
-        #    for b in range(nvirt):
-        #        for i in range(nocc):
-        #            for j in range(nocc):
-        #                print(D3_aa[a,b,i,j])
-        #sys.exit()
-        storedInfo.denomInfo.update({'D1aa':D1_aa,'D2aa':D2_aa,'D3aa':D3_aa})
-        # call AmpHandler class to harvest amps, extract perturbative correction
-        ampObj = ampHandles.AmpHandler(o,v,storedInfo,cc_runtype["pertCorr"]["T2infile"],cc_runtype["pertCorr"]["T1infile"])
+            occupationInfo={'nocc_aa':xaccObj.nocc,'nvirt_aa':xaccObj.nvirt}
+            occupationSliceInfo={'occ_aa':xaccObj.o,'virt_aa':xaccObj.v}
+            integralInfo={'oei':xaccObj.mo_energies,'tei':xaccObj.tei}
+            denomInfo={"D1aa":xaccObj.e_ai, "D2aa":xaccObj.e_abij, "D3aa":xaccObj.e_abcijk}
+            storedInfo=StoredInfo(occupationInfo,occupationSliceInfo,denomInfo,cc_runtype,None,None,integralInfo)
+            ampObj=ampHandles.AmpHandler(xaccObj.o,xaccObj.v,storedInfo,None,None,xaccObj)
+        else:#otherwise,read external T1/T2 amplitude files and run pyscf for ints
+            storedInfo=convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo)
+            # overwrite/add denominator information for T1/T3 amplitudes to storedInfo    
+            n = np.newaxis
+            o=storedInfo.occSliceInfo["occ_aa"]
+            v=storedInfo.occSliceInfo["virt_aa"]
+            nocc=storedInfo.occInfo["nocc_aa"]
+            nvirt=storedInfo.occInfo["nvirt_aa"]
+            eps=np.kron(mf.mo_energy,np.ones(2))
+            eps = np.sort(eps)
+            print('eps:',eps)
+            print('o',o,'v',v)
+            D1_aa=1.0/(-eps[v,n]+eps[n,o])
+            D2_aa=1.0/(-eps[v,n,n,n]-eps[n,v,n,n]+eps[n,n,o,n]+eps[n,n,n,o])
+            D3_aa=1.0/(-eps[v,n,n,n,n,n]-eps[n,v,n,n,n,n]-eps[n,n,v,n,n,n]+
+                       eps[n,n,n,o,n,n]+eps[n,n,n,n,o,n]+eps[n,n,n,n,n,o])
+     
+            storedInfo.denomInfo.update({'D1aa':D1_aa,'D2aa':D2_aa,'D3aa':D3_aa})
+            # call AmpHandler class to harvest amps, extract perturbative correction
+            ampObj = ampHandles.AmpHandler(o,v,storedInfo,cc_runtype["pertCorr"]["T2infile"],cc_runtype["pertCorr"]["T1infile"])
 
 
         if cc_runtype["pertCorrOrders"] == "pdagq_parT":

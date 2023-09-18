@@ -3,18 +3,26 @@ import UT2.pdagq_T3corr as pdagq_T3corr
 import numpy as np
 import UT2.wicked_T3corr as wicked_T3corr
 class AmpHandler():
-    def __init__(self,o,v,storedInfo,T2infile,T1infile=None,T3infile=None):
+    def __init__(self,o,v,storedInfo,T2infile=None,T1infile=None,xaccObj=None):
         self.t1=None
         self.t2=None
         self.t3={}
         self.T2infile=T2infile
         self.T1infile=T1infile
-        self.T3infile=T3infile
+
         self.o=o
         self.v=v
         self.nocc=storedInfo.occInfo["nocc_aa"]
         self.nvirt=storedInfo.occInfo["nvirt_aa"]
-        self.getAmps()
+        if T2infile or T1infile:
+            self.getAmps()
+        elif xaccObj:
+            self.t1=xaccObj.t1amps
+            self.t2=xaccObj.t2amps
+        else:
+            print('T1infile,T2infile, and xaccObj are all None; try again')
+            sys.exit()
+            
         self.g=storedInfo.integralInfo["tei"]
         self.fock=storedInfo.integralInfo["oei"]
         self.denoms=storedInfo.denomInfo
@@ -86,3 +94,17 @@ class AmpHandler():
         energy_t1=wicked_T3corr.getE_parenT_t1(self.g,self.o,self.v,t3,t1_dag)
         print('[T]-based triples energy correction to CC is:',energy)
         print('(T)-based triples w/ T1_dag:',energy+energy_t1)
+
+        netT2=wicked_T3corr.build_netT2(self.g,self.o,self.v,t3)
+        netT2=wicked_T3corr.antisym_T2(netT2,self.nocc,self.nvirt)
+        t2=netT2.transpose(2,3,0,1)
+        t2=t2*self.denoms["D2aa"]
+        t2=t2.transpose(2,3,0,1)
+        t2_likeE=0.250000000 * np.einsum("abij,ijab->",t2_dag,t2,optimize="optimal")
+        print('netT2-like energy:',t2_likeE)
+
+        o=self.o
+        v=self.v
+        r = -0.250000000 * np.einsum("ijkabc,adij,bckd->",t3,t2_dag,self.g[v,v,o,v],optimize="optimal")
+        r += -0.250000000 * np.einsum("ijkabc,abil,lcjk->",t3,t2_dag,self.g[o,v,o,o],optimize="optimal")
+        print('try again:',r)
