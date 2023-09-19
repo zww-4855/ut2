@@ -9,6 +9,7 @@ class AmpHandler():
         self.t3={}
         self.T2infile=T2infile
         self.T1infile=T1infile
+        self.cc_runtype=storedInfo.cc_runtype
 
         self.o=o
         self.v=v
@@ -80,20 +81,31 @@ class AmpHandler():
 
     def run_wickedTest(self):#run [T] test **ONLY**
         # need tensors in occ,occ,virt,virt ordering
+#        if "xaccfiles" in self.cc_runtype:
+#            self.t1=self.t1.transpose(1,0)
+#            self.t2=self.t2.transpose(2,3,0,1)
+
         t1_dag=self.t1
         self.t1=self.t1.transpose(1,0)
         t2_dag=self.t2
         self.t2=self.t2.transpose(2,3,0,1)
         t3resid=wicked_T3corr.build_T3_secondO(self.g,self.o,self.v,self.t2)
         t3resid=wicked_T3corr.antisym_T3(t3resid,self.nocc,self.nvirt)
+        t3residOrigContract=t3resid
         t3resid=t3resid.transpose(3,4,5,0,1,2)
         t3=t3resid*self.denoms["D3aa"]
+        t3Contract=t3
         t3=t3.transpose(3,4,5,0,1,2)
         
         energy=wicked_T3corr.getE_squareBrackT(self.g,self.o,self.v,t3,t2_dag)
         energy_t1=wicked_T3corr.getE_parenT_t1(self.g,self.o,self.v,t3,t1_dag)
         print('[T]-based triples energy correction to CC is:',energy)
         print('(T)-based triples w/ T1_dag:',energy+energy_t1)
+        newwayE=0.111111111 * np.einsum("ijkabc,abcijk->",t3residOrigContract,t3Contract,optimize="optimal")
+
+        print('redone energy:',newwayE)
+        wicked_T3corr.wicked_main(self.g,self.o,self.v,self.t1,t1_dag,self.t2,t2_dag,self.denoms["D3aa"],self.denoms["D2aa"],self.nocc,self.nvirt)
+        sys.exit()
 
         netT2=wicked_T3corr.build_netT2(self.g,self.o,self.v,t3)
         netT2=wicked_T3corr.antisym_T2(netT2,self.nocc,self.nvirt)
