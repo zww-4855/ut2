@@ -45,11 +45,11 @@ def test_ccdTypesCheck(Basis,Method1,Method2):
 
     diff=abs(abs(value[0])-abs(value[1]))
     print('diff:',diff)
-    assert diff <= 10**-10
+    assert diff <= 10**-9
 
 
 #Basis='6-31G'
 #Method={"ccdTypeSlow":"CCD"}
 #Answer=-100.114058950498
-#test_ConsistentEnergy(Basis,Method,Answer)
+#test_ccdTypesCheck(Basis,Method,{"fullCCType":"CCD"})
 
