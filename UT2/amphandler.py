@@ -27,7 +27,7 @@ class AmpHandler():
         self.g=storedInfo.integralInfo["tei"]
         self.fock=storedInfo.integralInfo["oei"]
         self.denoms=storedInfo.denomInfo
-        print(self.denoms.keys())
+        #print(self.denoms.keys())
 
 
 
@@ -77,7 +77,8 @@ class AmpHandler():
         #l2=self.t2 #.transpose(2,3,0,1)
         energy=pdagq_T3corr.pdagq_T3energy(self.g,self.o,self.v,l1,l2,t3)
         print('(T)-based triples correction to CCSD is:', energy)
-        pdagq_T3corr.ccsd_energy(self.g,self.fock,self.o,self.v,self.t1,self.t2)
+        ccsd_energy=pdagq_T3corr.ccsd_energy(self.g,self.fock,self.o,self.v,self.t1,self.t2)
+        return ccsd_energy,energy
 
     def run_wickedTest(self):#run [T] test **ONLY**
         # need tensors in occ,occ,virt,virt ordering
@@ -104,8 +105,7 @@ class AmpHandler():
         newwayE=0.111111111 * np.einsum("ijkabc,abcijk->",t3residOrigContract,t3Contract,optimize="optimal")
 
         print('redone energy:',newwayE)
-        wicked_T3corr.wicked_main(self.g,self.o,self.v,self.t1,t1_dag,self.t2,t2_dag,self.denoms["D3aa"],self.denoms["D2aa"],self.nocc,self.nvirt)
-        sys.exit()
+        square_brackTenergy=wicked_T3corr.wicked_main(self.g,self.o,self.v,self.t1,t1_dag,self.t2,t2_dag,self.denoms["D3aa"],self.denoms["D2aa"],self.nocc,self.nvirt)
 
         netT2=wicked_T3corr.build_netT2(self.g,self.o,self.v,t3)
         netT2=wicked_T3corr.antisym_T2(netT2,self.nocc,self.nvirt)
@@ -120,3 +120,4 @@ class AmpHandler():
         r = -0.250000000 * np.einsum("ijkabc,adij,bckd->",t3,t2_dag,self.g[v,v,o,v],optimize="optimal")
         r += -0.250000000 * np.einsum("ijkabc,abil,lcjk->",t3,t2_dag,self.g[o,v,o,o],optimize="optimal")
         print('try again:',r)
+        return None,square_brackTenergy

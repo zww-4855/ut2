@@ -48,7 +48,7 @@ class run_xacc():
         n=np.newaxis
         o=slice(None,self.nocc)
         v=slice(self.nocc,None)
-        print(self.mo_energies,type(self.mo_energies[0]),self.nocc,o,v)
+        #print(self.mo_energies,type(self.mo_energies[0]),self.nocc,o,v)
         eps_a = np.asarray(self.mo_energies)
         eps_b = np.asarray(self.mo_energies)
         eps = np.append(eps_a, eps_b)
@@ -72,9 +72,9 @@ class run_xacc():
                         denom=self.mo_energies[floor(i/2)]+self.mo_energies[floor(j/2)]-self.mo_energies[floor(a/2)]-self.mo_energies[floor(b/2)]
                         if abs(self.t2amps[a-self.nocc,b-self.nocc,i,j])>10E-6:
                             e+=(self.tei[a,b,i,j])**2/denom
-                            print(a,b,i,j,self.t2amps[a-self.nocc,b-self.nocc,i,j])#self.tei[a,b,i,j],denom)
+                            #print(a,b,i,j,self.t2amps[a-self.nocc,b-self.nocc,i,j])#self.tei[a,b,i,j],denom)
         print('looped e:',e)
-        print(self.tei[8,9,0,1],self.tei[8,9,1,0])
+        #print(self.tei[8,9,0,1],self.tei[8,9,1,0])
         #sys.exit()
     def read_tei(self,tei_infile):
         tei={}
@@ -87,7 +87,7 @@ class run_xacc():
                     if index_list[operator] == '|':
                         break
                     operator_list.append(int(index_list[operator].strip('^')))
-                print('op list/key:',operator_list,tei_key,operator_list[0])
+                #print('op list/key:',operator_list,tei_key,operator_list[0])
                 idx=str(operator_list[0])+','+str(operator_list[1])+','+str(operator_list[2])+','+str(operator_list[3])
                 a=operator_list[0]
                 b=operator_list[1]
@@ -113,7 +113,7 @@ class run_xacc():
                         if index_list[operator] == '|':
                             break
                         operator_list.append(int(index_list[operator].strip('^')))
-                    print('op list:',operator_list,'amp key:',amp_key)
+                    #print('op list:',operator_list,'amp key:',amp_key)
                     if len(operator_list)==4: #dealing with t2amp
 #                        t2amp.update({amp_key:operator_list})
                         a=operator_list[0]-self.nocc
@@ -124,7 +124,7 @@ class run_xacc():
                         self.t2amps[b,a,i,j]= -1.0* amp_key
                         self.t2amps[a,b,j,i]= -1.0*amp_key
                         self.t2amps[b,a,j,i]=amp_key
-                        print(self.t2amps[a,b,i,j]) 
+                        #print(self.t2amps[a,b,i,j]) 
                     else: # dealing with t1amp
                         a=operator_list[0]-self.nocc
                         i=operator_list[1]
@@ -133,8 +133,8 @@ class run_xacc():
                 if line[:5]=="+++++":#parse the file until this str is read
                     read_amps=True
 
-        print('t1:',self.t1amps)
-        print('t2:',self.t2amps)
+        #print('t1:',self.t1amps)
+        #print('t2:',self.t2amps)
         self.t2amps=self.t2amps*0.25
 
     def read_bkgrd(self,bkgrd_infile):
