@@ -63,5 +63,5 @@ def test_squareBrackT(Basis,Method1,Method2):
     assert abs(abs(et)-abs(corrCo)) <10E-7
     assert abs(abs(et)-abs(wicked_squareBrackT3)) < 10E-7
 
-test_squareBrackT('Basis','Method',{"fullCCType":"CCD"})
+#test_squareBrackT('Basis','Method',{"fullCCType":"CCD"})
 
