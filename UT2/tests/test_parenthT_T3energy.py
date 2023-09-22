@@ -10,8 +10,8 @@ from UT2.run_ccd import *
 
 
 
-@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"fullCCType":"CCD"},{"ccdTypeSlow":"CCD"}),])
-def test_squareBrackT(Basis,Method1,Method2):
+#@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"fullCCType":"CCD"},{"ccdTypeSlow":"CCD"}),])
+def test_squareBrackT(): #Basis,Method1,Method2):
     '''
     Runs the pyscf CCD, and adds a (T) correction on top of the converged T2 amplitudes ====> resulting in CCD[T]. Checks the resulting correction against those generated inside UT2 using pdaggerq and wicked diagrams. 
     '''

@@ -10,8 +10,8 @@ from UT2.run_ccd import *
 
 
 
-@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"fullCCType":"CCD"},{"ccdTypeSlow":"CCD"}),])
-def test_xaccinputfile(Basis,Method1,Method2):
+#@pytest.mark.parametrize("Basis,Method1,Method2",[('6-31G',{"fullCCType":"CCD"},{"ccdTypeSlow":"CCD"}),])
+def test_xaccinputfile():
     '''
     Placeholder test that reads relevant 2e integral files, etc, that are written 
     to file from Xacc, then performs T3-like energy corrections based on PT.
