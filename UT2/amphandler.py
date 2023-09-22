@@ -110,7 +110,7 @@ class AmpHandler():
         netT2=wicked_T3corr.build_netT2(self.g,self.o,self.v,t3)
         netT2=wicked_T3corr.antisym_T2(netT2,self.nocc,self.nvirt)
         t2=netT2.transpose(2,3,0,1)
-        t2=t2*self.denoms["D2aa"]
+        t2=t2#*self.denoms["D2aa"]
         t2=t2.transpose(2,3,0,1)
         t2_likeE=0.250000000 * np.einsum("abij,ijab->",t2_dag,t2,optimize="optimal")
         print('netT2-like energy:',t2_likeE)

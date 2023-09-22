@@ -43,7 +43,7 @@ def test_squareBrackT(Basis,Method1,Method2):
 
    # Now check the wicked-generated [T] correction
     infiles={"T2infile":'tamps.pickle', "T1infile":None}
-    cc_runtype={"pertOrderSoftware":None,"pertCorr":infiles,"pertCorrOrders":"pdagq_parT"}
+    cc_runtype={"pertOrderSoftware":None,"pertCorr":infiles,"pertCorrOrders":"wicked_parT"}
     correlatedEnergy,wicked_squareBrackT3=ccd_main(mf,mol,orb,cc_runtype)
 
    # Now run pyscf-based CCD to extract (T) correction

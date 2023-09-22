@@ -25,7 +25,8 @@ def wicked_main(g,o,v,t1,t1_dag,t2,t2_dag,D3denom,D2denom,nocc,nvirt):
 
     # Get fifth order correction
     fifthOenergy=get_fifthOrder(g,o,v,t2_dag,nocc,nvirt,t3resids_base,D3denom)
-    return 0.25*newwayE
+    print(type(fourthOenergy),type(energy_total))
+    return 0.25*fourthOenergy 
 
 def get_fifthOrder(g,o,v,t2_dag,nocc,nvirt,t3resids,D3denom):
     # construct diagram A

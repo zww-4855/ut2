@@ -178,7 +178,7 @@ def ccd_main(mf, mol, orb, cc_runtype):
         if cc_runtype["pertCorrOrders"] == "pdagq_parT":
             currentE, corrE=ampObj.run_pdagq()
         elif cc_runtype["pertCorrOrders"] == "wicked_parT":
-            ampObj.run_wickedTest()
+            currentE, corrE=ampObj.run_wickedTest()
         else: # run UCC(5)-based energy corrections for triples
             pass
 #        sys.exit()
