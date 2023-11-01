@@ -119,11 +119,16 @@ def residMain(ccd_kernel):
 
 #        resid_t2_abab += ccsdt_t2_abab_residual_Qf(t4_aaaa, t4_bbbb, t4_aaab, t4_aabb, t4_abbb, f_aa, f_bb, t2_aaaa.transpose(2,3,0,1), t2_bbbb.transpose(2,3,0,1), t2_abab.transpose(2,3,0,1), oa, ob, va, vb)
 
-
-    resid_t3_aaa=ccsdt_t3_aaaaaa_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-    resid_t3_bbb=ccsdt_t3_bbbbbb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-    resid_t3_aab=ccsdt_t3_aabaab_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-    resid_t3_abb=ccsdt_t3_abbabb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+    if ccd_kernel.cc_type == "CCSD(Qf)":
+        resid_t3_aaa=0.0*t3_aaaaaa
+        resid_t3_bbb=0.0*t3_aaaaaa
+        resid_t3_aab=0.0*t3_aaaaaa
+        resid_t3_abb=0.0*t3_aaaaaa
+    else:
+        resid_t3_aaa=ccsdt_t3_aaaaaa_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t3_bbb=ccsdt_t3_bbbbbb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t3_aab=ccsdt_t3_aabaab_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t3_abb=ccsdt_t3_abbabb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
 
 

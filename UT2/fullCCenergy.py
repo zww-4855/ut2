@@ -3,7 +3,8 @@ Drives the determination of - up to - the CCSDT quality (spin-integrated) energi
 """
 import numpy as np
 from numpy import einsum
-
+import UT2.build_approxT3full as approxT3
+import UT2.square_brakT_corr as squareBrakT3
 
 def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
     """
@@ -47,6 +48,10 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
     g_bbbb=tei["g_bbbb"]
     g_abab=tei["g_abab"]
 
+    D3aaa=ccd_kernel.denom["D3aaa"]
+    D3bbb=ccd_kernel.denom["D3bbb"]
+    D3aab=ccd_kernel.denom["D3aab"]
+    D3abb=ccd_kernel.denom["D3abb"]
 
     if get_perturbCorr==True:
         l2dic=ccd_kernel.get_l2amps()
@@ -59,6 +64,19 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
         l2_bbbb=ccd_kernel.tamps["t2bb"].transpose(2,3,0,1)
         l2_abab=ccd_kernel.tamps["t2ab"].transpose(2,3,0,1)
         t1_aa=t1_bb=t4_aaaaaaaa=t4_bbbbbbbb=t4_aaabaaab=t4_aabbaabb=t4_abbbabbb=None
+        if ccd_kernel.cc_type == "CCSD(Qf)":# build T3 approximately
+            resid_t3aaa=approxT3.ccsdtq_t3_aaaaaa_residual(t2_aaaa,t2_bbbb,t2_abab,g_aaaa,g_bbbb,g_abab,o,o,v,v)
+            resid_t3aab=approxT3.ccsdtq_t3_aabaab_residual(t2_aaaa,t2_bbbb,t2_abab,g_aaaa,g_bbbb,g_abab,o,o,v,v)
+            resid_t3abb=approxT3.ccsdtq_t3_abbabb_residual(t2_aaaa,t2_bbbb,t2_abab,g_aaaa,g_bbbb,g_abab,o,o,v,v)
+            resid_t3bbb=approxT3.ccsdtq_t3_bbbbbb_residual(t2_aaaa,t2_bbbb,t2_abab,g_aaaa,g_bbbb,g_abab,o,o,v,v)
+
+            t3_aaaaaa=resid_t3aaa*D3aaa
+            t3_aabaab=resid_t3aab*D3aab
+            t3_abbabb=resid_t3abb*D3abb
+            t3_bbbbbb=resid_t3bbb*D3bbb
+
+            square_brakT=squareBrakT3.square_brakT(g_aaaa,g_abab,g_bbbb,o,v,l2_aaaa,l2_abab,l2_bbbb,t3_aaaaaa,t3_aabaab,t3_abbabb,t3_bbbbbb)
+            print('[T] correction:',square_brakT)
 
         t4_aaaa=ccsdtq_t4_aaaaaaaa_residual(t1_aa, t1_bb,
                                 t2_aaaa, t2_bbbb, t2_abab,
