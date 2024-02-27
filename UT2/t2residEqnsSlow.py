@@ -46,9 +46,9 @@ def residMain(ccd_kernel):
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
         if ccd_kernel.cc_label=="UCC(4)":
             return resid_aaaa
-        #if ccd_kernel.cc_type=='LCCD':
-        #    lccd_offset=doubles_resLCCDoffset(t2_aaaa,fock,tei,oa,va)
-        #    resid_aaaa-=lccd_offset
+        if ccd_kernel.cc_type=='LCCD':
+            lccd_offset=doubles_resLCCDoffset(t2_aaaa,fock,tei,oa,va)
+            resid_aaaa-=lccd_offset
 
     # determine if we need to augment the CCD T2 equations with terms from XCCD(n)
     if ccd_kernel.xccd_resids:
