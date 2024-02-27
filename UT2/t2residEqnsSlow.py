@@ -35,16 +35,21 @@ def residMain(ccd_kernel):
     # construct the baseline pCCD or CCD residual equations
     if ccd_kernel.cc_type=="pCCD":
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
-        if np.linalg.norm(ccd_kernel.tamps['t2aa']) > 10E-8:
-            tmp=np.zeros((nvirt,nvirt,nocc,nocc ))
-            for a in range(nvirt):
-                for i in range(nocc):
-                    tmp[a,a,i,i]=resid_aaaa[a,a,i,i]
-                    print('resid shape',resid_aaaa.shape)
-            resid_aaaa=tmp
+#        if np.linalg.norm(ccd_kernel.tamps['t2aa']) > 10E-8:
+        tmp=np.zeros((nvirt,nvirt,nocc,nocc ))
+        for a in range(nvirt):
+            for i in range(nocc):
+                tmp[a,a,i,i]=resid_aaaa[a,a,i,i]
+#                  print('resid shape',resid_aaaa.shape)
+#            resid_aaaa=tmp
     else: 
         resid_aaaa=ccd_t2residual(t2_aaaa, fock, tei, oa, va)
-         
+        if ccd_kernel.cc_label=="UCC(4)":
+            return resid_aaaa
+        #if ccd_kernel.cc_type=='LCCD':
+        #    lccd_offset=doubles_resLCCDoffset(t2_aaaa,fock,tei,oa,va)
+        #    resid_aaaa-=lccd_offset
+
     # determine if we need to augment the CCD T2 equations with terms from XCCD(n)
     if ccd_kernel.xccd_resids:
         resid_aaaaBKUP=resid_aaaa
@@ -64,7 +69,31 @@ def residMain(ccd_kernel):
     resid_aaaa=resid_aaaa+np.reciprocal(eabij_aa)*t2_aaaa
     final_resid={"resT2aa":resid_aaaa}
     ccd_kernel.set_resid(final_resid)
-    t2amp={"t2aa":resid_aaaa*eabij_aa,"t2bb":resid_aaaa*0.0,"t2ab":resid_aaaa*0.0}#
+    if ccd_kernel.cc_type=="pCCD":
+        resid_aaaa=resid_aaaa*eabij_aa
+        t2amp=np.zeros((nvirt,nvirt,nocc,nocc ))
+        for a in range(nvirt):
+            for i in range(nocc):
+                t2amp[a,a,i,i]=resid_aaaa[a,a,i,i]
+                #print('resid_aaaa',resid_aaaa[a,a,i,i])
+        t2amp={"t2aa":t2amp,"t2bb":t2amp*0.0,"t2ab":t2amp*0.0}
+    else:
+        t2amp={"t2aa":resid_aaaa*eabij_aa,"t2bb":resid_aaaa*0.0,"t2ab":resid_aaaa*0.0}#
+
+        #print('t2amp',t2amp["t2aa"])
+        zww=t2amp["t2aa"].transpose(0,2,1,3)
+        #print('reshaped t2:',zww,np.reshape(zww,(4,4)))
+        #print(zww[0,:,:,0],'\n',zww[0,:,0,0])
+        #print('a,b,i,j, t2amp')
+    #print('\n\n Slice one:',t2amp["t2aa"][3,2,0,:])
+    #print('\n\n Slice two: ', t2amp["t2aa"][3,2,1,:])
+    #print('\n\n Slice 3: ', t2amp["t2aa"][2,3,1,:])
+    #print('\n\n Slice 4: ', t2amp["t2aa"][3,2,:,1])
+    #print('\n\n Slice 5: ', t2amp["t2aa"][3,2,:,0])
+    zww=t2amp["t2aa"]
+    #print('max transition:',zww[0,1,0,1],zww[0,1,2,3])
+    #checksum(nvirt,nocc,zww)
+    #print(zww[0,2,0,2],zww[1,3,1,3])
     ccd_kernel.set_tamps(t2amp)
     return ccd_kernel
 
@@ -79,7 +108,8 @@ def checksum(nvirt,nocc,val):
                     total+=(val[a,b,i,j])**2
                     if abs(val[a,b,i,j])>maxval:
                         maxval=abs(val[a,b,i,j])
-    print(total,maxval)
+                        index=(a,b,i,j)
+    #print(total,maxval,index)
 
 def check_norms(nvirt,nocc,resid_aaaa,resid_aaaaBKUP):
     norm=0.0
@@ -149,6 +179,25 @@ def ccd_t2residual(t2,f,g,o,v):
     
     return doubles_res
 
+def doubles_resLCCDoffset(t2,f,g,o,v):
+    #        -0.5000 P(i,j)<l,k||c,d>*t2(c,d,j,k)*t2(a,b,i,l)
+    contracted_intermediate = -0.500000000000000 * einsum('lkcd,cdjk,abil->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 1), (0, 1)])
+    doubles_res =  1.00000 * contracted_intermediate + -1.00000 * einsum('abij->abji', contracted_intermediate)
+
+    #         0.2500 <l,k||c,d>*t2(c,d,i,j)*t2(a,b,l,k)
+    doubles_res +=  0.250000000000000 * einsum('lkcd,cdij,ablk->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 1), (0, 1)])
+
+    #        -0.5000 <l,k||c,d>*t2(c,a,l,k)*t2(d,b,i,j)
+    doubles_res += -0.500000000000000 * einsum('lkcd,calk,dbij->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 1), (0, 1)])
+
+    #         1.0000 P(i,j)<l,k||c,d>*t2(c,a,j,k)*t2(d,b,i,l)
+    contracted_intermediate =  1.000000000000000 * einsum('lkcd,cajk,dbil->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 1), (0, 1)])
+    doubles_res +=  1.00000 * contracted_intermediate + -1.00000 * einsum('abij->abji', contracted_intermediate)
+
+    #        -0.5000 <l,k||c,d>*t2(c,a,i,j)*t2(d,b,l,k)
+    doubles_res += -0.500000000000000 * einsum('lkcd,caij,dblk->abij', g[o, o, v, v], t2, t2, optimize=['einsum_path', (0, 2), (0, 1)])
+
+    return doubles_res
 
 
 

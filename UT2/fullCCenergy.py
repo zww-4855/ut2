@@ -37,6 +37,8 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
     t3_aabaab=ccd_kernel.tamps["t3aab"]
     t3_abbabb=ccd_kernel.tamps["t3abb"]
 
+
+
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 
@@ -52,6 +54,7 @@ def fullCC_energyMain(ccd_kernel,get_perturbCorr=False):
     D3bbb=ccd_kernel.denom["D3bbb"]
     D3aab=ccd_kernel.denom["D3aab"]
     D3abb=ccd_kernel.denom["D3abb"]
+
 
     if get_perturbCorr==True:
         l2dic=ccd_kernel.get_l2amps()

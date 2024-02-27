@@ -163,8 +163,8 @@ def ccd_main(mf, mol, orb, cc_runtype):
             nvirt=storedInfo.occInfo["nvirt_aa"]
             eps=np.kron(mf.mo_energy,np.ones(2))
             eps = np.sort(eps)
-            print('eps:',eps)
-            print('o',o,'v',v)
+            #print('eps:',eps)
+            #print('o',o,'v',v)
             D1_aa=1.0/(-eps[v,n]+eps[n,o])
             D2_aa=1.0/(-eps[v,n,n,n]-eps[n,v,n,n]+eps[n,n,o,n]+eps[n,n,n,o])
             D3_aa=1.0/(-eps[v,n,n,n,n,n]-eps[n,v,n,n,n,n]-eps[n,n,v,n,n,n]+
@@ -175,10 +175,13 @@ def ccd_main(mf, mol, orb, cc_runtype):
             ampObj = ampHandles.AmpHandler(o,v,storedInfo,cc_runtype["pertCorr"]["T2infile"],cc_runtype["pertCorr"]["T1infile"])
 
 
+
         if cc_runtype["pertCorrOrders"] == "pdagq_parT":
             currentE, corrE=ampObj.run_pdagq()
         elif cc_runtype["pertCorrOrders"] == "wicked_parT":
             currentE, corrE=ampObj.run_wickedTest()
+        elif cc_runtype["pertCorrOrders"] == "checkUCCD":
+            ampObj.run_UCCDcheck()
         else: # run UCC(5)-based energy corrections for triples
             pass
 #        sys.exit()
@@ -207,13 +210,21 @@ def ccd_main(mf, mol, orb, cc_runtype):
     elif "fullCCType" in cc_runtype: # running >T2 spin-integrated code
         storedInfo = convertSCFinfo(mf, mol, orb, cc_runtype, storedInfo)
 
+        #storedInfo=convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo)
         if "stopping_eps" not in cc_runtype:
             cc_runtype.update({"stopping_eps":10**-10})
 
         if "max_iter" not in cc_runtype:
             cc_runtype.update({"max_iter":75})
-        
-        cc_runtype.update({"diis_size":None, "diis_start_cycle":None})
+
+        if "diis_size" in cc_runtype:
+            ds=cc_runtype["diis_size"]
+            dstart=cc_runtype["diis_start_cycle"]
+            #cc_runtype.update({"diis_size":10, "diis_start_cycle":1})
+            cc_runtype.update({"diis_size":ds, "diis_start_cycle":dstart})
+        else:
+            cc_runtype.update({"diis_size":None, "diis_start_cycle":None})
+
         CCDobj=kernel.UltT2CC(storedInfo)
         t2, currentE, corrE = CCDobj.kernel()
 
@@ -264,7 +275,7 @@ def ccd_kernel(
     t2bbbb = np.zeros((nvirtb, nvirtb, nb, nb))
     t2abab = np.zeros((nvirta, nvirtb, na, nb))
 
-    print(t2aaaa.shape, t2bbbb.shape, t2abab.shape)
+    #print(t2aaaa.shape, t2bbbb.shape, t2abab.shape)
     # Initialize t2 amplitudes to 2e- integrals
     #t2aaaa=gaaaa.transpose(2,3,0,1)[:nvirta,:nvirta,:na,:na]
     #t2bbbb=gbbbb.transpose(2,3,0,1)[:nvirtb,:nvirtb,:nb,:nb]
@@ -731,6 +742,8 @@ def convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo):
     eps = np.append(eps_a, eps_b)
 
 
+
+    #sys.exit()
     # Sort the columns of C according to the order of increasing orbital energies
     C = C[:, eps.argsort()]
 
@@ -751,7 +764,7 @@ def convertSCFinfo_tmpslow(mf,mol,orb,cc_runtype,storedInfo):
 
     mp2E=0.250000000000000 * np.einsum('jiab,abji',gmo[o, o, v, v], t2)
 
-    print('mp2E:', mp2E)
+    #print('mp2E:', mp2E)
 
     eps2={"eps_aa":eps}
     if 'pertCorr' not in cc_runtype:
@@ -779,7 +792,7 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     :return: Returns an updated storedInfo object, where the integrals and denominator information has been updated. 
     """
     orb=np.asarray(orb)
-    print('orb:', np.shape(orb), orb.ndim)
+    #print('orb:', np.shape(orb), orb.ndim)
     if orb.ndim <= 2:
         occ = mf.mo_occ
         print('occ:',occ)
@@ -821,8 +834,8 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
             with open('ao_tei.pickle', 'rb') as handle:
                 twoEints=pickle.load(handle)
 
-        print('final tei load')
-        print(two_electron_integrals)
+        #print('final tei load')
+        #print(two_electron_integrals)
         #sys.exit()
 #        two_electron_integrals = ao2mo.restore(
 #                1, # no permutation symmetry
@@ -913,7 +926,7 @@ def convertSCFinfo_slow(mf, mol, orb,cc_runtype,storedInfo):
     
         mp2E=0.250000000000000 * np.einsum('jiab,abji',gmo[o, o, v, v], t2)
     
-        print('mp2E:', mp2E)
+        #print('mp2E:', mp2E)
 
         eps2={"eps_aa":eps}
         denomInfo=get_denoms(cc_runtype,occupationSliceInfo,eps2)
@@ -986,6 +999,10 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
     denomInfo.update({"D2aa":eabij_aa})
     if "ccdTypeSlow" in cc_runtype:
         hgherO=cc_runtype["ccdTypeSlow"]
+        D1=1.0/(-epsaa[virt_aa,n]+epsaa[n,occ_aa])
+        D3=1.0/(-epsaa[virt_aa,n,n,n,n,n]-epsaa[n,virt_aa,n,n,n,n]-epsaa[n,n,virt_aa,n,n,n]
+                +epsaa[n,n,n,occ_aa,n,n]+epsaa[n,n,n,n,occ_aa,n]+epsaa[n,n,n,n,n,occ_aa])
+        denomInfo.update({"D1aa":D1,"D3aa":D3})
     else:
         hgherO=0
     if hgherO == "UT2-CCD(7)" or hgherO == "UT2-CCD(8)" or hgherO == "UT2-CCD(9)":
@@ -1064,8 +1081,8 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
         denomInfo.update({"D1aa":eai_aa,"D1bb":eai_bb,"D1ab":eai_ab,
                           "D3aaa":eabcijk_aa,"D3bbb":eabcijk_bb,"D3aab":eabcijk_aab,
                           "D3abb":eabcijk_abb})
-        if "CCSDTQ" in cc_runtype.values():
-            eabcdijkl_aa = 1.0/ (
+        if "CCSDTQ" in cc_runtype.values() or "CCDQ" in cc_runtype.values():
+            eabcdijkl_aaaa = 1.0/ (
                 -epsaa[virt_aa,n,n, n, n, n, n, n]
                 - epsaa[n, virt_aa,n,n, n, n, n, n]
                 - epsaa[n, n,virt_aa, n,n,n, n, n]
@@ -1076,7 +1093,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
                 + epsaa[n, n, n, n, n, n,n,occ_aa]
             )
             print('quads alla ')
-            eabcdijkl_bb = 1.0/ (
+            eabcdijkl_bbbb = 1.0/ (
                 -epsbb[virt_bb,n,n, n, n, n, n, n]
                 - epsbb[n, virt_bb,n,n, n, n, n, n]
                 - epsbb[n, n,virt_bb, n,n,n, n, n]
@@ -1087,20 +1104,40 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
                 + epsbb[n, n, n, n, n, n,n,occ_bb]
             )
             print('quads allb')
-            eabcdijkl_ab = 1.0/ (
+            eabcdijkl_aabb = 1.0/ (
                 -epsaa[virt_aa,n,n, n, n, n, n, n]
-                - epsbb[n, virt_bb,n,n, n, n, n, n]
+                - epsaa[n, virt_bb,n,n, n, n, n, n]
+                - epsbb[n, n,virt_aa, n,n,n, n, n]
+                - epsbb[n, n,n, virt_bb, n,n, n, n]
+                + epsaa[n, n, n, n, occ_aa,n, n, n]
+                + epsaa[n, n, n, n, n,occ_bb, n,n]
+                + epsbb[n, n, n, n, n, n,occ_aa,n]
+                + epsbb[n, n, n, n, n, n,n,occ_bb]
+            )
+            eabcdijkl_aaab = 1.0/ (
+                -epsaa[virt_aa,n,n, n, n, n, n, n]
+                - epsaa[n, virt_bb,n,n, n, n, n, n]
                 - epsaa[n, n,virt_aa, n,n,n, n, n]
                 - epsbb[n, n,n, virt_bb, n,n, n, n]
                 + epsaa[n, n, n, n, occ_aa,n, n, n]
-                + epsbb[n, n, n, n, n,occ_bb, n,n]
+                + epsaa[n, n, n, n, n,occ_bb, n,n]
                 + epsaa[n, n, n, n, n, n,occ_aa,n]
                 + epsbb[n, n, n, n, n, n,n,occ_bb]
             )
+            eabcdijkl_abbb = 1.0/ (
+                -epsaa[virt_aa,n,n, n, n, n, n, n]
+                - epsbb[n, virt_bb,n,n, n, n, n, n]
+                - epsbb[n, n,virt_aa, n,n,n, n, n]
+                - epsbb[n, n,n, virt_bb, n,n, n, n]
+                + epsaa[n, n, n, n, occ_aa,n, n, n]
+                + epsbb[n, n, n, n, n,occ_bb, n,n]
+                + epsbb[n, n, n, n, n, n,occ_aa,n]
+                + epsbb[n, n, n, n, n, n,n,occ_bb]
+            )
 
-
-            denomInfo.update({"D4aa":eabcdijkl_aa,"D4bb":eabcdijkl_bb,
-                           "D4ab":eabcdijkl_ab})
+            denomInfo.update({"D4aaaa":eabcdijkl_aaaa,"D4bbbb":eabcdijkl_bbbb,
+                "D4aaab":eabcdijkl_aaab,"D4aabb":eabcdijkl_aabb,
+                "D4abbb":eabcdijkl_abbb})
 
     return denomInfo
 
@@ -1133,9 +1170,18 @@ def generalUHF(mf, mol, h1e, f, na, nb, orb):
     # nelec=mol.nelectron
     # na, nb = mf.nelec
     eri = mol.intor("int2e", aosym="s1")
-    g_aaaa = ao2mo.incore.general(eri, (orb[0], orb[0], orb[0], orb[0]))
-    g_bbbb = ao2mo.incore.general(eri, (orb[1], orb[1], orb[1], orb[1]))
-    g_abab = ao2mo.incore.general(eri, (orb[0], orb[0], orb[1], orb[1]))
+    eri = mol.intor('int2e',aosym='s1')
+    if np.shape(eri)==(0,0,0,0):# otherwise,
+        norbs=orb[0].shape[0]
+        print(norbs)#.shape[0])
+        eri=np.zeros((norbs,norbs,norbs,norbs))
+        print(np.shape(eri))
+        with open('ao_tei.pickle', 'rb') as handle:
+            eri=pickle.load(handle)
+    else:
+        g_aaaa = ao2mo.incore.general(eri, (orb[0], orb[0], orb[0], orb[0]))
+        g_bbbb = ao2mo.incore.general(eri, (orb[1], orb[1], orb[1], orb[1]))
+        g_abab = ao2mo.incore.general(eri, (orb[0], orb[0], orb[1], orb[1]))
 
     # Verify the 2e- integral coulomb energy
     ga = g_aaaa.transpose(0, 2, 1, 3)

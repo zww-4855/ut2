@@ -4,6 +4,7 @@ Drives the solution of - up to - the CCSDT, spin-integrated, residual equations,
 from numpy import einsum
 import UT2.modify_T2resid_T4Qf1 as qf1
 import UT2.modify_T2resid_T4Qf2 as qf2
+import UT2.ccdq_resids as ccdq
 import numpy as np
 
 def residMain(ccd_kernel):
@@ -34,6 +35,12 @@ def residMain(ccd_kernel):
     t3_aabaab=ccd_kernel.tamps["t3aab"]
     t3_abbabb=ccd_kernel.tamps["t3abb"]
 
+    t4_aaaa=ccd_kernel.tamps["t4aaaa"]
+    t4_aaab=ccd_kernel.tamps["t4aaab"]
+    t4_aabb=ccd_kernel.tamps["t4aabb"]
+    t4_abbb=ccd_kernel.tamps["t4abbb"]
+    t4_bbbb=ccd_kernel.tamps["t4bbbb"]
+
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 
@@ -61,7 +68,11 @@ def residMain(ccd_kernel):
 
     
 
-
+    D4aaaa=ccd_kernel.denom["D4aaaa"]
+    D4aaab=ccd_kernel.denom["D4aaab"]
+    D4aabb=ccd_kernel.denom["D4aabb"]
+    D4abbb=ccd_kernel.denom["D4abbb"]
+    D4bbbb=ccd_kernel.denom["D4bbbb"]
 
     resid_t1_aa = ccsdt_t1_aa_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
@@ -69,57 +80,41 @@ def residMain(ccd_kernel):
     resid_t1_bb = ccsdt_t1_bb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
 
+    if ccd_kernel.cc_type =="CCDQ":
+        resid_t2_aaaa=ccdq.ccdq_t2_aaaa_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t2_bbbb=ccdq.ccdq_t2_bbbb_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t2_abab=ccdq.ccdq_t2_abab_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
 
-    resid_t2_aaaa=ccsdt_t2_aaaa_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-    resid_t2_bbbb=ccsdt_t2_bbbb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-    resid_t2_abab=ccsdt_t2_abab_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t4aaaa=ccdq.ccdq_t4_aaaaaaaa_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t4aaab=ccdq.ccdq_t4_aaabaaab_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t4aabb=ccdq.ccdq_t4_aabbaabb_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t4abbb=ccdq.ccdq_t4_abbbabbb_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+        resid_t4bbbb=ccdq.ccdq_t4_bbbbbbbb_residual(t2_aaaa,t2_bbbb,t2_abab,
+                t4_aaaa,t4_aaab,t4_aabb,t4_abbb,t4_bbbb,f_aa,f_bb,g_aaaa,
+                g_bbbb,g_abab,oa,ob,va,vb)
+
+    else:
+        resid_t2_aaaa=ccsdt_t2_aaaa_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t2_bbbb=ccsdt_t2_bbbb_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
+        resid_t2_abab=ccsdt_t2_abab_residual(t1_aa, t1_bb, t2_aaaa, t2_bbbb, t2_abab, t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb, f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
 
-#    if ccd_kernel.cc_type == "CCSDTQf-1":
-#        import UT2.testing_modifyT2eqns_with_T4
-#        from UT2.fullCCenergy import ccsdtq_t4_aaaaaaaa_residual, ccsdtq_t4_bbbbbbbb_residual, ccsdtq_t4_aaabaaab_residual, ccsdtq_t4_aabbaabb_residual, ccsdtq_t4_abbbabbb_residual #import UT2.fullCCenergy 
-#
-#        l2dic=ccd_kernel.get_l2amps()
-#        l2_aaaa=l2dic["l2aa"]
-#        l2_bbbb=l2dic["l2bb"]
-#        l2_abab=l2dic["l2ab"]
-#
-#        t1_aa=t1_bb=t4_aaaaaaaa=t4_bbbbbbbb=t4_aaabaaab=t4_aabbaabb=t4_abbbabbb=None
-#
-#        t4_aaaa=ccsdtq_t4_aaaaaaaa_residual(t1_aa, t1_bb,
-#                                t2_aaaa, t2_bbbb, t2_abab,
-#                                t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
-#                                t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
-#                                f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-#        t4_bbbb=ccsdtq_t4_bbbbbbbb_residual(t1_aa, t1_bb,
-#                                t2_aaaa, t2_bbbb, t2_abab,
-#                                t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
-#                                t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
-#                                f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-#        t4_aaab=ccsdtq_t4_aaabaaab_residual(t1_aa, t1_bb,
-#                                t2_aaaa, t2_bbbb, t2_abab,
-#                                t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
-#                                t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
-#                                f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-#        t4_aabb=ccsdtq_t4_aabbaabb_residual(t1_aa, t1_bb,
-#                                t2_aaaa, t2_bbbb, t2_abab,
-#                                t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
-#                                t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
-#                                f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
-#        t4_abbb=ccsdtq_t4_abbbabbb_residual(t1_aa, t1_bb,
-#                                t2_aaaa, t2_bbbb, t2_abab,
-#                                t3_aaaaaa, t3_aabaab, t3_abbabb, t3_bbbbbb,
-#                                t4_aaaaaaaa, t4_aaabaaab, t4_aabbaabb, t4_abbbabbb, t4_bbbbbbbb,
-#                                f_aa, f_bb, g_aaaa, g_bbbb, g_abab, oa, ob, va, vb)
 
-        
-#        resid_t2_aaaa += ccsdt_t2_aaaa_residual_Qf(t4_aaaa, t4_bbbb, t4_aaab, t4_aabb, t4_abbb, f_aa, f_bb, t2_aaaa.transpose(2,3,0,1), t2_bbbb.transpose(2,3,0,1), t2_abab.transpose(2,3,0,1), oa, ob, va, vb)
-
-#        resid_t2_bbbb += ccsdt_t2_bbbb_residual_Qf(t4_aaaa, t4_bbbb, t4_aaab, t4_aabb, t4_abbb, f_aa, f_bb, t2_aaaa.transpose(2,3,0,1), t2_bbbb.transpose(2,3,0,1), t2_abab.transpose(2,3,0,1), oa, ob, va, vb)
-
-#        resid_t2_abab += ccsdt_t2_abab_residual_Qf(t4_aaaa, t4_bbbb, t4_aaab, t4_aabb, t4_abbb, f_aa, f_bb, t2_aaaa.transpose(2,3,0,1), t2_bbbb.transpose(2,3,0,1), t2_abab.transpose(2,3,0,1), oa, ob, va, vb)
-
-    if ccd_kernel.cc_type == "CCSD(Qf)":
+    if ccd_kernel.cc_type == "CCSD(Qf)" or ccd_kernel.cc_type == "CCDQ":
         resid_t3_aaa=0.0*t3_aaaaaa
         resid_t3_bbb=0.0*t3_aaaaaa
         resid_t3_aab=0.0*t3_aaaaaa
@@ -145,7 +140,13 @@ def residMain(ccd_kernel):
     resid_t3_aab+=np.reciprocal(D3aab)*t3_aabaab
     resid_t3_abb+=np.reciprocal(D3abb)*t3_abbabb
 
-    if ccd_kernel.cc_type == "CCD(Qf)" or ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type =="CCD" or ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*":
+    resid_t4aaaa+=np.reciprocal(D4aaaa)*t4_aaaa
+    resid_t4aaab+=np.reciprocal(D4aaab)*t4_aaab
+    resid_t4aabb+=np.reciprocal(D4aabb)*t4_aabb
+    resid_t4abbb+=np.reciprocal(D4abbb)*t4_abbb
+    resid_t4bbbb+=np.reciprocal(D4bbbb)*t4_bbbb
+
+    if ccd_kernel.cc_type == "CCD(Qf)" or ccd_kernel.cc_type == "CCD(Qf*)" or ccd_kernel.cc_type =="CCD" or ccd_kernel.cc_type == "CCDQf" or ccd_kernel.cc_type == "CCDQf*" or ccd_kernel.cc_type == "CCDQ":
         resid_t1_aa=resid_t1_bb=0.0*resid_t1_aa
         resid_t3_aaa=resid_t3_bbb=resid_t3_abb=resid_t3_aab=0.0*resid_t3_aaa
 
@@ -167,7 +168,10 @@ def residMain(ccd_kernel):
     tamp={"t1aa":resid_t1_aa*D1aa, "t1bb":resid_t1_bb*D1bb,
            "t2aa":resid_t2_aaaa*D2aa, "t2bb":resid_t2_bbbb*D2bb,"t2ab":resid_t2_abab*D2ab,
            "t3aaa":resid_t3_aaa*D3aaa,"t3bbb":resid_t3_bbb*D3bbb,"t3aab":resid_t3_aab*D3aab,
-           "t3abb":resid_t3_abb*D3abb}
+           "t3abb":resid_t3_abb*D3abb,
+           "t4aaaa":resid_t4aaaa*D4aaaa,"t4aaab":resid_t4aaab*D4aaab,
+           "t4aabb":resid_t4aabb*D4aabb,"t4abbb":resid_t4abbb*D4abbb,
+           "t4bbbb":resid_t4bbbb*D4bbbb}
 
 
         #tamp.update({"t2aa":resid_t2_aaaa*D2aa,"t2bb":resid_t2_bbbb*D2bb, "t2ab":resid_t2_abab*D2ab})

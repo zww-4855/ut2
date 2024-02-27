@@ -26,7 +26,7 @@ import re
 from numpy import einsum
 import numpy as np
 import UT2.XCCDbasebuilder as XCCDbasebuilder
-
+import UT2.drive_ucc4 as drive_ucc4
 
 def get_calc(storedInfo,calc_list):
     """
@@ -120,14 +120,22 @@ class UltT2CC():
         self.xccd_resids="X" in self.cc_type # Boolean that when turned on, modifies the CCD T2 residual equations according to the order of XCCD
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
-            self.tamps = {"t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab}
+            self.tamps = {"t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab,'t1aa':None}
             self.resid = {"resT2aa":resT2aa,"resT2bb":resT2bb,"resT2ab":resT2ab}
-
+            nvrta=self.nvrta
+            nocca=self.nocca
             if self.diis_size is not None:
                 from UT2.diis import DIIS
         
                 self.diis_update = DIIS(self.diis_size, start_iter=self.diis_start_cycle)
-                self.old_vec = np.hstack((self.tamps["t2aa"].flatten(), self.tamps["t2bb"].flatten(), self.tamps["t2ab"].flatten()))
+
+                if "UCC(4)" in self.cc_type:
+                    added_amps={'t1aa':np.zeros((nvrta,nocca)),'t3aa':np.zeros((nvrta,nvrta,nvrta,nocca,nocca,nocca))}
+                    self.tamps.update(added_amps)
+
+                    self.old_vec= np.hstack((self.tamps["t1aa"].flatten(), self.tamps["t2aa"].flatten(), self.tamps["t3aa"].flatten()))
+                else:
+                    self.old_vec = np.hstack((self.tamps["t2aa"].flatten(), self.tamps["t2bb"].flatten(), self.tamps["t2ab"].flatten()))
      
         elif "fullCCType" in storedInfo.get_cc_runtype(None):
             nvrta=self.nvrta
@@ -135,20 +143,28 @@ class UltT2CC():
             t1aa=t1bb=resT1aa=resT1bb=np.zeros((nvrta,nocca)) 
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((nvrta,nvrta,nocca,nocca))
             t3aaa=t3bbb=t3aab=t3abb=resT3aaa=resT3bbb=resT3aab=resT3abb=np.zeros((nvrta,nvrta,nvrta,nocca,nocca,nocca))
-            
+            t4aaaa=t4bbbb=t4aaab=t4aabb=t4abbb=np.zeros((nvrta,nvrta,nvrta,nvrta,nocca,nocca,nocca,nocca)) 
 
             tamps={"t1aa":t1aa,"t1bb":t1bb,
                    "t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab,
-                   "t3aaa":t3aaa,"t3bbb":t3bbb,"t3aab":t3aab,"t3abb":t3abb}
+                   "t3aaa":t3aaa,"t3bbb":t3bbb,"t3aab":t3aab,"t3abb":t3abb,
+                   "t4aaaa":t4aaaa,"t4bbbb":t4bbbb,"t4aaab":t4aaab,"t4aabb":t4aabb,"t4abbb":t4abbb}
 
             resid={"resT1aa":resT1aa,"resT1bb":resT1bb,
                    "resT2aa":resT2aa,"resT2bb":resT2bb,"resT2ab":resT2ab,
                    "resT3aaa":resT3aaa,"resT3bbb":resT3bbb,"resT3aab":resT3aab,"resT3abb":resT3abb}
 
-            if storedInfo.get_cc_runtype("fullCCType") == "CCSDTQ":
-                t4aa=t4bb=t4ab=resT4aa=resT4bb=resT4ab=np.zeros((nvrta,nvrta,nvrta,nvrta,nocca,nocca,nocca,nocca))
-                tamps.update({"t4aa":t4aa,"t4bb":t4bb,"t4ab":t4ab})       
-                resid.update({"resT4aa":resT4aa,"resT4bb":resT4bb,"resT4ab":resT4ab})
+            self.tamps=tamps
+            if self.diis_size is not None:
+                from UT2.diis import DIIS
+
+                self.diis_update = DIIS(self.diis_size, start_iter=self.diis_start_cycle)
+                self.old_vec= np.hstack((self.tamps["t2aa"].flatten(), self.tamps["t2bb"].flatten(), self.tamps["t2ab"].flatten(), self.tamps["t4aaaa"].flatten(),self.tamps["t4aaab"].flatten(),self.tamps["t4aabb"].flatten(),self.tamps["t4abbb"].flatten(),self.tamps["t4bbbb"].flatten()))
+
+            #if storedInfo.get_cc_runtype("fullCCType") == "CCSDTQ" or storedInfo.get_cc_runtype("fullCCType")=='CCDQ':
+            #    t4aaaa=t4bbbb=t4aaab=t4aabb=t4abbb==np.zeros((nvrta,nvrta,nvrta,nvrta,nocca,nocca,nocca,nocca))
+            #    tamps.update({"t4aaaa":t4aaaa,"t4bbbb":t4bbbb,"t4aaab":t4aaab,"t4aabb":t4aabb,"t4abbb":t4abbb})       
+            #    #resid.update({"resT4aa":resT4aa,"resT4bb":resT4bb,"resT4ab":resT4ab})
 
             self.tamps=tamps
             self.resid=resid
@@ -226,7 +242,7 @@ class UltT2CC():
             #corrE=nucE+current_energy
             tfinalEnergy=current_energy+nucE
 
-        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCD(Qf*)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)":
+        if self.cc_type == "CCD(Qf)" or self.cc_type == "CCD(Qf*)" or self.cc_type == "CCSDT(Qf)" or self.cc_type == "CCSDT(Qf*)" or self.cc_type == "CCSD(Qf)":
             corrE=nucE+current_energy-hf_energy
 
             if self.cc_label == "ccdType":
@@ -274,8 +290,16 @@ class UltT2CC():
         if self.cc_label == "ccdType":
             old_energy = t2energy.ccd_energyMain(self)
         elif self.cc_label =="ccdTypeSlow":
-            old_energy = t2energySlow.ccd_energyMain(self) 
-
+            sliceInfo=self.sliceInfo
+            oa=sliceInfo["occ_aa"]
+            va=sliceInfo["virt_aa"]
+            self.tamps["t2aa"]=0.0*self.ints["tei"][va,va,oa,oa]*self.denom["D2aa"]
+            if "UCC(4)" in self.cc_type:
+                old_energy=drive_ucc4.ucc4_energy_simplified(self)
+            else:
+                old_energy = t2energySlow.ccd_energyMain(self) 
+            print('mp2 energy:', 0.25*np.einsum('jiab,abji',self.ints["tei"][oa,oa,va,va],self.tamps["t2aa"]))
+            print('initial CC energy:',old_energy)
         elif self.cc_label == "fullCCType":
             old_energy = fullCCenergy.fullCC_energyMain(self) 
 
@@ -287,7 +311,10 @@ class UltT2CC():
             if self.cc_label == "ccdType":
                 t2residEqns.residMain(self)
             elif self.cc_label == "ccdTypeSlow":
-                t2residEqnsSlow.residMain(self)
+                if "UCC(4)" in self.cc_type:
+                    drive_ucc4.resid_main(self)
+                else:
+                    t2residEqnsSlow.residMain(self)
 
             elif self.cc_label == "fullCCType":
                 fullCCresidEqns.residMain(self)
@@ -295,37 +322,113 @@ class UltT2CC():
 
         # diis update
             if self.diis_size is not None:
-                vectorized_iterate = np.hstack(
-                    (
-                        self.tamps["t2aa"].flatten(),
-                        self.tamps["t2bb"].flatten(),
-                        self.tamps["t2ab"].flatten(),
+                if "UCC(4)" in self.cc_type:
+                    vectorized_iterate = np.hstack(
+                        (
+                            self.tamps["t1aa"].flatten(),
+                            self.tamps["t2aa"].flatten(),
+                            self.tamps["t3aa"].flatten(),
+                        )
                     )
-                )
+                elif "CCDQ" in self.cc_type:
+                    vectorized_iterate = np.hstack(
+                        (
+                            self.tamps["t2aa"].flatten(),
+                            self.tamps["t2bb"].flatten(),
+                            self.tamps["t2ab"].flatten(),
+                            self.tamps["t4aaaa"].flatten(),
+                            self.tamps["t4aaab"].flatten(),
+                            self.tamps["t4aabb"].flatten(),
+                            self.tamps["t4abbb"].flatten(),
+                            self.tamps["t4bbbb"].flatten(),
+                        )
+                    )
+                else:
+                    vectorized_iterate = np.hstack(
+                        (
+                            self.tamps["t2aa"].flatten(),
+                            self.tamps["t2bb"].flatten(),
+                            self.tamps["t2ab"].flatten(),
+                        )
+                    )
                 error_vec = self.old_vec - vectorized_iterate
                 new_vectorized_iterate = self.diis_update.compute_new_vec(
                     vectorized_iterate, error_vec
                 )
-                t2aaaa=self.tamps["t2aa"]
-                t2bbbb=self.tamps["t2bb"]
-                t2abab=self.tamps["t2ab"]
-                t2aaaa_dim=self.tamps["t2aa"].size
-                t2bbbb_dim=self.tamps["t2bb"].size
-                t2abab_dim=self.tamps["t2ab"].size
-                self.tamps["t2aa"] = new_vectorized_iterate[:t2aaaa_dim].reshape(t2aaaa.shape)
-                self.tamps["t2bb"] = new_vectorized_iterate[
-                    t2aaaa_dim : t2aaaa_dim + t2bbbb_dim
-                ].reshape(t2bbbb.shape)
-                self.tamps["t2ab"] = new_vectorized_iterate[
-                    t2aaaa_dim + t2bbbb_dim :
-                ].reshape(t2abab.shape)
-                self.old_vec = new_vectorized_iterate
+
+                if "UCC(4)" in self.cc_type:
+                    t1=self.tamps["t1aa"]
+                    t2=self.tamps["t2aa"]
+                    t3=self.tamps["t3aa"]
+                    t1_dim=self.tamps["t1aa"].size
+                    t2_dim=self.tamps["t2aa"].size
+                    t3_dim=self.tamps["t3aa"].size
+                    self.tamps["t1aa"] = new_vectorized_iterate[:t1_dim].reshape(t1.shape)
+                    self.tamps["t2aa"] = new_vectorized_iterate[
+                        t1_dim : t1_dim + t2_dim
+                    ].reshape(t2.shape)
+                    self.tamps["t3aa"] = new_vectorized_iterate[
+                        t1_dim + t2_dim :
+                    ].reshape(t3.shape)
+                    self.old_vec = new_vectorized_iterate
+                elif "CCDQ" in self.cc_type:
+                    t2aaaa=self.tamps["t2aa"]
+                    t2bbbb=self.tamps["t2bb"]
+                    t2abab=self.tamps["t2ab"]
+                    t2aaaa_dim=self.tamps["t2aa"].size
+                    t2bbbb_dim=self.tamps["t2bb"].size
+                    t2abab_dim=self.tamps["t2ab"].size
+                    self.tamps["t2aa"] = new_vectorized_iterate[:t2aaaa_dim].reshape(t2aaaa.shape)
+                    self.tamps["t2bb"] = new_vectorized_iterate[
+                        t2aaaa_dim : t2aaaa_dim + t2bbbb_dim
+                    ].reshape(t2bbbb.shape)
+                    self.tamps["t2ab"] = new_vectorized_iterate[
+                        t2aaaa_dim + t2bbbb_dim : t2aaaa_dim + t2bbbb_dim + t2abab_dim
+                    ].reshape(t2abab.shape)
+
+                    start=t2aaaa_dim + t2bbbb_dim + t2abab_dim
+                    t4_dim1=t2aaaa_dim + t2bbbb_dim + t2abab_dim + self.tamps["t4aaaa"].size
+                    t4_dim2=t4_dim1 + self.tamps["t4aaab"].size
+                    t4_dim3=t4_dim2 + self.tamps["t4aabb"].size
+                    t4_dim4=t4_dim3 + self.tamps["t4abbb"].size
+                    t4_dim5=t4_dim4 + self.tamps["t4bbbb"].size
+
+                    t4aaaa_shape=self.tamps["t4aaaa"].shape
+                    t4aaab_shape=self.tamps["t4aaab"].shape
+                    t4aabb_shape=self.tamps["t4aabb"].shape
+                    t4abbb_shape=self.tamps["t4abbb"].shape
+                    t4bbbb_shape=self.tamps["t4bbbb"].shape
+                    self.tamps["t4aaaa"] = new_vectorized_iterate[start:t4_dim1].reshape(t4aaaa_shape)
+                    self.tamps["t4aaab"] = new_vectorized_iterate[t4_dim1:t4_dim2].reshape(t4aaab_shape)
+                    self.tamps["t4aabb"] = new_vectorized_iterate[t4_dim2:t4_dim3].reshape(t4aabb_shape)
+                    self.tamps["t4abbb"] = new_vectorized_iterate[t4_dim3:t4_dim4].reshape(t4abbb_shape)
+                    self.tamps["t4bbbb"] = new_vectorized_iterate[t4_dim4:].reshape(t4bbbb_shape)
+
+                    self.old_vec = new_vectorized_iterate
+                else:
+                    t2aaaa=self.tamps["t2aa"]
+                    t2bbbb=self.tamps["t2bb"]
+                    t2abab=self.tamps["t2ab"]
+                    t2aaaa_dim=self.tamps["t2aa"].size
+                    t2bbbb_dim=self.tamps["t2bb"].size
+                    t2abab_dim=self.tamps["t2ab"].size
+                    self.tamps["t2aa"] = new_vectorized_iterate[:t2aaaa_dim].reshape(t2aaaa.shape)
+                    self.tamps["t2bb"] = new_vectorized_iterate[
+                        t2aaaa_dim : t2aaaa_dim + t2bbbb_dim
+                    ].reshape(t2bbbb.shape)
+                    self.tamps["t2ab"] = new_vectorized_iterate[
+                        t2aaaa_dim + t2bbbb_dim :
+                    ].reshape(t2abab.shape)
+                    self.old_vec = new_vectorized_iterate
 
 
             if self.cc_label == "ccdType":
                 current_energy = t2energy.ccd_energyMain(self)
             elif self.cc_label =="ccdTypeSlow":
-                current_energy = t2energySlow.ccd_energyMain(self)
+                if "UCC(4)" in self.cc_type:
+                    current_energy=drive_ucc4.ucc4_energy_simplified(self)
+                else:
+                    current_energy = t2energySlow.ccd_energyMain(self)
             elif self.cc_label == "fullCCType":
                 current_energy = fullCCenergy.fullCC_energyMain(self)
 
@@ -347,8 +450,10 @@ class UltT2CC():
         if self.dump_tamps == True:
             import pickle
             with open('tamps.pickle', 'wb') as handle:
-                pickle.dump(self.tamps, handle)
- 
+                pickle.dump(self.tamps["t2aa"], handle)
+
+
+        print(self.tamps["t2aa"][0,0,0,:],'\n',self.tamps["t2aa"][0,:,0,0]) 
         self.finalize(self.nucE,current_energy,self.hf_energy)
  
         return self.tamps,self.tfinalEnergy, self.corrE

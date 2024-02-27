@@ -105,9 +105,13 @@ class run_xacc():
         read_amps=False
         with open(tamp_infile,'r') as f:
             for line in f:
-                if read_amps:
-                    amp_key=float(line.split()[-1])
-                    index_list=line.split()
+                if read_amps:#have to uncomment 109,13 for nospace
+                    #amp_key=float(line.split()[-1])#.strip('|'))
+                    amp_key=float(line.split()[-1].strip('|'))
+                    #index_list=line.split()
+                    index_list=line.split()[:-1]
+                    index_list.append('|')
+                    index_list.append(amp_key)
                     operator_list=[]
                     for operator in range(4): # max T2, min T1
                         if index_list[operator] == '|':
@@ -135,7 +139,7 @@ class run_xacc():
 
         #print('t1:',self.t1amps)
         #print('t2:',self.t2amps)
-        self.t2amps=self.t2amps*0.25
+        self.t2amps=self.t2amps#*0.25
 
     def read_bkgrd(self,bkgrd_infile):
         '''

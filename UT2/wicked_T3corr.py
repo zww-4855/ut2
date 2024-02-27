@@ -119,9 +119,27 @@ def getE_parenT_t1(g,o,v,t3,t1_dag):
 
 
 
+def get_netT1_fromT2(g,o,v,t2):
+    rov = -0.500000000 * np.einsum("jkab,ibjk->ia",t2,g[o,v,o,o],optimize="optimal")
+    rov += -0.500000000 * np.einsum("ijbc,bcja->ia",t2,g[v,v,o,v],optimize="optimal")
+    return rov
 
+def get_netT1_thirdO(g,o,v,t2):
+    t2dag=t2.transpose(2,3,0,1)
+    rov = -0.500000000 * np.einsum("ijab,cdjk,kbcd->ia",t2,t2dag,g[o,v,v,v],optimize="optimal")
+    rov += -0.500000000 * np.einsum("ijab,bckl,kljc->ia",t2,t2dag,g[o,o,o,v],optimize="optimal")
+    rov += -0.250000000 * np.einsum("jkab,cdjk,ibcd->ia",t2,t2dag,g[o,v,v,v],optimize="optimal")
+    rov += 1.000000000 * np.einsum("jkab,bcjl,ilkc->ia",t2,t2dag,g[o,o,o,v],optimize="optimal")
+    rov += 1.000000000 * np.einsum("ijbc,bdjk,kcad->ia",t2,t2dag,g[o,v,v,v],optimize="optimal")
+    rov += -0.250000000 * np.einsum("ijbc,bckl,klja->ia",t2,t2dag,g[o,o,o,v],optimize="optimal")
+    rov += 0.500000000 * np.einsum("jkbc,bdjk,icad->ia",t2,t2dag,g[o,v,v,v],optimize="optimal")
+    rov += 0.500000000 * np.einsum("jkbc,bcjl,ilka->ia",t2,t2dag,g[o,o,o,v],optimize="optimal")
+    return rov
 
-
+def get_T2resid_fromT1bar(g,o,v,t1_bar):
+    roovv = -0.500000000 * np.einsum("ka,ijkb->ijab",t1_bar,g[o,o,o,v],optimize="optimal")
+    roovv += -0.500000000 * np.einsum("ic,jcab->ijab",t1_bar,g[o,v,v,v],optimize="optimal")
+    return roovv
 
 
 
