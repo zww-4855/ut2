@@ -965,7 +965,7 @@ def get_denoms(cc_runtype,occupationSliceInfo,eps):
         occ_aa=occupationSliceInfo["occ_aa"]
         epsaa=eps['eps_aa']
         print('inside two')
-        
+        print('v', virt_aa, 'o', occ_aa) 
 
     elif "ccdType" in cc_runtype or "fullCCType" in cc_runtype: # spin-integrated formalisms
         print('inside one')

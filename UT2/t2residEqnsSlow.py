@@ -24,7 +24,7 @@ def residMain(ccd_kernel):
     nvirt=ccd_kernel.nvrta
 
     t2_aaaa=ccd_kernel.tamps["t2aa"]
-
+    print('t2shape:', t2_aaaa.shape)
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 

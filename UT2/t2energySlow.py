@@ -23,9 +23,7 @@ def ccd_energyMain(ccd_kernel,get_perturbCorr=False):
     sliceInfo=ccd_kernel.sliceInfo
     oa=sliceInfo["occ_aa"]
     va=sliceInfo["virt_aa"]
-
     t2_aaaa=ccd_kernel.tamps["t2aa"]
-
     fock=ccd_kernel.ints["oei"]
     tei=ccd_kernel.ints["tei"]
 

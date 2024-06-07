@@ -27,6 +27,8 @@ from numpy import einsum
 import numpy as np
 import UT2.XCCDbasebuilder as XCCDbasebuilder
 import UT2.drive_ucc4 as drive_ucc4
+import UT2.drive_ccsd_SO as drive_ccsd_SO
+
 
 def get_calc(storedInfo,calc_list):
     """
@@ -120,6 +122,7 @@ class UltT2CC():
         self.xccd_resids="X" in self.cc_type # Boolean that when turned on, modifies the CCD T2 residual equations according to the order of XCCD
         if "ccdType" in storedInfo.get_cc_runtype(None) or "ccdTypeSlow" in storedInfo.get_cc_runtype(None):
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((self.nvrta,self.nvrta,self.nocca,self.nocca))
+            print(t2aa.shape)
             self.tamps = {"t2aa":t2aa,"t2bb":t2bb,"t2ab":t2ab,'t1aa':None}
             self.resid = {"resT2aa":resT2aa,"resT2bb":resT2bb,"resT2ab":resT2ab}
             nvrta=self.nvrta
@@ -140,6 +143,8 @@ class UltT2CC():
         elif "fullCCType" in storedInfo.get_cc_runtype(None):
             nvrta=self.nvrta
             nocca=self.nocca
+            print(nvrta,nocca,'ndim')
+            print(flush=True)
             t1aa=t1bb=resT1aa=resT1bb=np.zeros((nvrta,nocca)) 
             t2aa=t2bb=t2ab=resT2aa=resT2bb=resT2ab=np.zeros((nvrta,nvrta,nocca,nocca))
             t3aaa=t3bbb=t3aab=t3abb=resT3aaa=resT3bbb=resT3aab=resT3abb=np.zeros((nvrta,nvrta,nvrta,nocca,nocca,nocca))
@@ -293,9 +298,13 @@ class UltT2CC():
             sliceInfo=self.sliceInfo
             oa=sliceInfo["occ_aa"]
             va=sliceInfo["virt_aa"]
-            self.tamps["t2aa"]=0.0*self.ints["tei"][va,va,oa,oa]*self.denom["D2aa"]
+            self.tamps["t2aa"]=self.ints["tei"][va,va,oa,oa]*self.denom["D2aa"]
             if "UCC(4)" in self.cc_type:
                 old_energy=drive_ucc4.ucc4_energy_simplified(self)
+
+            elif "CCSD(Qf)" in self.cc_type:
+                old_energy=drive_ccsd_SO.get_ccsdE(self)
+
             else:
                 old_energy = t2energySlow.ccd_energyMain(self) 
             print('mp2 energy:', 0.25*np.einsum('jiab,abji',self.ints["tei"][oa,oa,va,va],self.tamps["t2aa"]))
@@ -305,6 +314,9 @@ class UltT2CC():
 
 
         for idx in range(self.max_iter):
+            if idx>75:
+                sys.exit()
+
             self.set_l2amps()
 
             # Updates all of aaaa,abab,bbbb spin residuals
@@ -313,6 +325,8 @@ class UltT2CC():
             elif self.cc_label == "ccdTypeSlow":
                 if "UCC(4)" in self.cc_type:
                     drive_ucc4.resid_main(self)
+                elif "CCSD(Qf)" in self.cc_type:
+                    drive_ccsd_SO.resid_main(self)
                 else:
                     t2residEqnsSlow.residMain(self)
 
@@ -427,6 +441,8 @@ class UltT2CC():
             elif self.cc_label =="ccdTypeSlow":
                 if "UCC(4)" in self.cc_type:
                     current_energy=drive_ucc4.ucc4_energy_simplified(self)
+                elif "CCSD(Qf)" in self.cc_type:
+                    current_energy=drive_ccsd_SO.get_ccsdE(self)
                 else:
                     current_energy = t2energySlow.ccd_energyMain(self)
             elif self.cc_label == "fullCCType":
