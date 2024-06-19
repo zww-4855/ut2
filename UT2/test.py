@@ -1,4 +1,4 @@
-
+import numpy as np
 
 
 
@@ -22,14 +22,79 @@ class SetupCC():
         self.occSliceInfo=None
         self.denomInfo=None
         self.integralInfo=None
+        self.eps=None
 
         if "slowSOcalc" in cc_info:
             self.cc_calcs=cc_info.get("slowSOcalc",'CCD')
             self.get_occInfo(pyscf_mf)
+            self.get_integrals(pyscf_mf)
+            self.get_denomsSlow(pyscf_mf,cc_info["slowSOcalc"])
 
 
 
-        print(cc_info)
+    def get_denomsSlow(pyscf_mf,cc_calc):
+        virt_aa=self.occSliceInfo["virt_aa"]
+        occ_aa=self.occSliceInfo["occ_aa"]
+        epsaa=self.eps
+        if "S" in cc_calc: # Get T1 denoms
+
+
+
+    def get_integrals(self,pyscf_mf):
+        dropcore=cc_runtype["dropcore"]
+        print('dropcore:',dropcore)
+        if 'RHF' in str(type(pyscf_mf)): # running RHF calculation
+            Ca = Cb = np.asarray(pyscf_mf.mo_coeff)
+            eps_a = eps_b = np.asarray(pyscf_mf.mo_energy)
+    
+        elif 'UHF' in str(type(pyscf_mf)): # running UHF calculation
+            Ca = np.asarray(pyscf_mf.mo_coeff[0])
+            Cb = np.asarray(pyscf_mf.mo_coeff[1])
+            eps_a = np.asarray(pyscf_mf.mo_energy[0])
+            eps_b = np.asarray(pyscf_mf.mo_energy[1])
+            print('eps_a',eps_a)
+
+        # default is to try and use PySCF object to harvest AO 2eints
+        eri = mol.intor('int2e',aosym='s1')
+        if np.shape(eri)==(0,0,0,0):# otherwise,
+            eri=np.zeros((norbs,norbs,norbs,norbs))
+            print(np.shape(eri))
+            with open('ao_tei.pickle', 'rb') as handle:
+                eri=pickle.load(handle)
+    
+        C = np.block([
+                 [      Ca           ,   np.zeros_like(Cb) ],
+                 [np.zeros_like(Ca)  ,          Cb         ]
+                ])
+    
+    
+        I = np.asarray(eri)
+        I_spinblock = spin_block_tei(I)
+        # Converts chemist's notation to physicist's notation, and antisymmetrize
+        # (pq | rs) ---> <pr | qs>
+        # Physicist's notation
+        tmp = I_spinblock.transpose(0, 2, 1, 3)
+        # Antisymmetrize:
+        # <pr||qs> = <pr | qs> - <pr | sq>
+        gao = tmp - tmp.transpose(0, 1, 3, 2)
+        eps = np.append(eps_a, eps_b)
+    
+        # Sort the columns of C according to the order of increasing orbital energies
+        C = C[:, eps.argsort()[dropcore*2:]]
+        # Sort orbital energies in increasing order
+        eps = np.sort(eps)[dropcore*2:]
+        self.eps=eps
+
+            # Transform gao, which is the spin-blocked 4d array of physicist's notation,
+    # antisymmetric two-electron integrals, into the MO basis using MO coefficients
+        gmo = np.einsum('pQRS, pP -> PQRS',
+              np.einsum('pqRS, qQ -> pQRS',
+              np.einsum('pqrS, rR -> pqRS',
+              np.einsum('pqrs, sS -> pqrS', gao, C, optimize=True), C, optimize=True), C, optimize=True), C, optimize=True)
+
+        fock=np.diag(eps)
+        self.integralInfo={"oei":fock,"tei":gmo}
+
 
 
 
@@ -63,14 +128,11 @@ class SetupCC():
 
 
 
-    def print(self):
-        print(self.cc_calcs)
-
-
 
 class DriveCC(SetupCC):
-    def __init__(self,pyscf_mf,cc_info):
+    def __init__(self,pyscf_mf,cc_info,t2_amps=None):
         SetupCC.__init__(self,pyscf_mf,cc_info)
         print(self.cc_calcs)
+        self.t2_amps=t2_amps
 
 
