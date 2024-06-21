@@ -1,10 +1,10 @@
 import numpy as np
-
+import UT2.set_denoms as set_denoms
 
 
 
 class SetupCC():
-    def __init__(self,pyscf_mf,cc_info):#Set the defaults up for CC calculation
+    def __init__(self,pyscf_mf,pyscf_mol,cc_info):#Set the defaults up for CC calculation
         # Load mean-field information from PySCF object
         self.hf_e=pyscf_mf.e_tot
         self.nuc_e=pyscf_mf.energy_nuc()
@@ -20,28 +20,46 @@ class SetupCC():
         # Initialize data dictionaries
         self.occInfo=None
         self.occSliceInfo=None
-        self.denomInfo=None
-        self.integralInfo=None
+        self.denomInfo={}
+        self.integralInfo={}
         self.eps=None
 
         if "slowSOcalc" in cc_info:
             self.cc_calcs=cc_info.get("slowSOcalc",'CCD')
             self.get_occInfo(pyscf_mf)
-            self.get_integrals(pyscf_mf)
+            self.get_integrals(pyscf_mf,pyscf_mol)
             self.get_denomsSlow(pyscf_mf,cc_info["slowSOcalc"])
 
 
 
-    def get_denomsSlow(pyscf_mf,cc_calc):
+    def get_denomsSlow(self,pyscf_mf,cc_calc):
         virt_aa=self.occSliceInfo["virt_aa"]
         occ_aa=self.occSliceInfo["occ_aa"]
         epsaa=self.eps
+        n = np.newaxis
         if "S" in cc_calc: # Get T1 denoms
+            self.denomInfo.update({"D1aa":set_denoms.D1denomSlow(epsaa,occ_aa,virt_aa,n)})
+        if "D" in cc_calc: # Get T2 denoms
+            self.denomInfo.update({"D2aa":set_denoms.D2denomSlow(epsaa,occ_aa,virt_aa,n)})
+        if "T" in cc_calc: #Get T3 denoms
+            self.denomInfo.update({"D3aa":set_denoms.D3denomSlow(epsaa,occ_aa,virt_aa,n)})
+        if "UT2" in cc_calc or "X" in cc_calc or "Qdebug" in cc_calc:
+            self.denomInfo.update({"D4aa":set_denoms.D4denomSlow(epsaa,occ_aa,virt_aa)})
 
 
+    def spin_block_tei(self,I):
+        """
+        Function that spin blocks two-electron integrals
+        Using np.kron, we project I into the space of the 2x2 identity, tranpose the result
+        and project into the space of the 2x2 identity again. This doubles the size of each axis.
+        The result is our two electron integral tensor in the spin orbital form.
+        """
+        identity = np.eye(2)
+        I = np.kron(identity, I)
+        return np.kron(identity, I.T)
 
-    def get_integrals(self,pyscf_mf):
-        dropcore=cc_runtype["dropcore"]
+    def get_integrals(self,pyscf_mf,pyscf_mol):
+        dropcore=self.dropcore
         print('dropcore:',dropcore)
         if 'RHF' in str(type(pyscf_mf)): # running RHF calculation
             Ca = Cb = np.asarray(pyscf_mf.mo_coeff)
@@ -55,7 +73,7 @@ class SetupCC():
             print('eps_a',eps_a)
 
         # default is to try and use PySCF object to harvest AO 2eints
-        eri = mol.intor('int2e',aosym='s1')
+        eri = pyscf_mol.intor('int2e',aosym='s1')
         if np.shape(eri)==(0,0,0,0):# otherwise,
             eri=np.zeros((norbs,norbs,norbs,norbs))
             print(np.shape(eri))
@@ -69,7 +87,7 @@ class SetupCC():
     
     
         I = np.asarray(eri)
-        I_spinblock = spin_block_tei(I)
+        I_spinblock = self.spin_block_tei(I)
         # Converts chemist's notation to physicist's notation, and antisymmetrize
         # (pq | rs) ---> <pr | qs>
         # Physicist's notation
@@ -101,7 +119,7 @@ class SetupCC():
     def get_occInfo(self,pyscf_mf):
         dropcore=self.dropcore
         print('dropcore:',dropcore)
-        if 'RHF' in str(type(mf)): # running RHF calculation
+        if 'RHF' in str(type(pyscf_mf)): # running RHF calculation
             if dropcore>0: 
                 print('dropcore not implemented for RHF')
                 sys.exit()
@@ -130,8 +148,8 @@ class SetupCC():
 
 
 class DriveCC(SetupCC):
-    def __init__(self,pyscf_mf,cc_info,t2_amps=None):
-        SetupCC.__init__(self,pyscf_mf,cc_info)
+    def __init__(self,pyscf_mf,pyscf_mol,cc_info,t2_amps=None):
+        SetupCC.__init__(self,pyscf_mf,pyscf_mol,cc_info)
         print(self.cc_calcs)
         self.t2_amps=t2_amps
 
