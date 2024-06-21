@@ -1,6 +1,6 @@
 import numpy as np
 import UT2.set_denoms as set_denoms
-
+import UT2.tamps as tamps
 
 
 class SetupCC():
@@ -24,12 +24,12 @@ class SetupCC():
         self.integralInfo={}
         self.eps=None
 
-        if "slowSOcalc" in cc_info:
+        if "slowSOcalc" in cc_info: # If a slow, spin-orb-based CC calc
             self.cc_calcs=cc_info.get("slowSOcalc",'CCD')
             self.get_occInfo(pyscf_mf)
             self.get_integrals(pyscf_mf,pyscf_mol)
             self.get_denomsSlow(pyscf_mf,cc_info["slowSOcalc"])
-
+        ## TO DO:: ADD OPTION FOR SPIN-INTEGRATED CC EQNS, AND INTERFACE TO XACC
 
 
     def get_denomsSlow(self,pyscf_mf,cc_calc):
@@ -148,9 +148,25 @@ class SetupCC():
 
 
 class DriveCC(SetupCC):
-    def __init__(self,pyscf_mf,pyscf_mol,cc_info,t2_amps=None):
+    def __init__(self,pyscf_mf,pyscf_mol,cc_info,t2ampFile=None):
         SetupCC.__init__(self,pyscf_mf,pyscf_mol,cc_info)
         print(self.cc_calcs)
-        self.t2_amps=t2_amps
+        self.correlationE={} #options: totalCorrCorrection, and options for (T), (Qf), etc
+        self.tamps={}     #TO DO:: Load T2 if not None
+        
 
+
+
+        # setup t amplitudes TODO:: ADD in query/setup for tamps of spin-intgr eqns
+        if "slowSOcalc" in cc_info:
+            nocc=self.occInfo["nocc_aa"]
+            nvirt=self.occInfo["nvirt_aa"]
+            self.tamps = tamps.set_tampsSLOW(cc_info["slowSOcalc"],nocc,nvirt,t2ampFile) 
+
+
+
+        if self.diis_size is not None:# only works for spin-orb models rn
+            from UT2.diis import DIIS
+            self.diis_update=DIIS(self.diis_size, start_iter=self.diis_start_cycle)
+            self.old_vec=tamps.get_oldvec(self.tamps,cc_info["slowSOcalc"])
 
