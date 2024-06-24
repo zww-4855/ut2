@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 
-def set_tampsSLOW(cc_calc,no,nv,t2ampFile=None):
+def set_tampsSLOW(cc_calc,no,nv,initT2,t2ampFile=None):
     tamps={}
     if "S" in cc_calc:
         t1=np.zeros((no,nv))
@@ -12,7 +12,7 @@ def set_tampsSLOW(cc_calc,no,nv,t2ampFile=None):
             with open(t2ampFile,'rb') as t2handle:
                 t2=pickle.load(t2handle)
         else:
-            t2=np.zeros((no,no,nv,nv))#self.ints["tei"][va,va,oa,oa]*self.denom["D2aa"]
+            t2=initT2#np.zeros((no,no,nv,nv))#self.ints["tei"][va,va,oa,oa]*self.denom["D2aa"]
 
         tamps.update({"t2aa":t2})
 
@@ -43,4 +43,15 @@ def get_oldvec(tamps,cc_calc):
 
     return oldvec
 
+
+
+def antisym_T2(Roovv,nocc,nvir):
+    nocc=Roovv.shape[0]
+    nvir=Roovv.shape[2]
+    Roovv_anti = np.zeros((nocc, nocc, nvir, nvir))
+    Roovv_anti += np.einsum("ijab->ijab", Roovv)
+    Roovv_anti -= np.einsum("ijab->jiab", Roovv)
+    Roovv_anti -= np.einsum("ijab->ijba", Roovv)
+    Roovv_anti += np.einsum("ijab->jiba", Roovv)
+    return Roovv_anti
 

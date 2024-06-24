@@ -1,7 +1,8 @@
 import numpy as np
 import UT2.set_denoms as set_denoms
 import UT2.tamps as tamps
-
+import UT2.cc_energy as cc_energy
+import UT2.cc_eqns as cc_eqns
 
 class SetupCC():
     def __init__(self,pyscf_mf,pyscf_mol,cc_info):#Set the defaults up for CC calculation
@@ -13,7 +14,7 @@ class SetupCC():
         self.max_iter=cc_info.get("max_iter",75)
         self.dump_tamps=cc_info.get('dump_tamps',False)
         self.dropcore=cc_info.get('dropcore',0)
-        self.stopping_eps=cc_info.get("stopping_eps","10**-8")
+        self.stopping_eps=cc_info.get("stopping_eps",10**-8)
         self.diis_size=cc_info.get("diis_size")
         self.diis_start_cycle=cc_info.get("diis_start_cycle")
 
@@ -156,12 +157,14 @@ class DriveCC(SetupCC):
         
 
 
-
         # setup t amplitudes TODO:: ADD in query/setup for tamps of spin-intgr eqns
         if "slowSOcalc" in cc_info:
             nocc=self.occInfo["nocc_aa"]
             nvirt=self.occInfo["nvirt_aa"]
-            self.tamps = tamps.set_tampsSLOW(cc_info["slowSOcalc"],nocc,nvirt,t2ampFile) 
+            o=self.occSliceInfo["occ_aa"]
+            v=self.occSliceInfo["virt_aa"]
+            self.cc_type = cc_info["slowSOcalc"]
+            self.tamps = tamps.set_tampsSLOW(cc_info["slowSOcalc"],nocc,nvirt,self.integralInfo["tei"][o,o,v,v]*self.denomInfo["D2aa"],t2ampFile) 
 
 
 
@@ -169,4 +172,42 @@ class DriveCC(SetupCC):
             from UT2.diis import DIIS
             self.diis_update=DIIS(self.diis_size, start_iter=self.diis_start_cycle)
             self.old_vec=tamps.get_oldvec(self.tamps,cc_info["slowSOcalc"])
+
+
+
+
+
+    def kernel(self,cc_info):
+
+
+        print("    ==> ", self.cc_type, " amplitude equations <==")
+        print("")
+        print("     Iter              Corr. Energy                 |dE|    ")
+        print(flush=True)
+
+        old_energy=cc_energy.ccenergy_driver(self,cc_info)
+        print('old energy:',old_energy-self.hf_e+self.nuc_e)
+        for idx in range(10): #self.max_iter):
+            cc_eqns.cceqns_driver(self,cc_info)
+            current_energy=cc_energy.ccenergy_driver(self,cc_info)
+            delta_e = np.abs(old_energy - current_energy)
+            print(
+                "    {: 5d} {: 20.12f} {: 20.12f} ".format(
+                    idx, self.nuc_e+current_energy-self.hf_e, delta_e
+                )
+            )
+            print(flush=True)
+
+            if delta_e < self.stopping_eps:  # and res_norm < stopping_eps:
+                break
+            else:
+                old_energy = current_energy
+            if idx > self.max_iter:
+                raise ValueError("CC iterations did not converge")
+
+
+
+        
+
+
 
