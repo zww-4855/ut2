@@ -18,15 +18,15 @@ def cceqns_driver(driveCCobj,cc_info):
             D2=driveCCobj.denomInfo["D2aa"]
             resid_t1=ccsd_t1resid(Fock,W,T1,T2,o,v)
             resid_t2=ccsd_t2resid(Fock,W,T1,T2,o,v,nocc,nvirt)
-            resid_t1+=np.reciprocal(driveCCobj.denomInfo["D1aa"])
-            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])
+            resid_t1+=np.reciprocal(driveCCobj.denomInfo["D1aa"])*T1
+            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])*T2
             driveCCobj.tamps.update({"t1aa":resid_t1*D1,"t2aa":resid_t2*D2})
 
         elif "D" in cc_info["slowSOcalc"]: #Generate CCD base resids
             T2=driveCCobj.tamps["t2aa"]
             D2=driveCCobj.denomInfo["D2aa"]
             resid_t2=ccsd_t2resid(Fock,W,np.zeros((nocc,nvirt)),T2,o,v,nocc,nvirt)
-            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])
+            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])*T2
             driveCCobj.tamps.update({"t2aa":resid_t2*D2})
 
 def ccsd_t1resid(F,W,T1,T2,o,v):

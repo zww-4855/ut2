@@ -186,14 +186,16 @@ class DriveCC(SetupCC):
         print(flush=True)
 
         old_energy=cc_energy.ccenergy_driver(self,cc_info)
+        self.correlationE.update({"mp2e":old_energy})
         print('old energy:',old_energy-self.hf_e+self.nuc_e)
-        for idx in range(10): #self.max_iter):
+        for idx in range(self.max_iter):
             cc_eqns.cceqns_driver(self,cc_info)
             current_energy=cc_energy.ccenergy_driver(self,cc_info)
             delta_e = np.abs(old_energy - current_energy)
+            self.correlationE.update({"totalCorrE":self.nuc_e+current_energy-self.hf_e})
             print(
                 "    {: 5d} {: 20.12f} {: 20.12f} ".format(
-                    idx, self.nuc_e+current_energy-self.hf_e, delta_e
+                    idx, self.correlationE["totalCorrE"], delta_e
                 )
             )
             print(flush=True)
