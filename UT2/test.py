@@ -44,8 +44,8 @@ class SetupCC():
             self.denomInfo.update({"D2aa":set_denoms.D2denomSlow(epsaa,occ_aa,virt_aa,n)})
         if "T" in cc_calc: #Get T3 denoms
             self.denomInfo.update({"D3aa":set_denoms.D3denomSlow(epsaa,occ_aa,virt_aa,n)})
-        if "UT2" in cc_calc or "X" in cc_calc or "Qdebug" in cc_calc:
-            self.denomInfo.update({"D4aa":set_denoms.D4denomSlow(epsaa,occ_aa,virt_aa)})
+        if "UT2" in cc_calc or "X" in cc_calc or "Qdebug" in cc_calc or "Q" in cc_calc:
+            self.denomInfo.update({"D4aa":set_denoms.D4denomSlow(epsaa,occ_aa,virt_aa,n)})
 
 
     def spin_block_tei(self,I):
@@ -175,8 +175,6 @@ class DriveCC(SetupCC):
 
 
 
-
-
     def kernel(self,cc_info):
 
 
@@ -185,6 +183,7 @@ class DriveCC(SetupCC):
         print("     Iter              Corr. Energy                 |dE|    ")
         print(flush=True)
 
+        convergedCC=False
         old_energy=cc_energy.ccenergy_driver(self,cc_info)
         self.correlationE.update({"mp2e":old_energy})
         print('old energy:',old_energy-self.hf_e+self.nuc_e)
@@ -193,6 +192,7 @@ class DriveCC(SetupCC):
             current_energy=cc_energy.ccenergy_driver(self,cc_info)
             delta_e = np.abs(old_energy - current_energy)
             self.correlationE.update({"totalCorrE":self.nuc_e+current_energy-self.hf_e})
+            self.correlationE.update({"totalE":current_energy})
             print(
                 "    {: 5d} {: 20.12f} {: 20.12f} ".format(
                     idx, self.correlationE["totalCorrE"], delta_e
@@ -201,15 +201,35 @@ class DriveCC(SetupCC):
             print(flush=True)
 
             if delta_e < self.stopping_eps:  # and res_norm < stopping_eps:
+                convergedCC=True
                 break
             else:
                 old_energy = current_energy
             if idx > self.max_iter:
                 raise ValueError("CC iterations did not converge")
 
-
-
+        if convergedCC:
+            self.finalizeCC()
+        else:
+            print('CC iterations did not converge!!')
+            sys.exit()
         
 
 
+    def finalizeCC(self):
 
+        print("\n\n\n")
+        print("************************************************************")
+        print("************************************************************\n\n")
+        print('Total SCF energy: \t {: 20.12f}'.format(self.hf_e))
+        print('Nuclear repulsion energy: \t {: 20.12f}'.format(self.nuc_e))
+        print(f"\n \t**** Results for {self.cc_type}: **** \n\n")
+
+        print('Total energy (SCF + correlation): \t {: 20.12f}'.format(self.correlationE["totalE"]))
+        print("Iterative correlation energy: \t {: 20.12f}".format(self.correlationE["totalCorrE"]))
+        print(flush=True)
+        # Handle the post-hoc perturbative corrections, if there are any
+        if "(" in self.cc_type:
+            correctionDict = cc_energy.perturbE_driver(self, self.cc_type)
+            for key in correctionDict.keys():
+                print(key,"{: 20.12f}".format(correctionDict[key]))

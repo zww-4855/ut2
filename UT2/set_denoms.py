@@ -23,7 +23,7 @@ def D3denomSlow(epsaa,occ_aa,virt_aa,n):
             +epsaa[n,n,n,occ_aa,n,n]
             +epsaa[n,n,n,n,occ_aa,n]
             +epsaa[n,n,n,n,n,occ_aa] )
-    D3=D3.tranpose(3,4,5,0,1,2)
+    D3=D3.transpose(3,4,5,0,1,2)
     return D3
 
 

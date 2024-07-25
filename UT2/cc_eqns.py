@@ -1,5 +1,7 @@
 import numpy as np
 import UT2.tamps as tamps
+import UT2.ccdq_eqns as ccdq_eqns
+import UT2.ccsdt_eqns as ccsdt_eqns
 
 def cceqns_driver(driveCCobj,cc_info):
     o=driveCCobj.occSliceInfo["occ_aa"]
@@ -11,7 +13,28 @@ def cceqns_driver(driveCCobj,cc_info):
     W=driveCCobj.integralInfo["tei"]
     Fock=driveCCobj.integralInfo["oei"]
     if "slowSOcalc" in cc_info: # spin-orb eqns
-        if "CCSD" in cc_info["slowSOcalc"]: #Generate CCSD resid eqns
+
+        if "CCSDT" in cc_info["slowSOcalc"]: # Generate CCSDT resid eqns
+            print('Entering CCSDT eqns')
+            T1=driveCCobj.tamps["t1aa"]
+            T2=driveCCobj.tamps["t2aa"]
+            T3=driveCCobj.tamps["t3aa"]
+            D1=driveCCobj.denomInfo["D1aa"]
+            D2=driveCCobj.denomInfo["D2aa"]
+            D3=driveCCobj.denomInfo["D3aa"]
+
+            resid_t1=ccsdt_eqns.ccsdt_t1eqns(Fock,W,T1,T2,T3,o,v)
+            resid_t2=ccsdt_eqns.ccsdt_t2eqns(Fock,W,T1,T2,T3,o,v)
+            resid_t3=ccsdt_eqns.ccsdt_t3eqns(Fock,W,T1,T2,T3,o,v)
+
+            resid_t1+=np.reciprocal(driveCCobj.denomInfo["D1aa"])*T1
+            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])*T2
+            resid_t3+=np.reciprocal(driveCCobj.denomInfo["D3aa"])*T3
+
+            driveCCobj.tamps.update({'t1aa':resid_t1*D1,"t2aa":resid_t2*D2,"t3aa":resid_t3*D3})
+
+        elif "CCSD" in cc_info["slowSOcalc"]: #Generate CCSD resid eqns
+            print('Entering CCSD eqns')
             T1=driveCCobj.tamps["t1aa"]
             T2=driveCCobj.tamps["t2aa"]
             D1=driveCCobj.denomInfo["D1aa"]
@@ -21,6 +44,18 @@ def cceqns_driver(driveCCobj,cc_info):
             resid_t1+=np.reciprocal(driveCCobj.denomInfo["D1aa"])*T1
             resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])*T2
             driveCCobj.tamps.update({"t1aa":resid_t1*D1,"t2aa":resid_t2*D2})
+
+        elif "CCDQ" in cc_info["slowSOcalc"]: # Generate CCDQ resid eqns
+            print('Entering CCDQ eqns')
+            T2=driveCCobj.tamps["t2aa"]
+            T4=driveCCobj.tamps["t4aa"]
+            D2=driveCCobj.denomInfo["D2aa"]
+            D4=driveCCobj.denomInfo["D4aa"]
+            resid_t2=ccdq_eqns.ccdq_t2eqns(Fock,W,T2,T4,o,v)
+            resid_t4=ccdq_eqns.ccdq_t4eqns(Fock,W,T2,T4,o,v)
+            resid_t2+=np.reciprocal(driveCCobj.denomInfo["D2aa"])*T2
+            resid_t4+=np.reciprocal(driveCCobj.denomInfo["D4aa"])*T4
+            driveCCobj.tamps.update({"t2aa":resid_t2*D2,"t4aa":resid_t4*D4})
 
         elif "D" in cc_info["slowSOcalc"]: #Generate CCD base resids
             T2=driveCCobj.tamps["t2aa"]
